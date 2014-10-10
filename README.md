@@ -6,4 +6,4 @@ Dale J.
 
 Some more text
 
-James' text
+James' text is better

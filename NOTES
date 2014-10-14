@@ -1,0 +1,19 @@
+
+==============
+= WAVE files =
+==============
+We do not want to put data files in the repo.  We'll have to each make data directories (possibly subdirectories of the repo) that are ignored by git.
+
+
+============
+= Matfiles =
+============
+save
+load
+matfile
+
+
+==============
+= References =
+==============
+http://blogs.mathworks.com/loren/2012/03/26/considering-performance-in-object-oriented-matlab-code/

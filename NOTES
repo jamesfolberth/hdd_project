@@ -3,7 +3,7 @@
 = WAVE files =
 ==============
 We do not want to put data files in the repo.  We'll have to each make data directories (possibly subdirectories of the repo) that are ignored by git.
-
+The csv files that contains the list of all the songs, along with the genres, has incorrect file extensions for the songs (uses .mp3 instead of .wav).
 
 ============
 = Matfiles =

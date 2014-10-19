@@ -1,3 +1,4 @@
 *.h5
 *.mat
+cd_data/*
 

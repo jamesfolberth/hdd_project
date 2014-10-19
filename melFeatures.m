@@ -1,12 +1,15 @@
 %% Code to extract Mel Frequency Cepstral Coefficients
 %% currently extracts coefficients for the full length of a random song
 
+clear;
+
 % Base directory for all of the data
 % Should not be hardcoded in here as it is different for everyone
-dataDir = '/media/removable/SDcard/cd_data/';
+%dataDir = '/media/removable/SDcard/cd_data/';
+dataDir = './cd_data/';
 
 % Load the list of songs
-[wavList,genre] = textread([dataDir,'ground_truth.csv'],"%s %s",'delimiter',',');
+[wavList,genre] = textread([dataDir,'ground_truth.csv'],'%s %s','delimiter',',');
 nSongs = length(wavList);
 % Fix the names
 wavList = strrep( wavList, '"', '');
@@ -14,7 +17,10 @@ wavList = strrep( wavList, 'mp3','wav');
 
 % Load a song, currently randomly
 % Eventually will loop over all of the songs
-[wav,fs] = wavread([dataDir,wavList{randi(nSongs)}]);
+wavFile = strcat(dataDir, wavList{randi(nSongs)});
+% wavread will be deprecated, so use audioread
+[wav,fs] = audioread(wavFile,'double');
+
 % wavread returns values between -1 and 1
 % rescale to correspond to a max being 96 dB
 wav = wav*10^(96/20);
@@ -40,7 +46,7 @@ end
 
 % Calculate the power of the segments
 %pow = abs(1/sqrt(segLength) * fft(segMat)).^2;
-pow = abs(fft(segMat)).^2;
+pow = abs(fft(segMat,[],1)).^2;
 % Keep only the first half (+1) of the elements
 pow = pow(1:(segLength/2 + 1),:);
 

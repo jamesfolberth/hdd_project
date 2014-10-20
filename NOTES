@@ -3,13 +3,21 @@
 = WAVE files =
 ==============
 We do not want to put data files in the repo.  We'll have to each make data directories (possibly subdirectories of the repo) that are ignored by git.
+
 The csv files that contains the list of all the songs, along with the genres, has incorrect file extensions for the songs (uses .mp3 instead of .wav).
+
+If you want to listen to any of these groovy tracks, use audioplayer.  For example
+   player = audioplayer(wav, fs);
+   play(player)
+   pause(player)
+   stop(player)
 
 
 =======
 = FFT =
 =======
 I believe there exist methods for computing two real FFTs for O(N\log N) + O(N) recovery work (i.e. cheaper than two O(N\log N) separate FFTs).  We'll have to profile both implementations.
+
 As of 18 Oct 2014, the FFT call in melFeatures.m is roughly half of the total cost of running melFeatures.m
 
 

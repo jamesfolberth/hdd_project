@@ -19,7 +19,11 @@ wavList = strrep( wavList, 'mp3','wav');
 % Eventually will loop over all of the songs
 wavFile = strcat(dataDir, wavList{randi(nSongs)});
 % wavread will be deprecated, so use audioread
-[wav,fs] = audioread(wavFile,'double');
+if ( isOctave() )
+   [wav,fs] = wavread(wavFile);
+else
+   [wav,fs] = audioread(wavFile,'double');
+end
 
 % wavread returns values between -1 and 1
 % rescale to correspond to a max being 96 dB

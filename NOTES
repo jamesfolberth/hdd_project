@@ -17,6 +17,7 @@ If you want to listen to any of these groovy tracks, use audioplayer.  For examp
 = FFT =
 =======
 I believe there exist methods for computing two real FFTs for O(N\log N) + O(N) recovery work (i.e. cheaper than two O(N\log N) separate FFTs).  We'll have to profile both implementations.
+UPDATE: For our problem size (N=2^9=512), my MATLAB implementation of two real FFTs via one complex FFT plus O(N) work couldn't beat two real FFTs.
 
 As of 18 Oct 2014, the FFT call in melFeatures.m is roughly half of the total cost of running melFeatures.m
 

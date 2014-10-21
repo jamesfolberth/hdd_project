@@ -88,6 +88,9 @@ elseif( opt1 == 'pca' )
   melCov = cov(melPowDB');
   [u,s,~] = svd(melCov);
   powCoeffs = u(1:opt2,:)*s;
+  
+elseif( opt1 == 'dwt' )
+  disp('Wavelet transform not yet implemented!')
 end
 
 end

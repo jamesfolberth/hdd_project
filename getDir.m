@@ -7,14 +7,16 @@ elseif ispc
     [~, userName] = system('echo %USERDOMAIN%\%USERNAME%');
 end
 
-disp(userName)
+%disp(userName)
 
-if(userName == 'dalekj')
+if ( strcmp(userName,'dalekj') )
   dataDir = '/media/removable/SDcard/cd_data/';
-elseif(userName == 'james') % needs correct username here
+elseif ( strcmp(userName,'james') )
   dataDir = './cd_data/';
-elseif(userName == 'aly') % needs correct username here
+elseif ( strcmp(userName,'aly') ) %TODO needs correct username here
   dataDir = 'unknown';
+else
+   error('Unknown user name.')
 end
 
 end

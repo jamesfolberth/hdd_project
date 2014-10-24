@@ -1,11 +1,20 @@
-function [powCoeffs, melPowDB] = mfcc(wav,fs,opt1,opt2)
+function [powCoeffs, melPowDB] = mfcc(wav,fs,opt)
+% Compute the Mel frequency cepstrum coefficients.
+%
+% wav - vector read of WAVE file data
+% fs  - sampling frequency
+% opt - options structure
+%       opt.method    - method to compress Mel power spectrum
+%                       values: dct, pca, dwt
+%       opt.numTerms - number of terms to keep in DCT, PCA, DWT, etc.
+%
 
-%persistent wHann;
 persistent melFilter; % TODO profile this to make sure persistent is faster
 
 
 if( nargin < 3 )
-   opt1 = 'dct';
+   opt = struct('method','dct',...
+                'numTerms',20);
 end
 
 % Greatest recoverable frequency
@@ -15,10 +24,11 @@ maxFreq = fs/2;
 %segLength = 512; % 46 ms for 11025 Hz sampling
 %% How much to shift by for each segment
 %shiftLength = segLength/2; % 50% overlap
-[pow, segLength, shiftLength] = computePower(wav);
+computePowerOpt = struct('segLength',512,'shiftLength',512*0.5);
+[pow, segLength, shiftLength] = computePower(wav,computePowerOpt);
 
 % Number of mel frequency bins to use
-nMelFreq = 36;
+nMelFreq = 36; % TODO put this in opt or is it 'optimal'?
 if( isempty(melFilter) )
    % current frequency bins
    freq = linspace(0,maxFreq,segLength/2 + 1);
@@ -53,28 +63,24 @@ melPow = melFilter*pow;
 melPow(melPow<1) = 1;
 melPowDB = 10*log10(melPow);
 
-if( opt1 == 'dct' )
-   % Compress the Mel power spectrum
-   if( nargin < 4 )
-      opt2 = 20;
-   end
-   nCoeffs = opt2;
+% Compress the Mel power spectrum
+switch opt.method
+   case 'dct'
+      % TODO should we throw away first term?
+      powCoeffs = dct(melPowDB);
+      powCoeffs = powCoeffs(1:opt.numTerms,:);
 
-   powCoeffs = dct(melPowDB);
-   powCoeffs = powCoeffs(1:nCoeffs,:); % TODO should we throw away first term?
+   case 'pca'
+      % Extract the principal components of the Mel power spectrum
+      melCov = cov(melPowDB');
+      [u,s,~] = svd(melCov);
+      powCoeffs = u(1:opt.numTerms,:)*s;
 
-elseif( opt1 == 'pca' )
-   % Extract the principal components of the Mel power spectrum
-   if(nargin < 4)
-      opt2 = 3;
-   end
- 
-   melCov = cov(melPowDB');
-   [u,s,~] = svd(melCov);
-   powCoeffs = u(1:opt2,:)*s;
+   case 'dwt'
+      error('Wavelet transform not yet implemented.')
 
-elseif( opt1 == 'dwt' )
-   disp('Wavelet transform not yet implemented!')
+   otherwise
+      error(sprintf('Bad MFCC compression option: %s',opt.method))
 end
 
 end

@@ -22,13 +22,13 @@ function [] = testmfcc()
    computePowerOpt = struct('segLength',512,'shiftLength',512*0.5);
    [pow, segLength, shiftLength] = computePower(wav,computePowerOpt);
 
-   mfccOpt = struct('method','dct','numCoeffs',20);
-   [melPowCoeffs, melPowDB] = mfcc(wav, fs, mfccOpt.method, mfccOpt.numCoeffs);
+   mfccOpt = struct('method','dct','numTerms',20);
+   [melPowCoeffs, melPowDB] = mfcc(wav, fs, mfccOpt);
 
 
    % pad with zeros to recover Mel power spectrum
    recovMelPowDB = [melPowCoeffs; ...
-                    zeros([36-mfccOpt.numCoeffs size(melPowCoeffs,2)])];
+                    zeros([36-mfccOpt.numTerms size(melPowCoeffs,2)])];
    recovMelPowDB = idct(recovMelPowDB);
 
    plotSpectra(pow, melPowDB, recovMelPowDB);

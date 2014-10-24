@@ -18,9 +18,9 @@ nSongs = 50;
 
 principalComponents = cell(nSongs,1);
 
+mfccOpts = struct('method','pca','numTerms',3);
 for(i = 1:nSongs)
-  %disp(i);
-  %fflush(stdout);
+  fprintf(1,'\rMFCC: %d of %d.',i, nSongs);
   wavFile = strcat(dataDir, wavList{i});
   % wavread will be deprecated, so use audioread
   if ( isOctave() )
@@ -31,7 +31,7 @@ for(i = 1:nSongs)
   
   wav = wav*10^(96/20);
   
-  principalComponents{i} = mfcc(wav,fs,'pca',3);
+  principalComponents{i} = mfcc(wav,fs,mfccOpts);
   
 end
 

@@ -19,6 +19,7 @@ nSongs = 50;
 
 melCoeffs = cell(nSongs,1);
 
+mfccOpts = struct('method','dct','numTerms',20);
 for(i = 1:nSongs)
   fprintf(1,'\rMFCC: %d of %d.',i, nSongs);
   wavFile = strcat(dataDir, wavList{i});
@@ -31,7 +32,7 @@ for(i = 1:nSongs)
   
   wav = wav*10^(96/20);
   
-  melCoeffs{i} = mfcc(wav,fs,'dct',20);
+  melCoeffs{i} = mfcc(wav,fs,mfccOpts);
 
 end
 fprintf(1,'\n');

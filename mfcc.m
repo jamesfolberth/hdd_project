@@ -1,12 +1,13 @@
-function [powCoeffs, melPowDB] = mfcc(wav,fs,opt)
+function [compMelPow, melPowDB] = mfcc(wav,fs,opt)
 % Compute the Mel frequency cepstrum coefficients.
 %
 % wav - vector read of WAVE file data
 % fs  - sampling frequency
 % opt - options structure
-%       opt.method    - method to compress Mel power spectrum
-%                       values: dct, pca, dwt
-%       opt.numTerms - number of terms to keep in DCT, PCA, DWT, etc.
+%       opt.method     - method to compress Mel power spectrum
+%                        values: dct, pca, wav
+%       opt.numTerms   - number of terms to keep in DCT, PCA, etc.
+%       opt.wName      - wavelet name (see wavenames and waveinfo)
 %
 
 persistent melFilter; % TODO profile this to make sure persistent is faster
@@ -67,17 +68,25 @@ melPowDB = 10*log10(melPow);
 switch opt.method
    case 'dct'
       % TODO should we throw away first term?
-      powCoeffs = dct(melPowDB);
-      powCoeffs = powCoeffs(1:opt.numTerms,:);
+      compMelPow = dct(melPowDB);
+      compMelPow = compMelPow(1:opt.numTerms,:);
+      %fprintf(1,'DCT compression: %f\n',numel(compMelPow)/numel(melPowDB));
 
    case 'pca'
       % Extract the principal components of the Mel power spectrum
       melCov = cov(melPowDB');
       [u,s,~] = svd(melCov);
-      powCoeffs = u(1:opt.numTerms,:)*s;
+      compMelPow = u(1:opt.numTerms,:)*s;
 
-   case 'dwt'
-      error('Wavelet transform not yet implemented.')
+   case 'wav'
+      % TODO This treats melPowDB as an image.  I'm not sure we want that.
+      % TODO What is a good wavelet to use?  Thresholding parameter?
+      [C, L] = wavedec2(melPowDB,opt.wLevel,opt.wName);
+      [~,CC,LC,perf0,perfl2] = wdencmp('gbl',C,L,opt.wName,opt.wLevel,...
+                                       opt.numTerms,'s',1);
+      CC = sparse(CC);
+      %fprintf(1,'Wavelet compression: %f\n',nnz(CC)/prod(size(CC)));
+      compMelPow = {CC, LC};
 
    otherwise
       error(sprintf('Bad MFCC compression option: %s',opt.method))

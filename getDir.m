@@ -13,8 +13,8 @@ if ( strcmp(userName,'dalekj') )
   dataDir = '/media/removable/SDcard/cd_data/';
 elseif ( strcmp(userName,'james') )
   dataDir = './cd_data/';
-elseif ( strcmp(userName,'aly') ) %TODO needs correct username here
-  dataDir = 'unknown';
+elseif ( strcmp(userName,'alfox') ) %TODO needs correct username here
+  dataDir = '/Users/alfox/Documents/Data/';
 else
    error('Unknown user name.')
 end

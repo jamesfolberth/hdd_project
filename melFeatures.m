@@ -6,7 +6,8 @@ clear;
 % Base directory for all of the data
 % Should not be hardcoded in here as it is different for everyone
 %dataDir = '/media/removable/SDcard/cd_data/';
-dataDir = './cd_data/';
+%dataDir = './cd_data/';
+dataDir = '/Users/alfox/Documents/Data/';
 
 % Load the list of songs
 [wavList,genre] = textread([dataDir,'ground_truth.csv'],'%s %s','delimiter',',');

@@ -40,25 +40,6 @@ function [] = testmfcc()
 
 end
 
-function [recovMelPowDB] = recoverMelPower(compMelPow, mfccOpt)
-% Recover the Mel power spectrum
-
-switch mfccOpt.method
-   case 'dct'
-      % pad with zeros to recover Mel power spectrum
-      recovMelPowDB = [compMelPow; ...
-                       zeros([36-mfccOpt.numTerms size(compMelPow,2)])];
-      recovMelPowDB = idct(recovMelPowDB);
-
-   case 'wav'
-      recovMelPowDB = waverec2(compMelPow{1},compMelPow{2},mfccOpt.wName);
-
-   otherwise
-      error(sprintf('Bad MFCC compression option: %s',opt.method));
-end
-
-end
-
 function [] = plotSpectra(pow,melPowDB,recovMelPowDB)
 % plot the DFT power spectrum (in dB), Mel power spectrum (in dB),
 % and recovered Mel power spectrum (in dB)
@@ -90,8 +71,8 @@ function [] = plotSpectraCompare(wav,fs,mfccOpt1,mfccOpt2)
 % plot the Mel power spectrum (in dB) and the recovered Mel power spectrum 
 % using two methods 
 
-   computePowerOpt = struct('segLength',512,'shiftLength',512*0.5);
-   [pow, segLength, shiftLength] = computePower(wav,computePowerOpt);
+   %computePowerOpt = struct('segLength',512,'shiftLength',512*0.5);
+   %[pow, segLength, shiftLength] = computePower(wav,computePowerOpt);
 
    [compMelPow1, melPowDB] = mfcc(wav, fs, mfccOpt1);
    [compMelPow2] = mfcc(wav, fs, mfccOpt2);

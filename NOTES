@@ -13,6 +13,20 @@ If you want to listen to any of these groovy tracks, use audioplayer.  For examp
    stop(player)
 
 
+
+
+
+
+==========================
+= Fluctuation Parameters =
+==========================
+Can compute FPs based on power spectrum or on a Mel scale.  One advantage of using Mel scale is we presumably already have the MFCCs.
+
+There are other methods for computing the frequency modulation.  See [PDW03a].
+
+
+
+
 =======
 = FFT =
 =======

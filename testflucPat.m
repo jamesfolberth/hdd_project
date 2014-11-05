@@ -1,6 +1,5 @@
 function [] = testflucPat()
 % Test flucPat.m, a function to compute various fluctuation patterns
-%
 
 % pick a random song
 dataDir = getDir();
@@ -9,7 +8,9 @@ nSongs = length(wavList);
 % Fix the names
 wavList = strrep( wavList, '"', '');
 wavList = strrep( wavList, 'mp3','wav');
-wavFile = strcat(dataDir, wavList{randi(nSongs)});
+songIndex = randi(nSongs);
+wavFile = strcat(dataDir, wavList{songIndex});
+songGenre = strrep(genre{songIndex}, '"','');
 
 % read in the song
 if ( isOctave() )
@@ -34,5 +35,6 @@ imagesc(reshape(fp, [12 30]))
 colorbar()
 set(gca,'YDir','normal')
 title('Fluctuation Pattern');
+fprintf(1,'This track is "%s".\n', songGenre);
 
 end

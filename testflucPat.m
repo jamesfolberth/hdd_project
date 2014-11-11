@@ -26,12 +26,12 @@ mfccOpt = struct('method','dct','numTerms',20);
 [compMelPow, melPowDB] = mfcc(wav, fs, mfccOpt);
 
 
-[fp] = flucPat(melPowDB);
+[fpAll, fp_med] = flucPat(melPowDB);
 % Note that we could also do
 %  [fp] = flucPat(recoverMelPower(compMelPow,mfccOpt));
 
 % Plot the summary flucutation patterns.  See Figure 2.18 of Pampalk 2006
-imagesc(reshape(fp, [12 30]))
+imagesc(reshape(fp_med, [12 30]))
 colorbar()
 set(gca,'YDir','normal')
 title('Fluctuation Pattern');

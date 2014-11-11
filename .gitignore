@@ -1,5 +1,4 @@
-*.h5
-*.mat
+*.h5*
+*.mat*
 cd_data/*
 devel/*
-

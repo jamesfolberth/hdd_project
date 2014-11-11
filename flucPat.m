@@ -1,4 +1,4 @@
-function [fpAll, fp_med] = flucPat(melPowDB,opt)
+function [fpMed, fpAll] = flucPat(melPowDB,opt)
 % Compute various fluctuation patterns
 % See Section 2.2.4 of Pampalk 2006 for details
 
@@ -50,9 +50,7 @@ for i=1:numSegments
 end
 
 % Summarize all fluctuation patterns 
-if nargout > 1
-   fp_med = median(fpAll,1);
-end
+fpMed = median(fpAll,1);
 
 % Note that we can compare two songs based on their fluctuation patterns
 % by computing the 2-norm of the difference

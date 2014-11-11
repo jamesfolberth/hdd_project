@@ -1,5 +1,5 @@
-function [] = testflucPat()
-% Test flucPat.m, a function to compute various fluctuation patterns
+function [] = testSimpFeat()
+% Test simpFeat.m, a function to compute various simple features
 
 % pick a random song
 dataDir = getDir();
@@ -23,18 +23,11 @@ wav = wav*10^(96/20);
 
 mfccOpt = struct('method','dct','numTerms',20);
 %mfccOpt = struct('method','wav','wName','bior3.3','wLevel',5,'numTerms',10);
-[compMelPow, melPowDB] = mfcc(wav, fs, mfccOpt);
+[compMelPow, melPowDB, pow] = mfcc(wav, fs, mfccOpt);
 
+[fpMed] = flucPat(melPowDB);
 
-[fpMed, fpAll] = flucPat(melPowDB);
-% Note that we could also do
-%  [fp] = flucPat(recoverMelPower(compMelPow,mfccOpt));
-
-% Plot the summary flucutation patterns.  See Figure 2.18 of Pampalk 2006
-imagesc(reshape(fpMed, [12 30]))
-colorbar()
-set(gca,'YDir','normal')
-title('Fluctuation Pattern');
-fprintf(1,'This track is "%s".\n', songGenre);
+simpOpt = struct();
+sfeat = simpFeat(wav, fs, pow, melPowDB, fpMed, simpOpt)
 
 end

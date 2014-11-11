@@ -1,4 +1,4 @@
-function [compMelPow, melPowDB] = mfcc(wav,fs,opt)
+function [compMelPow, melPowDB, pow] = mfcc(wav,fs,opt)
 % Compute the Mel frequency cepstrum coefficients.
 %
 % wav - vector read of WAVE file data

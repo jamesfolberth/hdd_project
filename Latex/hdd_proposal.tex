@@ -14,7 +14,10 @@ James Folberth, Dale Jennings, Alyson F0x}
 %_________________________________________________________________
 \section{Introduction}
 %_________________________________________________________________
-Digital music has changed the face of music collection. Users can have megabyte or a gigabyte worth of music on their personal labtops and can easily download music from the internet. This has lead to the need to invent and test new tools in musical information retrieval. There are many websites and apps, Pandora, iTunes are a few examples, that can create playlist based on similarity to a certain song or genre of music. These sites need to be able to classify certain features of a song and build the playlist from there. This project is based on being able to classify the genre of a song. This may seem like a simple problem, since we can usually classify a song by ear. However, automating the process to computers adds complexity that must be dealt with. 
+\indent Digital music has changed the face of music collection. Users can have megabyte or a gigabyte worth of music on their personal labtops and can easily download music from the internet. This has lead to the need to invent and test new tools in musical information retrieval. There are many websites and apps, Pandora, iTunes are a few examples, that can create playlist based on similarity to a certain song or genre of music. These sites need to be able to classify certain features of a song and build the playlist from there. This project is based on being able to classify the genre of a song. This may seem like a simple problem, since we can usually classify a song by ear, but that relies on the user having a vast knowledge of music. If we can automate the process using computers, we could find new and interesting insights that may not be obvious. However, this adds complexity that must be dealt with since we need techniques such that  the computer can ``listen'' to the song and extract features so that the genre can be identified. To do this we take  a song, which is a continuous signal and we sample at certain frequency to transform a signal into a discrete signal that is based on pitch which created by the sound pressures changes  and define it as a function of time. From the discrete signal we can define  ``features" for each song that many be able to used to classify the genre. 
+
+\indent For our project we are only dealing with 6 different genre, classical, electronically, jazz/blues, metal/punk, rock/pop and world. 
+\indent
 %_________________________________________________________________
 \section{Distance in song-space}
 Explain what are the available distance in the space of songs.
@@ -36,9 +39,19 @@ sophisticated methods.
 %_________________________________________________________________
 \section{Experiments}
 %_________________________________________________________________
-Describe the experiments, and include the confusion matrix. Discuss
-the influence of the various parameters, and describe how the optimal
-parameters were chosen. Include the computation time for your method.
+
+We have the following average cross validation matrix. 
+\begin{center}
+ \begin{tabular}{l| |l | l | l | l | l | l | }
+&classical &electronic& jazz &punk& rock &world \\ \hline \hline
+classical &63 & 1 & 2 & 0 & 1 & 10 \\ \hline 
+electronics& 0 & 16 & 0 & 0 & 1 & 3 \\ \hline 
+jazz& 0 & 0 & 1 & 0 & 0 & 0 \\ \hline 
+punk &0 & 0 & 0 & 4 & 3 & 0 \\ \hline 
+rock& 0 & 5 & 2 & 5 & 15 & 5 \\ \hline 
+world&1 & 1 & 0 & 0 & 1 & 6 \\ \hline 
+\end{tabular}
+\end{center}
 %_________________________________________________________________
 \section{Discussion}
 %_________________________________________________________________

@@ -2,3 +2,7 @@
 *.mat*
 cd_data/*
 devel/*
+*.log*
+*.aux*
+*.pdf*
+*.gz*

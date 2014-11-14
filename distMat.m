@@ -25,7 +25,7 @@ end
 
 % Set up variables common to all methods
 nSongs = length(wavList);
-%nSongs = 50; % for testing
+%nSongs = 5; % for testing
 
 printFile = 1; % stdout
 %printFile = fopen('/dev/null');

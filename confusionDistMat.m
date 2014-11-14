@@ -25,7 +25,7 @@ genreValues = getGenres(genre);
 
 % Build confusion matrix
 confMat = zeros(numel(unique(genreValues))); % 6x6
-K = 15; % how many neighbors to find
+K = 5; % how many neighbors to find
 for i=1:nSongs
    trueGenre = genreValues(i);
 

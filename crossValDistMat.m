@@ -54,8 +54,6 @@ for n =1: 10
         
     end
     
-
-    
 end
     crossValAvg = zeros(6,6); 
     crossValSD = zeros(6,6); 
@@ -87,7 +85,8 @@ end
         end
     end
 probCorrect = sum(diag(crossValAvg))/sum(sum(sum(crossValAvg)))
-latexTable(crossValAvg)
+latexTable(crossValAvg, 'crossValAvg.tex', '%i', unique(genre));
+latexTable(crossValSD, 'crossValSD.tex', '%3.2f', unique(genre));
 
 end
 

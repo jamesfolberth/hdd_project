@@ -21,7 +21,7 @@ wavList = strrep(wavList, '"', '');
 wavList = strrep(wavList, 'mp3','wav');
 genre   = strrep(genre, '"', '');
 
-genreValues = getGenres(genre);
+[genreValues, code] = getGenres(genre);
 
 % Build confusion matrix
 confMat = zeros(numel(unique(genreValues))); % 6x6
@@ -43,7 +43,7 @@ for i=1:numel(genreProb)
    genreProb(i) = sum(genreValues == i)/nSongs;
 end
 %genreProb
-%correctClassRate
+correctClassRate
 
 probCorrect = sum(diag(confMat))/nSongs;
 probCorrectNormalized = sum(correctClassRate*1/6);
@@ -51,6 +51,8 @@ probCorrectNormalized = sum(correctClassRate*1/6);
 fprintf(opt.printFile, 'Percent Correct: %3.2f%%\n', probCorrect*100);
 fprintf(opt.printFile, 'Percent Correct (normalized): %3.2f%%\n', ...
    probCorrectNormalized*100);
+
+latexTable(confMat,'confMat.tex', '%d', unique(genre));
 
 end % confusionDistMat
 

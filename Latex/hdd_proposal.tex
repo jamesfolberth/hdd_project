@@ -146,6 +146,7 @@ Once we have chosen a spectral similarity measure and computed various simple fe
 %_________________________________________________________________
 \section{Dimension reduction}
 %_________________________________________________________________
+% TODO Does he want us to justify the techniques we described above?
 Describe your dimension reduction technique, and justify why it 
 is appropriate to use it in this context. You should explain what 
 performance is expected.
@@ -158,38 +159,48 @@ To validate our classification algorithm, we want to use cross-validation which 
 
 %_________________________________________________________________
 \section{Initial results}
-Based on our algorithm, if we were to take one song from our training data and used the rest to train the algorithm we have the  following confusion matrix  in Figure {\ref{fig:confMat}}, \begin{figure}[h!]
+
+We have implemented the computation of the Mel power spectrum, the associated MFCCs, and the various simple features described above.  Our code is hosted at \url{https://github.com/jamesfolberth/hdd_project}.  We use a single Gaussian to cluster the MFCC frames for each track, and then compare the cluster models between two tracks using the rescaled KL-divergence.  We also compute the median fluctuation patterns, bass, and center of gravity.  We then standardize these distances using the mean and standard deviation taken across the entire training set and combine them using the weights $0.7$ for the spectral similarity, and $0.1$ each for median fluctuation pattern, bass, and center of gravity.  Pampalk describes this combination and calls it $G1C$ \cite{pampalk:dissertation}.\\
+
+Based on this algorithm, if we were to take one song from our training data and used the rest to train the algorithm we have the following confusion matrix in Figure {\ref{fig:confMat}}.  The confustion matrix is structured so that the $(i,j)$ entry is the number of songs of genre $i$ that were classified as genre $j$.
+
+\begin{figure}[h!]
 \centering
- \begin{tabular}{l| |l | l | l | l | l | l | }
-&classical &electronic& jazz &punk& rock &world \\ \hline \hline
-classical& 314 & 3 & 0 & 1 & 4 & 35 \\ \hline 
-electronic&0 & 83 & 2 & 1 & 10 & 16 \\ \hline 
-jazz&0 & 0 & 23 & 0 & 0 & 1 \\ \hline 
-punk& 0 & 1 & 0 & 24 & 7 & 3 \\ \hline 
-rock&1 & 20 & 1 & 18 & 80 & 24 \\ \hline 
-world&5 & 7 & 0 & 1 & 1 & 43 \\ \hline 
-\end{tabular}
+\input{../confMat.tex} % XXX we're all on *nix, right?
+%\begin{tabular}{l| |l | l | l | l | l | l | }
+%&classical &electronic& jazz &punk& rock &world \\ \hline \hline
+%classical& 314 & 3 & 0 & 1 & 4 & 35 \\ \hline 
+%electronic&0 & 83 & 2 & 1 & 10 & 16 \\ \hline 
+%jazz&0 & 0 & 23 & 0 & 0 & 1 \\ \hline 
+%punk& 0 & 1 & 0 & 24 & 7 & 3 \\ \hline 
+%rock&1 & 20 & 1 & 18 & 80 & 24 \\ \hline 
+%world&5 & 7 & 0 & 1 & 1 & 43 \\ \hline 
+%\end{tabular}
 \caption{Confusion Matrices}
 \label{fig:confMat}
 \end{figure}
 
-with the following percent correct for each genre, 
+This algorithm gives the following percent correct for each genre, 
 
+% TODO How did we get these numbers?  I'm getting the second set
+% XXX these aren't updated automagically
 \[  [87.96\%, 74.11\%, 95.83\%, 68.57\%, 55.56\%, 75.44\% ]. \]
+%\[ [    98.12\%, 72.81\%,88.46\%,53.33\%,78.43\%,35.25\%]. \] 
 
 
 To conduct the leave-out-$p$-cross-validation we split our data into five randomly distributed sets, ensuring an even spilt between each genre. When then create a confusion matrix for the test data for each of the 5 subsets and then repeated the process ten times, again randomly distributing the set. We end up with 50 confusion matrices for our cross-validation and we take the mean and standard deviation which are displayed below in Figure {\ref{fig:avgconfMat}}  and Figure {\ref{fig:stdconfMat}} respectively.
 \begin{figure}[h!]
 \centering
- \begin{tabular}{l| |l | l | l | l | l | l | }
-&classical &electronic& jazz &punk& rock &world \\ \hline \hline
-classical&63 & 0 & 2 & 0 & 1 & 10 \\ \hline 
-electronic&0 & 16 & 0 & 0 & 1 & 3 \\ \hline 
-jazz&0 & 0 & 1 & 0 & 0 & 0 \\ \hline 
-punk&0 & 0 & 0 & 4 & 2 & 0 \\ \hline 
-rock&0 & 5 & 2 & 4 & 16 & 7 \\ \hline 
-world&1 & 1 & 0 & 0 & 0 & 5 \\ \hline 
-\end{tabular}
+\input{../crossValAvg.tex}
+% \begin{tabular}{l| |l | l | l | l | l | l | }
+%&classical &electronic& jazz &punk& rock &world \\ \hline \hline
+%classical&63 & 0 & 2 & 0 & 1 & 10 \\ \hline 
+%electronic&0 & 16 & 0 & 0 & 1 & 3 \\ \hline 
+%jazz&0 & 0 & 1 & 0 & 0 & 0 \\ \hline 
+%punk&0 & 0 & 0 & 4 & 2 & 0 \\ \hline 
+%rock&0 & 5 & 2 & 4 & 16 & 7 \\ \hline 
+%world&1 & 1 & 0 & 0 & 0 & 5 \\ \hline 
+%\end{tabular}
 \caption{Average of the Confusion Matrices} 
 \label{fig:avgconfMat}
 \end{figure}
@@ -197,15 +208,16 @@ world&1 & 1 & 0 & 0 & 0 & 5 \\ \hline
 
 \begin{figure}[h!]
 \centering
- \begin{tabular}{l| |l | l | l | l | l | l | }
-&classical &electronic& jazz &punk& rock &world \\ \hline \hline
-classical& 1.353604 & 0.635353 & 1.031939 & 0.404061 & 0.856190 & 2.221968 \\ \hline 
-electronic& 0.000000 & 1.972153 & 0.350510 & 0.404061 & 0.868731 & 1.595402 \\ \hline 
-jazz&0.000000 & 0.000000 & 0.769044 & 0.000000 & 0.000000 & 0.350510 \\ \hline 
-punk&0.000000 & 0.567486 & 0.000000 & 1.324803 & 1.629323 & 0.328261 \\ \hline 
-rock&0.443087 & 1.982062 & 1.124132 & 1.355262 & 2.006520 & 1.764040 \\ \hline 
-world&1.271990 & 0.997139 & 0.609114 & 0.000000 & 0.481918 & 1.925235 \\ \hline 
-\end{tabular}
+\input{../crossValSD.tex}
+% \begin{tabular}{l| |l | l | l | l | l | l | }
+%&classical &electronic& jazz &punk& rock &world \\ \hline \hline
+%classical& 1.353604 & 0.635353 & 1.031939 & 0.404061 & 0.856190 & 2.221968 \\ \hline 
+%electronic& 0.000000 & 1.972153 & 0.350510 & 0.404061 & 0.868731 & 1.595402 \\ \hline 
+%jazz&0.000000 & 0.000000 & 0.769044 & 0.000000 & 0.000000 & 0.350510 \\ \hline 
+%punk&0.000000 & 0.567486 & 0.000000 & 1.324803 & 1.629323 & 0.328261 \\ \hline 
+%rock&0.443087 & 1.982062 & 1.124132 & 1.355262 & 2.006520 & 1.764040 \\ \hline 
+%world&1.271990 & 0.997139 & 0.609114 & 0.000000 & 0.481918 & 1.925235 \\ \hline 
+%\end{tabular}
 \caption{Standard Deviation of the Confusion Matrices} 
 \label{fig:stdconfMat}
 \end{figure}

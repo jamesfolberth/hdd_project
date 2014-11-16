@@ -10,3 +10,6 @@ devel/*
 *.blg*
 *.out*
 table.tex
+confMat.tex
+crossValAvg.tex
+crossValSD.tex

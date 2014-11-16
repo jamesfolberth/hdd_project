@@ -20,13 +20,92 @@ James Folberth, Dale Jennings, Alyson Fox}
 
 \indent This goal of this project is to able to classify the genre of a song. This may seem like a simple problem, since we can usually classify a song by ear, but that relies on the user having a vast knowledge of music. If we can automate the process using computers, we could find new and interesting insights that may not be obvious. However, this adds complexity that must be dealt with since we need techniques so that  the computer can ``listen'' to the song and extract features to be able to identify the genre. To do this we take  a song, which is a continuous signal and we sample at certain frequency to transform it into a discrete signal that is based on pitch which created by the sound pressures changes  and define it as a function of time. From the discrete signal we can define  ``features" for each song that many be able to be used to classify the genre. 
 
-\indent For our project we are only classifying within six different genres, classical, electronically, jazz/blues, metal/punk, rock/pop and world. To compute similarities between each song it is imperative that we generate features. Given 729 training tracks, we will construct features for each song and the song that we would like to classify to create a ``difference" to be able to use $k$-means nearest neighbor method. Most features that we used were developed by or used in Elias Pampalk dissertation. \cite{pampalk:dissertation}%\footnote{Computational Models of Music Similarity and their Application in Music Information Retrieval by Elias Pampal } %fix reference
+\indent For our project we are only classifying within six different genres, classical, electronically, jazz/blues, metal/punk, rock/pop and world. To compute similarities between each song it is imperative that we generate features. Given 729 training tracks, we will construct features for each song and the song that we would like to classify to create a ``difference" to be able to use $k$-means nearest neighbor method. Most features that we used were developed by or used in Elias Pampalk dissertation \cite{pampalk:dissertation} or in Tzanetakis and Cook \cite{tzanetakis:classification}.%\footnote{Computational Models of Music Similarity and their Application in Music Information Retrieval by Elias Pampal } %fix reference
 \indent
 %_________________________________________________________________
 \section{Distance in song-space}
-Explain what are the available distance in the space of songs.
-Describe your distance and any pre-processing performed before
-computing the distance.
+
+
+When trying to define a distance in song-space for genre classification, it is not very helpful to try to construct a distance based soley on the raw data.  Instead, feature extraction is applied to the songs in an attempt to represent each song in a manner that is more similar to how the human ear and brain perceives songs.  Having this quantification of musical features allows songs to be classified in a manner more similar to how a human might classify the songs.
+
+\subsection{Preprocessing}
+
+The first step in feature extraction is in preprocessing the song, where the raw pulse code modulation form of the song is transformed into segments of spectral information.  The preprocessing improves the accessibility of the features.  Preprocessing is also the first step in dimensionality reduction.
+
+\subsubsection{Power Spectrum}
+The power spectrum of an audio signal is a frequency-domain representation of the signal.  More specifically, the power spectrum is a short time Fourier representation of the signal.  The signal is broken up into many small, possible overlapping segments, each of which then is windowed and passed through a Fourier transform.  Once in the frequency domain, the square magnitude is calculated, to get the power spectrum.
+
+\subsubsection{Mel Frequency Cepstrum}
+While the power spectrum of a signal presents some nice information of the signal, the human ear processes audio signals in a different manner.  The Mel Frequency Cepstrum is a way to transform the power spectrum into a scale that is more similar to how the human ear perceives the signal.  Specifically, the Mel-scale is defined to be
+$$ m_{Mel} = 1127.01048 \ln(1 + f_{Hz}/700) $$
+Instead of looking at a linear spread of frequencies, the Mel-scale frequencies are approximately linear for small (below 500Hz) frequencies and have a logarithmic spread for higher frequencies.  In order to transform the power spectrum into the Mel Frequency Cepstrum, triangular filters are applied to the power spectrum, binning the frequencies appropriately.
+
+The frequency scales are not the only difference with how the ear perceives audio.  The loudness is also perceived in a non-linear way.  The perceived loudness of sounds approximately follows the Decibel (dB) logarithmic scale.  The log of Mel power is calculated to convert to this dB representation.
+
+\subsection{Available Features}
+
+After this preprocessing has been performed, many features become easily extracted.  With these features, a distance can be constructed between songs, with the metric depending on which features are of interest.  Below, some of the possible features are described.  This list is in no way exhaustive, as many other features exist.
+
+\subsubsection{Zero Crossing Rate}
+
+The zero crossing rate (ZCR) is one of the easiest features to extract, as it does not require any preprocessing.  The ZCR measures the average number of times a signal crosses zero, normalized to some unit time.  Generally speaking the ZCR can be used to help classify the noisiness of a signal, although perceived noisiness and perceived ZCR may differ for certain signals (as noted in Pampalk's thesis).  Mathematically, the ZCR is given by
+$$ \text{zcr} = \frac{\sum_{i=1}^{N-1} \vert w_{i+1} - w{i} \vert}{2 N f_s} $$
+where $\mathbf{w}$ is the raw data, $N$ is the length of the data, and $f_s$ is the sampling frequency.
+
+\subsubsection{Root Mean Square Energy}
+
+The Root Mean Square (RMS) energy is another feature that comes directly from the audio signal.  The RMS energy gives a measure of overall loudness of an audio signal, and is given by
+$$ \text{rms} = \sqrt{\frac{1}{N}\sum_{i=1}^N w_i^2} $$
+
+
+\subsubsection{Noisiness}
+
+As mentioned earlier, the ZCR gives one attempt at classifying noisiness, although it can differ from perceived noisiness.  To improve the measure of noisiness, the dB scale power spectrum of the audio signal can be used.  One measure of this spectrum based noisiness is based off of differences between frequency bins for a given time segment.  Let $\mathbf{P}$ represent the power spectrum of a signal, with rows corresponding to frequency bins, and columns corresponding to time segments.  Then,
+$$ \text{noisiness}  = \sum_{t} \sum_{f} \vert P_{f+1,t} - P_{f,t} \vert $$
+In practice, frequencies below 800Hz are ignored in this calculation for noisiness.  Low values for this noisiness measure correspond to noisy sound.
+
+\subsubsection{Average Loudness}
+
+When looking at the average loudness of an audio signal, it is useful to refer to the Mel frequencies, as we want to measure perceived average loudness. Let $\mathbf{M}$ represent the matrix of the dB scale mel frequency ceptstrum, then
+
+$$ \text{Avg Loudness} = \frac{1}{N T} \sum_{f,t} M_{f,t} $$
+
+\subsubsection{Percussiveness}
+
+A simple measure for percussiveness comes from the difference between successive time segments of the Mel ceptstrum.
+$$ \text{percussiveness} = \frac{1}{N(T-1)} \sum_{f,t} \vert M_{f,t+1} - M_{f,t}  \vert $$
+
+Other measures of percussiveness or rhythmic features can be calculated based on the wavelet transform of the audio signal.  The autocorrelation of a discrete wavelet representation of the audio signal presents periodicity information of the signal, which is related to the percussiveness of the signal.
+
+\subsubsection{Spectral Centroid}
+
+In an attempt to measure the brightness of the signal, the spectral centroid is used.  Heuristically, if a signal has a brighter sound, it is likely to have a lot of energy in the higher frequencies.  Thus, the spectral centroid might be higher.  One limitation, however, is if the signal has a full range of sounds, combining bright high pitch sounds with strong low pitched sounds (e.g. strong drums).
+$$ \text{Spectral Centroid} = \frac{\sum_f f*M_{f,t}}{\sum_f M_{f,t}} $$
+Note that this spectral centroid measure is for each time segment, and the mean across the entire song is usually used as a comparison feature.
+
+\subsubsection{Fluctuation Patterns}
+
+Fluctuation patterns are useful measures for describing features not captured by spectral similarities.  Fluctuation patterns are descriptors of the loudness modulation within the spectrogram.  Different aspects of these fluctuation parameters are closely related to certain perceptions of audio.  For a description of these relationships, see Pompak's thesis.
+
+The fluctuation patterns are computed by taking the Fourier transform of segments of the spectrogram.  The results are weighted to line up with perceived modulations, and filtered to accentuate specific patterns.  From these fluctuation patterns, certain features can be extracted: maximum fluctuation strength, bass, aggressiveness, low frequency domination, gravity, focus.  Let $\mathbf{FP}$ be the fluctuation pattern matrix, where rows correspond to frequency bands, and columns correspond to modulation frequencies.  Then
+
+\begin{align*}
+fp_{max} &= \max_{i,j} \{ FP_{i,j} \} \\
+fp_{bass} &= \sum_{i=1}^2 \sum_{j \geq 3} FP_{i,j} \\
+fp_{aggr} &= \frac{\sum_{i \geq 2} \sum_{j=1}^4 FP_{i,j} }{ \max_{i,j} \{ FP_{i,j} \}} \\
+fp_{DLF} &= \frac{ \sum_{i=1}^3 \sum_j FP_{i,j} }{ \sum_{i\geq 9} \sum_j FP_{i,j} } \\
+fp_{grav} &= \frac{ \sum_j j \sum_{i} FP_{i,j} }{ \sum_{i,j} FP_{i,j} } \\
+fp_{foc} &= \frac{1}{I J} \sum_{i,j} \frac{FP_{i,j}}{ \max_{i,j} \{ FP_{i,j} \} }
+\end{align*}
+
+\subsection{Using Features for Distances}
+
+Once the features of the songs have been collected, a distance between songs can be defined.  For most of the features, a simple Euclidean distance can be used.  However, for more complicated features like the Mel cepstrum, more sophisticated measures need to be used.
+
+\subsubsection{Guassian Modelling}
+Work in progress
+
+
 %_________________________________________________________________
 \section{Dimension reduction}
 %_________________________________________________________________
@@ -36,6 +115,8 @@ performance is expected.
 %_________________________________________________________________
 \section{Statistical learning}
 %_________________________________________________________________
+\textbf{Need to talk about machine learning methods here, i.e. kNN, SVM, etc}
+
 To validate our classification algorithm, we want to use cross-validation which is a way for us to asses our results if were were to generalize to a new and independent data set. We want to get an idea about how well we are able to predict the genre correctly using a random subset of our training data as the test data since we are have the ground truth. Cross-validation also give us insight in the training phase of our algorithm to determine if we are over fitting. Overfitting the data occurs when the algorithm is predicting the error instead of true trends in the data. This can occur due to many factors, one of which is due to using too many features to describe the model, thus cross-validation can also inform which features or methods provide the best and consistent results. For our purpose we are using a leave-$p$-out-cross-validation method. This consists of leaving out $p$ observations of our training set and using the rest of the observations as our training data. We then repeat with all the different ways to cut the original data and compute the mean and the standard deviation. 
 
 %_________________________________________________________________

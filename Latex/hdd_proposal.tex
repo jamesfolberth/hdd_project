@@ -10,7 +10,7 @@
 \begin{document}                                       
 %_________________________________________________________________
 \title{Project Proposal\\
-James Folberth, Dale Jennings, Alyson F0x}
+James Folberth, Dale Jennings, Alyson Fox}
 \maketitle
 %_________________________________________________________________
 \section{Introduction}
@@ -39,7 +39,27 @@ To validate our classification algorithm, we want to use cross-validation which 
 
 %_________________________________________________________________
 \section{Initial results}
-We split our data into five randomly distributed sets, ensuring an even spilt between each genre. When then create a confusion matrix for the test data for each of the 5 subsets and then repeated the process ten times, again randomly distributing the set. We end up with 50 confusion matrices for our cross-validation and we take the mean and standard deviation which are displayed below. 
+Based on our algorithm, if we were to take one song from our training data and used the rest to train the algorithm we have the  following confusion matrix  in Figure {\ref{fig:confMat}}, \begin{figure}[h!]
+\centering
+ \begin{tabular}{l| |l | l | l | l | l | l | }
+&classical &electronic& jazz &punk& rock &world \\ \hline \hline
+classical& 314 & 3 & 0 & 1 & 4 & 35 \\ \hline 
+electronic&0 & 83 & 2 & 1 & 10 & 16 \\ \hline 
+jazz&0 & 0 & 23 & 0 & 0 & 1 \\ \hline 
+punk& 0 & 1 & 0 & 24 & 7 & 3 \\ \hline 
+rock&1 & 20 & 1 & 18 & 80 & 24 \\ \hline 
+world&5 & 7 & 0 & 1 & 1 & 43 \\ \hline 
+\end{tabular}
+\caption{Confusion Matrices}
+\label{fig:confMat}
+\end{figure}
+
+with the following percent correct for each genre, 
+
+\[  [87.96\%, 74.11\%, 95.83\%, 68.57\%, 55.56\%, 75.44\% ]. \]
+
+
+To conduct the leave-out-$p$-cross-validation we split our data into five randomly distributed sets, ensuring an even spilt between each genre. When then create a confusion matrix for the test data for each of the 5 subsets and then repeated the process ten times, again randomly distributing the set. We end up with 50 confusion matrices for our cross-validation and we take the mean and standard deviation which are displayed below in Figure {\ref{fig:avgconfMat}}  and Figure {\ref{fig:stdconfMat}} respectively.
 \begin{figure}[h!]
 \centering
  \begin{tabular}{l| |l | l | l | l | l | l | }
@@ -52,6 +72,7 @@ rock&0 & 5 & 2 & 4 & 16 & 7 \\ \hline
 world&1 & 1 & 0 & 0 & 0 & 5 \\ \hline 
 \end{tabular}
 \caption{Average of the Confusion Matrices} 
+\label{fig:avgconfMat}
 \end{figure}
 
 
@@ -67,10 +88,12 @@ rock&0.443087 & 1.982062 & 1.124132 & 1.355262 & 2.006520 & 1.764040 \\ \hline
 world&1.271990 & 0.997139 & 0.609114 & 0.000000 & 0.481918 & 1.925235 \\ \hline 
 \end{tabular}
 \caption{Standard Deviation of the Confusion Matrices} 
+\label{fig:stdconfMat}
 \end{figure}
 
 The percent correct for each genre are as follows,
 \[ [82.89\%, 80.00\%, 100.00\%, 57.14\%, 48.48\%, 71.43\%] \]
+You can see that we are predicting, classical, electronic, jazz  and world with over $70\%$, while punk and jazz we did not do as well. 
 
 %_________________________________________________________________
 
@@ -78,8 +101,8 @@ The percent correct for each genre are as follows,
 
 %_________________________________________________________________
 \section{Discussion}
-%_________________________________________________________________
-Provide a critique of the approach and discuss any potential
-improvement. Discuss the ability of your approach to classify
-non-classical into the five remaining genres.
+
+Our algorithm creates a weighted distance between each test observation to all the training observations. another method would be to project our data into the feature space using a singular value decomposition (SVD). We would create a matrix where each feature that we would like to use to describe the data is represented column wise and the song is represented row wise. SVD then decompose our matrix into its singular values and the left and right singular vectors. We can then project our test data down the the feature space which is described by the SVD. We can reduce the dimensionally as well. We choose the $n$ largest singular values and there corresponding left and right singular vectors and use that as an approximation to our feature space. We can create an approximation of the feature space for each of the genre's and project the test song down on to each and then find the $k$-nearest neighbors to be able to determine the predicted genre. 
+
+
 \end{document}

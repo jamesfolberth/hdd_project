@@ -2,6 +2,7 @@
 \usepackage{graphicx}
 \usepackage{amsmath,amssymb}
 \usepackage{caption}
+\usepackage{hyperref}
 \textheight 240mm
 \textwidth  170mm
 \oddsidemargin  0mm
@@ -19,7 +20,7 @@ James Folberth, Dale Jennings, Alyson Fox}
 
 \indent This goal of this project is to able to classify the genre of a song. This may seem like a simple problem, since we can usually classify a song by ear, but that relies on the user having a vast knowledge of music. If we can automate the process using computers, we could find new and interesting insights that may not be obvious. However, this adds complexity that must be dealt with since we need techniques so that  the computer can ``listen'' to the song and extract features to be able to identify the genre. To do this we take  a song, which is a continuous signal and we sample at certain frequency to transform it into a discrete signal that is based on pitch which created by the sound pressures changes  and define it as a function of time. From the discrete signal we can define  ``features" for each song that many be able to be used to classify the genre. 
 
-\indent For our project we are only classifying within six different genres, classical, electronically, jazz/blues, metal/punk, rock/pop and world. To compute similarities between each song it is imperative that we generate features. Given 729 training tracks, we will construct features for each song and the song that we would like to classify to create a ``difference" to be able to use $k$-means nearest neighbor method. Most features that we used were developed by or used in Elias Pampalk dissertation. \footnote{Computational Models of Music Similarity and their Application in Music Information Retrieval by Elias Pampal } %fix reference
+\indent For our project we are only classifying within six different genres, classical, electronically, jazz/blues, metal/punk, rock/pop and world. To compute similarities between each song it is imperative that we generate features. Given 729 training tracks, we will construct features for each song and the song that we would like to classify to create a ``difference" to be able to use $k$-means nearest neighbor method. Most features that we used were developed by or used in Elias Pampalk dissertation. \cite{pampalk:dissertation}%\footnote{Computational Models of Music Similarity and their Application in Music Information Retrieval by Elias Pampal } %fix reference
 \indent
 %_________________________________________________________________
 \section{Distance in song-space}
@@ -104,5 +105,9 @@ You can see that we are predicting, classical, electronic, jazz  and world with 
 
 Our algorithm creates a weighted distance between each test observation to all the training observations. another method would be to project our data into the feature space using a singular value decomposition (SVD). We would create a matrix where each feature that we would like to use to describe the data is represented column wise and the song is represented row wise. SVD then decompose our matrix into its singular values and the left and right singular vectors. We can then project our test data down the the feature space which is described by the SVD. We can reduce the dimensionally as well. We choose the $n$ largest singular values and there corresponding left and right singular vectors and use that as an approximation to our feature space. We can create an approximation of the feature space for each of the genre's and project the test song down on to each and then find the $k$-nearest neighbors to be able to determine the predicted genre. 
 
+
+% References
+\bibliographystyle{siam}
+\bibliography{mir}
 
 \end{document}

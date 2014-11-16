@@ -1,9 +1,9 @@
-function [cossValAvg,cossValSD] = crossValDistMat(savefile)
+function [crossValAvg,crossValSD] = crossValDistMat(savefile)
 % Test the classification algorithm following the ideas of Section 6 of
 % Dr. Meyer's project guide.
-clc
-close all 
-clear all 
+%clc
+%close all 
+%clear all 
 if nargin == 0
    savefile = 'distG1C.mat';
 end 
@@ -86,7 +86,7 @@ end
                                     R{10,1}(i,j),R{10,2}(i,j),R{10,3}(i,j),R{10,4}(i,j),R{10,5}(i,j)]);                        
         end
     end
-probCorrect = sum(diag(crossValAvg))/sum(sum(sum(crossValAvg)));
+probCorrect = sum(diag(crossValAvg))/sum(sum(sum(crossValAvg)))
 latexTable(crossValAvg)
 
 end

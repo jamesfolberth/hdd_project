@@ -170,7 +170,7 @@ To validate our classification algorithm, we want to use cross-validation which 
 
 We have implemented the computation of the Mel power spectrum, the associated MFCCs, and the various simple features described above.  Our code is hosted at \url{https://github.com/jamesfolberth/hdd_project}.  We use a single Gaussian to cluster the MFCC frames for each track, and then compare the cluster models between two tracks using the rescaled KL-divergence.  We also compute the median fluctuation patterns, bass, and center of gravity.  We then standardize these distances using the mean and standard deviation taken across the entire training set and combine them using the weights $0.7$ for the spectral similarity, and $0.1$ each for median fluctuation pattern, bass, and center of gravity.  Pampalk describes this combination and calls it $G1C$ \cite{pampalk:dissertation}.\\
 
-Based on this algorithm, if we were to take one song from our training data and used the rest to train the algorithm we have the following confusion matrix in Figure {\ref{fig:confMat}}.  The confustion matrix is structured so that the $(i,j)$ entry is the number of songs of genre $i$ that were classified as genre $j$.
+Based on this algorithm, if we were to take one song from our training data and used the rest to train the algorithm we have the following confusion matrix in Figure {\ref{fig:confMat}}.  The confustion matrix is structured so that the $(i,j)$ entry is the number of songs of genre $i$ that were classified as genre $j$.\\
 
 \begin{figure}[h!]
 \centering
@@ -196,7 +196,8 @@ This algorithm gives the following percent correct for each genre,
 %\[ [    98.12\%, 72.81\%,88.46\%,53.33\%,78.43\%,35.25\%]. \] 
 
 
-To conduct the leave-out-$p$-cross-validation we split our data into five randomly distributed sets, ensuring an even spilt between each genre. When then create a confusion matrix for the test data for each of the 5 subsets and then repeated the process ten times, again randomly distributing the set. We end up with 50 confusion matrices for our cross-validation and we take the mean and standard deviation which are displayed below in Figure {\ref{fig:avgconfMat}}  and Figure {\ref{fig:stdconfMat}} respectively.
+To conduct the leave-out-$p$-cross-validation we split our data into five randomly distributed sets, ensuring an even spilt between each genre. When then create a confusion matrix for the test data for each of the 5 subsets and then repeated the process ten times, again randomly distributing the set. We end up with 50 confusion matrices for our cross-validation and we take the mean and standard deviation which are displayed below in Figure {\ref{fig:avgconfMat}}  and Figure {\ref{fig:stdconfMat}} respectively.\\
+
 \begin{figure}[h!]
 \centering
 \input{../crossValAvg.tex}
@@ -231,7 +232,8 @@ To conduct the leave-out-$p$-cross-validation we split our data into five random
 \end{figure}
 
 The percent correct for each genre are as follows,
-\[ [82.89\%, 80.00\%, 100.00\%, 57.14\%, 48.48\%, 71.43\%] \]
+\[ [82.89\%, 80.00\%, 100.00\%, 57.14\%, 48.48\%, 71.43\%]. \]
+
 You can see that we are predicting, classical, electronic, jazz  and world with over $70\%$, while punk and jazz we did not do as well. 
 
 %_________________________________________________________________

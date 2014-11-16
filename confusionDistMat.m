@@ -37,12 +37,15 @@ end
 
 % do some analysis on the confusion matrix
 genreProb = zeros([numel(unique(genreValues)) 1]);
+genreNum = genreProb;
 correctClassRate = zeros([numel(genreProb) 1]);
 for i=1:numel(genreProb)
+   genreNum(i) = sum(genreValues == i);
    correctClassRate(i) = confMat(i,i)/sum(genreValues == i);
    genreProb(i) = sum(genreValues == i)/nSongs;
 end
 %genreProb
+genreNum
 correctClassRate
 
 probCorrect = sum(diag(confMat))/nSongs;

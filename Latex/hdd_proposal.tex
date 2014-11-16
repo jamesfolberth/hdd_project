@@ -1,6 +1,7 @@
 \documentclass[12pt]{article}
 \usepackage{graphicx}
 \usepackage{amsmath,amssymb}
+\usepackage{caption}
 \textheight 240mm
 \textwidth  170mm
 \oddsidemargin  0mm
@@ -34,23 +35,47 @@ performance is expected.
 %_________________________________________________________________
 \section{Statistical learning}
 %_________________________________________________________________
-To validate our classification algorithm, we want to use cross-validation which is a way for us to asses our results if were were to generalize to a new and independent data set. We want to get an idea about how well we are able to predict the genre correctly using a random subset of our training data as the test data since we are have the ground truth. Cross-validation also give us insight in the training phase of our algorithm to determine if we are over fitting. Overfitting the data occurs when the algorithm is predicting the error instead of true trends in the data. This can occur due to many factors, one of which is due to using too many features to describe the model, thus cross-validation can also inform which features or methods provide the best and consistent results. For our purpose we are using a leave-$p$-out-cross-validation method. This consists of leaving out $p$ observations of our training set and using the rest of the observations as our training data. We then repeat with all the different ways to cut the original data and take the average  
-%_________________________________________________________________
-\section{Experiments}
-%_________________________________________________________________
+To validate our classification algorithm, we want to use cross-validation which is a way for us to asses our results if were were to generalize to a new and independent data set. We want to get an idea about how well we are able to predict the genre correctly using a random subset of our training data as the test data since we are have the ground truth. Cross-validation also give us insight in the training phase of our algorithm to determine if we are over fitting. Overfitting the data occurs when the algorithm is predicting the error instead of true trends in the data. This can occur due to many factors, one of which is due to using too many features to describe the model, thus cross-validation can also inform which features or methods provide the best and consistent results. For our purpose we are using a leave-$p$-out-cross-validation method. This consists of leaving out $p$ observations of our training set and using the rest of the observations as our training data. We then repeat with all the different ways to cut the original data and compute the mean and the standard deviation. 
 
-We have the following average cross validation matrix. 
-\begin{center}
+%_________________________________________________________________
+\section{Initial results}
+We split our data into five randomly distributed sets, ensuring an even spilt between each genre. When then create a confusion matrix for the test data for each of the 5 subsets and then repeated the process ten times, again randomly distributing the set. We end up with 50 confusion matrices for our cross-validation and we take the mean and standard deviation which are displayed below. 
+\begin{figure}[h!]
+\centering
  \begin{tabular}{l| |l | l | l | l | l | l | }
 &classical &electronic& jazz &punk& rock &world \\ \hline \hline
-classical &63 & 1 & 2 & 0 & 1 & 10 \\ \hline 
-electronics& 0 & 16 & 0 & 0 & 1 & 3 \\ \hline 
-jazz& 0 & 0 & 1 & 0 & 0 & 0 \\ \hline 
-punk &0 & 0 & 0 & 4 & 3 & 0 \\ \hline 
-rock& 0 & 5 & 2 & 5 & 15 & 5 \\ \hline 
-world&1 & 1 & 0 & 0 & 1 & 6 \\ \hline 
+classical&63 & 0 & 2 & 0 & 1 & 10 \\ \hline 
+electronic&0 & 16 & 0 & 0 & 1 & 3 \\ \hline 
+jazz&0 & 0 & 1 & 0 & 0 & 0 \\ \hline 
+punk&0 & 0 & 0 & 4 & 2 & 0 \\ \hline 
+rock&0 & 5 & 2 & 4 & 16 & 7 \\ \hline 
+world&1 & 1 & 0 & 0 & 0 & 5 \\ \hline 
 \end{tabular}
-\end{center}
+\caption{Average of the Confusion Matrices} 
+\end{figure}
+
+
+\begin{figure}[h!]
+\centering
+ \begin{tabular}{l| |l | l | l | l | l | l | }
+&classical &electronic& jazz &punk& rock &world \\ \hline \hline
+classical& 1.353604 & 0.635353 & 1.031939 & 0.404061 & 0.856190 & 2.221968 \\ \hline 
+electronic& 0.000000 & 1.972153 & 0.350510 & 0.404061 & 0.868731 & 1.595402 \\ \hline 
+jazz&0.000000 & 0.000000 & 0.769044 & 0.000000 & 0.000000 & 0.350510 \\ \hline 
+punk&0.000000 & 0.567486 & 0.000000 & 1.324803 & 1.629323 & 0.328261 \\ \hline 
+rock&0.443087 & 1.982062 & 1.124132 & 1.355262 & 2.006520 & 1.764040 \\ \hline 
+world&1.271990 & 0.997139 & 0.609114 & 0.000000 & 0.481918 & 1.925235 \\ \hline 
+\end{tabular}
+\caption{Standard Deviation of the Confusion Matrices} 
+\end{figure}
+
+The percent correct for each genre are as follows,
+\[ [82.89\%, 80.00\%, 100.00\%, 57.14\%, 48.48\%, 71.43\%] \]
+
+%_________________________________________________________________
+
+
+
 %_________________________________________________________________
 \section{Discussion}
 %_________________________________________________________________

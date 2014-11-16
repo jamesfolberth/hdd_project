@@ -20,36 +20,36 @@ James Folberth, Dale Jennings, Alyson Fox}
 
 \indent This goal of this project is to able to classify the genre of a song. This may seem like a simple problem, since we can usually classify a song by ear, but that relies on the user having a vast knowledge of music. If we can automate the process using computers, we could find new and interesting insights that may not be obvious. However, this adds complexity that must be dealt with since we need techniques so that  the computer can ``listen'' to the song and extract features to be able to identify the genre. To do this we take  a song, which is a continuous signal and we sample at certain frequency to transform it into a discrete signal that is based on pitch which created by the sound pressures changes  and define it as a function of time. From the discrete signal we can define  ``features" for each song that many be able to be used to classify the genre. 
 
-\indent For our project we are only classifying within six different genres, classical, electronically, jazz/blues, metal/punk, rock/pop and world. To compute similarities between each song it is imperative that we generate features. Given 729 training tracks, we will construct features for each song and the song that we would like to classify to create a ``difference" to be able to use $k$-means nearest neighbor method. Most features that we used were developed by or used in Elias Pampalk dissertation \cite{pampalk:dissertation} or in Tzanetakis and Cook \cite{tzanetakis:classification}.%\footnote{Computational Models of Music Similarity and their Application in Music Information Retrieval by Elias Pampal } %fix reference
-\indent
+\indent For our project we are only classifying within six different genres, classical, electronically, jazz/blues, metal/punk, rock/pop and world. To compute similarities between each song it is imperative that we generate features. Given 729 training tracks, we will construct features for each song and the song that we would like to classify to create a ``difference" to be able to use $k$-means nearest neighbor method. Most features that we used were developed by or used in Elias Pampalk dissertation \cite{pampalk:dissertation} or in Tzanetakis and Cook \cite{tzanetakis:classification}.
+
 %_________________________________________________________________
 \section{Distance in song-space}
 
 
-When trying to define a distance in song-space for genre classification, it is not very helpful to try to construct a distance based soley on the raw data.  Instead, feature extraction is applied to the songs in an attempt to represent each song in a manner that is more similar to how the human ear and brain perceives songs.  Having this quantification of musical features allows songs to be classified in a manner more similar to how a human might classify the songs.
+When trying to define a distance in song-space for genre classification, it is not very helpful to try to construct a distance based solely on the raw data.  Instead, feature extraction is applied to the songs in an attempt to represent each song in a manner that is more similar to how the human ear and brain perceives songs.  Having this quantification of musical features allows songs to be classified in a manner more similar to how a human might classify the songs.
 
 \subsection{Preprocessing}
 
 The first step in feature extraction is in preprocessing the song, where the raw pulse code modulation form of the song is transformed into segments of spectral information.  The preprocessing improves the accessibility of the features.  Preprocessing is also the first step in dimensionality reduction.
 
 \subsubsection{Power Spectrum}
-The power spectrum of an audio signal is a frequency-domain representation of the signal.  More specifically, the power spectrum is a short time Fourier representation of the signal.  The signal is broken up into many small, possible overlapping segments, each of which then is windowed and passed through a Fourier transform.  Once in the frequency domain, the square magnitude is calculated, to get the power spectrum.
+The power spectrum of an audio signal is a frequency-domain representation of the signal.  More specifically, we use a short-time Fourier transform to transform the signal to the frequency-domain, while maintaining some temporal locality.  The signal is broken up into many small, possibly overlapping segments, each of which then is windowed and passed through a Fourier transform.  Once in the frequency domain, the square magnitude is calculated, to get the power spectrum.
 
 \subsubsection{Mel Frequency Cepstrum}
 While the power spectrum of a signal presents some nice information of the signal, the human ear processes audio signals in a different manner.  The Mel Frequency Cepstrum is a way to transform the power spectrum into a scale that is more similar to how the human ear perceives the signal.  Specifically, the Mel-scale is defined to be
 $$ m_{Mel} = 1127.01048 \ln(1 + f_{Hz}/700) $$
 Instead of looking at a linear spread of frequencies, the Mel-scale frequencies are approximately linear for small (below 500Hz) frequencies and have a logarithmic spread for higher frequencies.  In order to transform the power spectrum into the Mel Frequency Cepstrum, triangular filters are applied to the power spectrum, binning the frequencies appropriately.
 
-The frequency scales are not the only difference with how the ear perceives audio.  The loudness is also perceived in a non-linear way.  The perceived loudness of sounds approximately follows the Decibel (dB) logarithmic scale.  The log of Mel power is calculated to convert to this dB representation.
+The frequency scales are not the only difference with how the ear perceives audio.  The loudness is also perceived in a non-linear way.  The perceived loudness of sounds approximately follows the Decibel (dB) logarithmic scale.  The logarithm of Mel power is calculated to convert to this dB representation.  Using the power spectrum in the Mel scale, we have various methods to compute a spectral similarity measure between songs.  There are also many other features that can be extracted from the Mel power spectrum.
 
-\subsection{Available Features}
+\subsection{Available Simple Features}
 
-After this preprocessing has been performed, many features become easily extracted.  With these features, a distance can be constructed between songs, with the metric depending on which features are of interest.  Below, some of the possible features are described.  This list is in no way exhaustive, as many other features exist.
+After this preprocessing has been performed, many simpler features are easily extracted.  With these features, a distance can be constructed between songs, with the metric depending on which features are of interest.  Below, some of the possible features are described.  This list is in no way exhaustive, as many other features exist.
 
 \subsubsection{Zero Crossing Rate}
 
 The zero crossing rate (ZCR) is one of the easiest features to extract, as it does not require any preprocessing.  The ZCR measures the average number of times a signal crosses zero, normalized to some unit time.  Generally speaking the ZCR can be used to help classify the noisiness of a signal, although perceived noisiness and perceived ZCR may differ for certain signals (as noted in Pampalk's thesis).  Mathematically, the ZCR is given by
-$$ \text{zcr} = \frac{\sum_{i=1}^{N-1} \vert w_{i+1} - w{i} \vert}{2 N f_s} $$
+$$ \text{zcr} = \frac{\sum_{i=1}^{N-1} \vert w_{i+1} - w_{i} \vert}{2 N f_s} $$
 where $\mathbf{w}$ is the raw data, $N$ is the length of the data, and $f_s$ is the sampling frequency.
 
 \subsubsection{Root Mean Square Energy}
@@ -85,10 +85,14 @@ Note that this spectral centroid measure is for each time segment, and the mean 
 
 \subsubsection{Fluctuation Patterns}
 
-Fluctuation patterns are useful measures for describing features not captured by spectral similarities.  Fluctuation patterns are descriptors of the loudness modulation within the spectrogram.  Different aspects of these fluctuation parameters are closely related to certain perceptions of audio.  For a description of these relationships, see Pompak's thesis.
+Fluctuation patterns are useful measures for describing features not captured by spectral similarities.  Fluctuation patterns are descriptors of the loudness modulation in the spectrogram (i.e. loudness modulation per frequency band).  In essence, fluctuation patterns are smoothed loudness modulation frequencies per frequency band.  Although fluctuation patterns can be defined for the Fourier power spectrum, we compute fluctuation patterns in the Mel power spectrum.\\
 
-The fluctuation patterns are computed by taking the Fourier transform of segments of the spectrogram.  The results are weighted to line up with perceived modulations, and filtered to accentuate specific patterns.  From these fluctuation patterns, certain features can be extracted: maximum fluctuation strength, bass, aggressiveness, low frequency domination, gravity, focus.  Let $\mathbf{FP}$ be the fluctuation pattern matrix, where rows correspond to frequency bands, and columns correspond to modulation frequencies.  Then
+As described by Pampalk \cite{pampalk:dissertation}, fluctuation patterns are computed by taking the Fourier transform of segments of the spectrogram.  The resulting coefficients are then smoothed and filtered to accentuate desired patterns.  It is typical to use the median of all fluctuation patterns as a feature.  The median fluctuation patterns for two songs may be shaped as a vector and compared using the $\ell_2$ norm.\\
 
+It is also possible to extract other simple features from the median of all fluctuation patterns.  For example, one may compute the maximum fluctuation strength, the fluctuation patterns restricted to the two lowest frequency bands, the aggressiveness, the domination of low frequencies, the center of gravity of the fluctuation patterns along the modulation frequency axis, and the focus of energy.  Each of these quantities is a scalar and may be compared to other songs via the absolute value of their difference.  See Figure 2.19 of Pampalk's dissertation \cite{pampalk:dissertation} for a comparison across genres of the above simple features and simple features derived from the median fluctuation patterns.\\
+
+% We can put this in if we want, or just reference Pampalk.
+To compute these simple features, we let $\mathbf{FP}$ be the fluctuation pattern matrix, where rows correspond to frequency bands, and columns correspond to modulation frequencies.  Then
 \begin{align*}
 fp_{max} &= \max_{i,j} \{ FP_{i,j} \} \\
 fp_{bass} &= \sum_{i=1}^2 \sum_{j \geq 3} FP_{i,j} \\
@@ -100,10 +104,43 @@ fp_{foc} &= \frac{1}{I J} \sum_{i,j} \frac{FP_{i,j}}{ \max_{i,j} \{ FP_{i,j} \} 
 
 \subsection{Using Features for Distances}
 
-Once the features of the songs have been collected, a distance between songs can be defined.  For most of the features, a simple Euclidean distance can be used.  However, for more complicated features like the Mel cepstrum, more sophisticated measures need to be used.
+Once the features of the songs have been collected, a distance between songs can be defined.  As noted previously, the simple features derived from the (Mel) power spectrum can be compared using the standard Euclidean distance.  However, for more complicated features like the Mel cepstrum, more sophisticated measures need to be used.
 
-\subsubsection{Guassian Modelling}
-Work in progress
+\subsubsection{Spectral Similarity Measures}
+% TODO are there other models you guys want to mention?  Is there a better way to find optimal parameters?
+We wish to compare directly the Mel power spectrum of two songs.  This can be done by taking the discrete cosine transform (DCT) of Mel power spectrum for each segment of the song.  We then keep a subset of the coefficients and call them the Mel frequency cepstral coefficients (MFCCs).  Note that this is also reducing the dimensionality of the problem.  Once the MFCCs are computed, they are summarized by clustering the frames.  Songs may be compared by comparing the cluster model.\\
+
+One possible cluster model fits a single Gaussian with mean $\mu$ and a full (as opposed to diagonal) covariance matrix $\Sigma$.  Cluster models of this form can be compared using a symmetric Kullback-Leibler divergence:
+
+\[ d_{KL}\left(\left(\mu_1,\Sigma_1\right),\left(\mu_2,\Sigma_2\right)\right) = \operatorname{tr}\left(\Sigma_1\Sigma_2^{-1}\right) + \operatorname{tr}\left(\Sigma_1^{-1}\Sigma_2\right) + \operatorname{tr}\left(\left(\Sigma_1+\Sigma_2\right)(\mu_1-\mu_2)(\mu_1-\mu_2)^T\right). \] 
+
+\noindent These distances will span over many orders of magnitude, so it is wise to rescale the distance to
+
+\[ d = -e^{-\frac{1}{450}d_{KL}}, \] 
+
+\noindent where the factor $450$ is recommended by Pampalk \cite{pampalk:dissertation}.\\
+
+It is natural to want to extend the single Gaussian cluster model to a full Gaussian mixture model (GMM).  Instead of a single Gaussian, we attempt to fit a convex combination of $M$ Gaussians.  This distribution takes the form
+
+\[ p(x|\Theta) = \sum_{i=1}^M P_i \mathcal{N}(\mu_i, \Sigma_i), \] 
+
+\noindent where $\Theta = \{P_i,\mu_i,\Sigma_i\}$, $P_i\ge 0$, $\sum_{i=1}^M P_i = 1$, and $\mu_i$ and $\Sigma_i$ are the mean and covariance of the $i$th Gaussian.  We wish to find the parameters in $\Theta$ that maximize the likelihood that that the frames $X = \{x_1,...,x_N\}$ were generated by the GMM with parameters $\Theta$.  The standard measure of likelihood is the log-likelihood
+
+\[ L(X|\Theta) = \sum_{n=1}^N \log\left(p(x_n|\Theta)\right). \] 
+
+\noindent We can approach finding the optimal parameters $\Theta$ by using the expectation maximization algorithm, which is iterative and can be initialized using random initial data or an initial cluster given by $k$-means.  Two cluster models can be compared via log-likelihoods, giving the distance
+
+\[ d = L(X_1|\Theta_1) + L(X_2|\Theta_2) - L(X_1|\Theta_2) - L(X_2|\Theta_1). \] 
+
+One may expect that a full GMM will provide better clustering than a single Gaussian, and thus a more accurate spectral similarity measure, but a working with full GMMs can become prohibitively expensive.  At the time of writing, we have implemented only the single Gaussian cluster model, which is much faster than a full GMM.\\
+
+\subsubsection{Combining Distances}
+
+Once we have chosen a spectral similarity measure and computed various simple features from the (Mel) power spectrum (e.g. median fluctuation patterns with Euclidean distance, center of gravity of fluctuation patterns with absolute value, etc.), we should combine the distances in a meaningful way.  One option is to use a convex combination of the $z$ (standard) scores of the distances.  This method gives the combined distance
+
+\[ d = \sum_{i} w_i \left(\dfrac{d_i - \mu_i}{\sigma_i}\right) + \text{offset}, \] 
+
+\noindent where $w_i\ge 0$, $\sum_i w_i=1$, $d_i$ is the $i$th distance to be combined, $\mu_i$ and $\sigma_i$ are the mean and standard deviation of the $i$th distance over some reference set of songs (e.g. the entire database of songs), and the offset is chosen to the distance is positive for each pair of songs.  Pampalk describes a few possible combinations in his dissertation \cite{pampalk:dissertation}; we have implemented one and describe it below.\\
 
 
 %_________________________________________________________________

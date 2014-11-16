@@ -6,3 +6,4 @@ devel/*
 *.aux*
 *.pdf*
 *.gz*
+table.tex

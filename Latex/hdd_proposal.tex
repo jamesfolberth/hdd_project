@@ -14,9 +14,11 @@ James Folberth, Dale Jennings, Alyson F0x}
 %_________________________________________________________________
 \section{Introduction}
 %_________________________________________________________________
-\indent Digital music has changed the face of music collection. Users can have megabyte or a gigabyte worth of music on their personal labtops and can easily download music from the internet. This has lead to the need to invent and test new tools in musical information retrieval. There are many websites and apps, Pandora, iTunes are a few examples, that can create playlist based on similarity to a certain song or genre of music. These sites need to be able to classify certain features of a song and build the playlist from there. This project is based on being able to classify the genre of a song. This may seem like a simple problem, since we can usually classify a song by ear, but that relies on the user having a vast knowledge of music. If we can automate the process using computers, we could find new and interesting insights that may not be obvious. However, this adds complexity that must be dealt with since we need techniques such that  the computer can ``listen'' to the song and extract features so that the genre can be identified. To do this we take  a song, which is a continuous signal and we sample at certain frequency to transform a signal into a discrete signal that is based on pitch which created by the sound pressures changes  and define it as a function of time. From the discrete signal we can define  ``features" for each song that many be able to used to classify the genre. 
+\indent Digital music has changed the face of music collection. Users can have megabyte or a gigabyte worth of music on their personal labtops and can easily download music from the internet. This has lead to the need to invent and test new tools in musical information retrieval. There are many websites and apps, Pandora and iTunes are a few examples, that can create playlists based on similarity to a certain song or genre of music. These sites need to be able to classify certain features of a song and build the playlist from there. 
 
-\indent For our project we are only dealing with 6 different genre, classical, electronically, jazz/blues, metal/punk, rock/pop and world. 
+\indent This goal of this project is to able to classify the genre of a song. This may seem like a simple problem, since we can usually classify a song by ear, but that relies on the user having a vast knowledge of music. If we can automate the process using computers, we could find new and interesting insights that may not be obvious. However, this adds complexity that must be dealt with since we need techniques so that  the computer can ``listen'' to the song and extract features to be able to identify the genre. To do this we take  a song, which is a continuous signal and we sample at certain frequency to transform it into a discrete signal that is based on pitch which created by the sound pressures changes  and define it as a function of time. From the discrete signal we can define  ``features" for each song that many be able to be used to classify the genre. 
+
+\indent For our project we are only classifying within six different genres, classical, electronically, jazz/blues, metal/punk, rock/pop and world. To compute similarities between each song it is imperative that we generate features. Given 729 training tracks, we will construct features for each song and the song that we would like to classify to create a ``difference" to be able to use $k$-means nearest neighbor method. Most features that we used were developed by or used in Elias Pampalk dissertation. \footnote{Computational Models of Music Similarity and their Application in Music Information Retrieval by Elias Pampal } %fix reference
 \indent
 %_________________________________________________________________
 \section{Distance in song-space}
@@ -30,12 +32,9 @@ Describe your dimension reduction technique, and justify why it
 is appropriate to use it in this context. You should explain what 
 performance is expected.
 %_________________________________________________________________
-\section{Statiscal learning}
+\section{Statistical learning}
 %_________________________________________________________________
-Explain how the training data help find the genre of an unknown
-song. This could be as simple as finding the closest song among all
-the songs for which you know the genre. Or it could involve more
-sophisticated methods.
+To validate our classification algorithm, we want to use cross-validation which is a way for us to asses our results if were were to generalize to a new and independent data set. We want to get an idea about how well we are able to predict the genre correctly using a random subset of our training data as the test data since we are have the ground truth. Cross-validation also give us insight in the training phase of our algorithm to determine if we are over fitting. Overfitting the data occurs when the algorithm is predicting the error instead of true trends in the data. This can occur due to many factors, one of which is due to using too many features to describe the model, thus cross-validation can also inform which features or methods provide the best and consistent results. For our purpose we are using a leave-$p$-out-cross-validation method. This consists of leaving out $p$ observations of our training set and using the rest of the observations as our training data. We then repeat with all the different ways to cut the original data and take the average  
 %_________________________________________________________________
 \section{Experiments}
 %_________________________________________________________________

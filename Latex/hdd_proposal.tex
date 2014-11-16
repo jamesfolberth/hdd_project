@@ -154,6 +154,14 @@ performance is expected.
 \section{Statistical learning}
 %_________________________________________________________________
 \textbf{Need to talk about machine learning methods here, i.e. kNN, SVM, etc}
+\subsection{$K$-Nearest Neighbor} 
+One way to classify an observation is to use $K$-Nearest Neighbors. It is a simple machine learning algorithm that stores all the similarity measures of the training data and classifies a new observation based on the ``distance" of the testing data to the training data. It finds the  $K$ nearest neighbors and uses those observation to classify based on a majority vote. The ``distance'' can be defined within any space we choose, whether it be Euclidian or feature space.  
+
+\subsection{Support Vector Machines} 
+Support vector machines is another simple machine learning algorithm. It defines each observation of the training data as a point in space and creates a boundary line that best separates the data into its correct classification with minimal amount of incorrect classifications. It then take the testing data projects in down into the space and classifies the observation based on its relation to the boundary line. Again the space can be any sufficient space. Note that we can also expand this idea to Kernal support vector machines. 
+
+\subsection{Cross-Validation}
+
 
 To validate our classification algorithm, we want to use cross-validation which is a way for us to asses our results if were were to generalize to a new and independent data set. We want to get an idea about how well we are able to predict the genre correctly using a random subset of our training data as the test data since we are have the ground truth. Cross-validation also give us insight in the training phase of our algorithm to determine if we are over fitting. Overfitting the data occurs when the algorithm is predicting the error instead of true trends in the data. This can occur due to many factors, one of which is due to using too many features to describe the model, thus cross-validation can also inform which features or methods provide the best and consistent results. For our purpose we are using a leave-$p$-out-cross-validation method. This consists of leaving out $p$ observations of our training set and using the rest of the observations as our training data. We then repeat with all the different ways to cut the original data and compute the mean and the standard deviation. 
 

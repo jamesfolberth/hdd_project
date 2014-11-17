@@ -175,7 +175,7 @@ To validate our classification algorithm, we want to use cross-validation which 
 
 We have implemented the computation of the Mel power spectrum, the associated MFCCs, and the various simple features described above.  Our code is hosted at \url{https://github.com/jamesfolberth/hdd_project}.  We use a single Gaussian to cluster the MFCC frames for each track, and then compare the cluster models between two tracks using the rescaled KL-divergence.  We also compute the median fluctuation patterns, bass, and center of gravity.  We then standardize these distances using the mean and standard deviation taken across the entire training set and combine them using the weights $0.7$ for the spectral similarity, and $0.1$ each for median fluctuation pattern, bass, and center of gravity.  Pampalk describes this combination and calls it $G1C$ \cite{pampalk:dissertation}.\\
 
-Based on this algorithm, if we were to take one song from our training data and used the rest to train the algorithm we have the following confusion matrix in Figure {\ref{fig:confMat}}.  The confustion matrix is structured so that the $(i,j)$ entry is the number of songs of genre $i$ that were classified as genre $j$.\\
+Based on this algorithm, if we were to take one song from our training data and used the rest to train the algorithm we have the following confusion matrix in Figure {\ref{fig:confMat}}.  The confustion matrix is structured so that the $(i,j)$ entry is the number of songs classified as genre $j$ that are actually of genre $i$.\\
 
 \begin{figure}[h!]
 \centering

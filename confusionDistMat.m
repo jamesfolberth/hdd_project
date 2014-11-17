@@ -45,7 +45,7 @@ for i=1:numel(genreProb)
    genreProb(i) = sum(genreValues == i)/nSongs;
 end
 %genreProb
-genreNum
+%genreNum
 correctClassRate
 
 probCorrect = sum(diag(confMat))/nSongs;

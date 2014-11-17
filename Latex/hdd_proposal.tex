@@ -8,7 +8,7 @@
 \oddsidemargin  0mm
 \evensidemargin 0mm
 \topmargin -20mm
-\begin{document}                                       
+\begin{document}
 %_________________________________________________________________
 \title{Project Proposal\\
 James Folberth, Dale Jennings, Alyson Fox}
@@ -16,9 +16,9 @@ James Folberth, Dale Jennings, Alyson Fox}
 %_________________________________________________________________
 \section{Introduction}
 %_________________________________________________________________
-\indent Digital music has changed the face of music collection. Users can have megabyte or a gigabyte worth of music on their personal labtops and can easily download music from the internet. This has lead to the need to invent and test new tools in musical information retrieval. There are many websites and apps, Pandora and iTunes are a few examples, that can create playlists based on similarity to a certain song or genre of music. These sites need to be able to classify certain features of a song and build the playlist from there. 
+\indent Digital music has changed the face of music collection. Users can have megabyte or a gigabyte worth of music on their personal labtops and can easily download music from the internet. This has lead to the need to invent and test new tools in musical information retrieval. There are many websites and apps, Pandora and iTunes are a few examples, that can create playlists based on similarity to a certain song or genre of music. These sites need to be able to classify certain features of a song and build the playlist from there.
 
-\indent This goal of this project is to able to classify the genre of a song. This may seem like a simple problem, since we can usually classify a song by ear, but that relies on the user having a vast knowledge of music. If we can automate the process using computers, we could find new and interesting insights that may not be obvious. However, this adds complexity that must be dealt with since we need techniques so that  the computer can ``listen'' to the song and extract features to be able to identify the genre. To do this we take  a song, which is a continuous signal and we sample at certain frequency to transform it into a discrete signal that is based on pitch which created by the sound pressures changes  and define it as a function of time. From the discrete signal we can define  ``features" for each song that many be able to be used to classify the genre. 
+\indent This goal of this project is to able to classify the genre of a song. This may seem like a simple problem, since we can usually classify a song by ear, but that relies on the user having a vast knowledge of music. If we can automate the process using computers, we could find new and interesting insights that may not be obvious. However, this adds complexity that must be dealt with since we need techniques so that  the computer can ``listen'' to the song and extract features to be able to identify the genre. To do this we take  a song, which is a continuous signal and we sample at certain frequency to transform it into a discrete signal that is based on pitch which created by the sound pressures changes  and define it as a function of time. From the discrete signal we can define  ``features" for each song that many be able to be used to classify the genre.
 
 \indent For our project we are only classifying within six different genres, classical, electronically, jazz/blues, metal/punk, rock/pop and world. To compute similarities between each song it is imperative that we generate features. Given 729 training tracks, we will construct features for each song and the song that we would like to classify to create a ``difference" to be able to use $k$-means nearest neighbor method. Most features that we used were developed by or used in Elias Pampalk dissertation \cite{pampalk:dissertation} or in Tzanetakis and Cook \cite{tzanetakis:classification}.
 
@@ -112,25 +112,25 @@ We wish to compare directly the Mel power spectrum of two songs.  This can be do
 
 One possible cluster model fits a single Gaussian with mean $\mu$ and a full (as opposed to diagonal) covariance matrix $\Sigma$.  Cluster models of this form can be compared using a symmetric Kullback-Leibler divergence:
 
-\[ d_{KL}\left(\left(\mu_1,\Sigma_1\right),\left(\mu_2,\Sigma_2\right)\right) = \operatorname{tr}\left(\Sigma_1\Sigma_2^{-1}\right) + \operatorname{tr}\left(\Sigma_1^{-1}\Sigma_2\right) + \operatorname{tr}\left(\left(\Sigma_1+\Sigma_2\right)(\mu_1-\mu_2)(\mu_1-\mu_2)^T\right). \] 
+\[ d_{KL}\left(\left(\mu_1,\Sigma_1\right),\left(\mu_2,\Sigma_2\right)\right) = \operatorname{tr}\left(\Sigma_1\Sigma_2^{-1}\right) + \operatorname{tr}\left(\Sigma_1^{-1}\Sigma_2\right) + \operatorname{tr}\left(\left(\Sigma_1+\Sigma_2\right)(\mu_1-\mu_2)(\mu_1-\mu_2)^T\right). \]
 
 \noindent These distances will span over many orders of magnitude, so it is wise to rescale the distance to
 
-\[ d = -e^{-\frac{1}{450}d_{KL}}, \] 
+\[ d = -e^{-\frac{1}{450}d_{KL}}, \]
 
 \noindent where the factor $450$ is recommended by Pampalk \cite{pampalk:dissertation}.\\
 
 It is natural to want to extend the single Gaussian cluster model to a full Gaussian mixture model (GMM).  Instead of a single Gaussian, we attempt to fit a convex combination of $M$ Gaussians.  This distribution takes the form
 
-\[ p(x|\Theta) = \sum_{i=1}^M P_i \mathcal{N}(\mu_i, \Sigma_i), \] 
+\[ p(x|\Theta) = \sum_{i=1}^M P_i \mathcal{N}(\mu_i, \Sigma_i), \]
 
 \noindent where $\Theta = \{P_i,\mu_i,\Sigma_i\}$, $P_i\ge 0$, $\sum_{i=1}^M P_i = 1$, and $\mu_i$ and $\Sigma_i$ are the mean and covariance of the $i$th Gaussian.  We wish to find the parameters in $\Theta$ that maximize the likelihood that that the frames $X = \{x_1,...,x_N\}$ were generated by the GMM with parameters $\Theta$.  The standard measure of likelihood is the log-likelihood
 
-\[ L(X|\Theta) = \sum_{n=1}^N \log\left(p(x_n|\Theta)\right). \] 
+\[ L(X|\Theta) = \sum_{n=1}^N \log\left(p(x_n|\Theta)\right). \]
 
 \noindent We can approach finding the optimal parameters $\Theta$ by using the expectation maximization algorithm, which is iterative and can be initialized using random initial data or an initial cluster given by $k$-means.  Two cluster models can be compared via log-likelihoods, giving the distance
 
-\[ d = L(X_1|\Theta_1) + L(X_2|\Theta_2) - L(X_1|\Theta_2) - L(X_2|\Theta_1). \] 
+\[ d = L(X_1|\Theta_1) + L(X_2|\Theta_2) - L(X_1|\Theta_2) - L(X_2|\Theta_1). \]
 
 One may expect that a full GMM will provide better clustering than a single Gaussian, and thus a more accurate spectral similarity measure, but a working with full GMMs can become prohibitively expensive.  At the time of writing, we have implemented only the single Gaussian cluster model, which is much faster than a full GMM.\\
 
@@ -138,7 +138,7 @@ One may expect that a full GMM will provide better clustering than a single Gaus
 
 Once we have chosen a spectral similarity measure and computed various simple features from the (Mel) power spectrum (e.g. median fluctuation patterns with Euclidean distance, center of gravity of fluctuation patterns with absolute value, etc.), we should combine the distances in a meaningful way.  One option is to use a convex combination of the $z$ (standard) scores of the distances.  This method gives the combined distance
 
-\[ d = \sum_{i} w_i \left(\dfrac{d_i - \mu_i}{\sigma_i}\right) + \text{offset}, \] 
+\[ d = \sum_{i} w_i \left(\dfrac{d_i - \mu_i}{\sigma_i}\right) + \text{offset}, \]
 
 \noindent where $w_i\ge 0$, $\sum_i w_i=1$, $d_i$ is the $i$th distance to be combined, $\mu_i$ and $\sigma_i$ are the mean and standard deviation of the $i$th distance over some reference set of songs (e.g. the entire database of songs), and the offset is chosen to the distance is positive for each pair of songs.  Pampalk describes a few possible combinations in his dissertation \cite{pampalk:dissertation}; we have implemented one and describe it below.\\
 
@@ -147,23 +147,28 @@ Once we have chosen a spectral similarity measure and computed various simple fe
 \section{Dimension reduction}
 %_________________________________________________________________
 % TODO Does he want us to justify the techniques we described above?
-Describe your dimension reduction technique, and justify why it 
-is appropriate to use it in this context. You should explain what 
-performance is expected.
+
+One of the biggest challenges in data analysis is dealing with high dimensional data, both because of increased complexity in algorithms, and in interpreting high dimensional spaces.  Dimension reduction thus becomes important to bring the data into a space that is more manageable.
+
+In the context of music classification, much of the dimension reduction is done in the feature extraction stages.  A 3 minute song sampled at 44,100Hz (which is a standard sampling rate, but higher than we are dealing with in this project) is essentially a 7,938,000 dimensional vector.  Trying to compare multiple songs with this length vector is computationally expensive.  On top of that, the song does not actually live in a 7,938,000 dimensional space.  It likely lives in a much lower dimensional manifold.  The process of feature extraction which was discussed in the previous section is a big part of trying to describe songs in a lower dimensional space.
+
+Even after features are extracted from the songs, the space may be larger than desired.  For example, the Mel Frequency Cepstrum Coefficients for each song only reduce the dimension of the space by about one half.  For this reason, Gaussian approximations are applied to these Cepstrum coefficients, again as discussed in the previous section.  After all of the features are extracted and put into a more manageable form.  There could still be 30-60 features describing each song, with strong correlations between some of the features.
+
+At the post-feature extraction phase, the goal is to choose the features that best describe the songs, with a possibly different set of features for each genre, without overfitting.  PCA techniques can be applied to approximate the dimension of the space required to represent each genre, after which a search technique can be used to choose the best features.  Pompak \cite{pampalk:dissertation} discusses methods for choosing 2 or 7 features along with a spectral similarity measure to represent the song space, while Tzanetakis and Cook \cite{tzanetakis:classification} uses a 30 feature space, and Carlos et al. \cite{silla:selection} use a genetic algorithm based feature selection.
+
 %_________________________________________________________________
 \section{Statistical learning}
 %_________________________________________________________________
-\textbf{Need to talk about machine learning methods here, i.e. kNN, SVM, etc}
-\subsection{$K$-Nearest Neighbor} 
-One way to classify an observation is to use $K$-Nearest Neighbors. It is a simple machine learning algorithm that stores all the similarity measures of the training data and classifies a new observation based on the ``distance" of the testing data to the training data. It finds the  $K$ nearest neighbors and uses those observation to classify based on a majority vote. The ``distance'' can be defined within any space we choose, whether it be Euclidian or feature space.  
+\subsection{$K$-Nearest Neighbor}
+One way to classify an observation is to use $K$-Nearest Neighbors. It is a simple machine learning algorithm that stores all the similarity measures of the training data and classifies a new observation based on the ``distance" of the testing data to the training data. It finds the  $K$ nearest neighbors and uses those observation to classify based on a majority vote. The ``distance'' can be defined within any space we choose, whether it be Euclidian or feature space.
 
-\subsection{Support Vector Machines} 
-Support vector machines is another simple machine learning algorithm. It defines each observation of the training data as a point in space and creates a boundary line that best separates the data into its correct classification with minimal amount of incorrect classifications. It then take the testing data projects in down into the space and classifies the observation based on its relation to the boundary line. Again the space can be any sufficient space. Note that we can also expand this idea to Kernal support vector machines. 
+\subsection{Support Vector Machines}
+Support vector machines is another simple machine learning algorithm. It defines each observation of the training data as a point in space and creates a boundary line that best separates the data into its correct classification with minimal amount of incorrect classifications. It then take the testing data projects in down into the space and classifies the observation based on its relation to the boundary line. Again the space can be any sufficient space. Note that we can also expand this idea to Kernal support vector machines.
 
 \subsection{Cross-Validation}
 
 
-To validate our classification algorithm, we want to use cross-validation which is a way for us to asses our results if were were to generalize to a new and independent data set. We want to get an idea about how well we are able to predict the genre correctly using a random subset of our training data as the test data since we are have the ground truth. Cross-validation also give us insight in the training phase of our algorithm to determine if we are over fitting. Overfitting the data occurs when the algorithm is predicting the error instead of true trends in the data. This can occur due to many factors, one of which is due to using too many features to describe the model, thus cross-validation can also inform which features or methods provide the best and consistent results. For our purpose we are using a leave-$p$-out-cross-validation method. This consists of leaving out $p$ observations of our training set and using the rest of the observations as our training data. We then repeat with all the different ways to cut the original data and compute the mean and the standard deviation. 
+To validate our classification algorithm, we want to use cross-validation which is a way for us to asses our results if were were to generalize to a new and independent data set. We want to get an idea about how well we are able to predict the genre correctly using a random subset of our training data as the test data since we are have the ground truth. Cross-validation also give us insight in the training phase of our algorithm to determine if we are over fitting. Overfitting the data occurs when the algorithm is predicting the error instead of true trends in the data. This can occur due to many factors, one of which is due to using too many features to describe the model, thus cross-validation can also inform which features or methods provide the best and consistent results. For our purpose we are using a leave-$p$-out-cross-validation method. This consists of leaving out $p$ observations of our training set and using the rest of the observations as our training data. We then repeat with all the different ways to cut the original data and compute the mean and the standard deviation.
 
 %_________________________________________________________________
 \section{Initial results}
@@ -177,21 +182,21 @@ Based on this algorithm, if we were to take one song from our training data and 
 %\input{../confMat.tex} % XXX we're all on *nix, right?
 \begin{tabular}{l| |l | l | l | l | l | l | }
 &classical &electronic& jazz &punk& rock &world \\ \hline \hline
-classical& 314 & 3 & 0 & 1 & 4 & 35 \\ \hline 
-electronic&0 & 83 & 2 & 1 & 10 & 16 \\ \hline 
-jazz&0 & 0 & 23 & 0 & 0 & 1 \\ \hline 
-punk& 0 & 1 & 0 & 24 & 7 & 3 \\ \hline 
-rock&1 & 20 & 1 & 18 & 80 & 24 \\ \hline 
-world&5 & 7 & 0 & 1 & 1 & 43 \\ \hline 
+classical& 314 & 3 & 0 & 1 & 4 & 35 \\ \hline
+electronic&0 & 83 & 2 & 1 & 10 & 16 \\ \hline
+jazz&0 & 0 & 23 & 0 & 0 & 1 \\ \hline
+punk& 0 & 1 & 0 & 24 & 7 & 3 \\ \hline
+rock&1 & 20 & 1 & 18 & 80 & 24 \\ \hline
+world&5 & 7 & 0 & 1 & 1 & 43 \\ \hline
 \end{tabular}
 \caption{Confusion Matrices}
 \label{fig:confMat}
 \end{figure}
 
-This algorithm gives the following percent correct for each genre, 
+This algorithm gives the following percent correct for each genre,
 
 % XXX these aren't updated automagically
-\[ [ 98.12\%, 72.81\%,88.46\%,53.33\%,78.43\%,35.25\%]. \] 
+\[ [ 98.12\%, 72.81\%,88.46\%,53.33\%,78.43\%,35.25\%]. \]
 
 
 To conduct the leave-out-$p$-cross-validation we split our data into five randomly distributed sets, ensuring an even spilt between each genre. When then create a confusion matrix for the test data for each of the 5 subsets and then repeated the process ten times, again randomly distributing the set. We end up with 50 confusion matrices for our cross-validation and we take the mean and standard deviation which are displayed below in Figure {\ref{fig:avgconfMat}}  and Figure {\ref{fig:stdconfMat}} respectively.\\
@@ -201,14 +206,14 @@ To conduct the leave-out-$p$-cross-validation we split our data into five random
 %\input{../crossValAvg.tex}
  \begin{tabular}{l| |l | l | l | l | l | l | }
 &classical &electronic& jazz &punk& rock &world \\ \hline \hline
-classical&63 & 0 & 2 & 0 & 1 & 10 \\ \hline 
-electronic&0 & 16 & 0 & 0 & 1 & 3 \\ \hline 
-jazz&0 & 0 & 1 & 0 & 0 & 0 \\ \hline 
-punk&0 & 0 & 0 & 4 & 2 & 0 \\ \hline 
-rock&0 & 5 & 2 & 4 & 16 & 7 \\ \hline 
-world&1 & 1 & 0 & 0 & 0 & 5 \\ \hline 
+classical&63 & 0 & 2 & 0 & 1 & 10 \\ \hline
+electronic&0 & 16 & 0 & 0 & 1 & 3 \\ \hline
+jazz&0 & 0 & 1 & 0 & 0 & 0 \\ \hline
+punk&0 & 0 & 0 & 4 & 2 & 0 \\ \hline
+rock&0 & 5 & 2 & 4 & 16 & 7 \\ \hline
+world&1 & 1 & 0 & 0 & 0 & 5 \\ \hline
 \end{tabular}
-\caption{(Rounded) Average of the Confusion Matrices} 
+\caption{(Rounded) Average of the Confusion Matrices}
 \label{fig:avgconfMat}
 \end{figure}
 
@@ -218,19 +223,19 @@ world&1 & 1 & 0 & 0 & 0 & 5 \\ \hline
 %\input{../crossValSD.tex}
  \begin{tabular}{l| |l | l | l | l | l | l | }
 &classical &electronic& jazz &punk& rock &world \\ \hline \hline
-classical& 1.353604 & 0.635353 & 1.031939 & 0.404061 & 0.856190 & 2.221968 \\ \hline 
-electronic& 0.000000 & 1.972153 & 0.350510 & 0.404061 & 0.868731 & 1.595402 \\ \hline 
-jazz&0.000000 & 0.000000 & 0.769044 & 0.000000 & 0.000000 & 0.350510 \\ \hline 
-punk&0.000000 & 0.567486 & 0.000000 & 1.324803 & 1.629323 & 0.328261 \\ \hline 
-rock&0.443087 & 1.982062 & 1.124132 & 1.355262 & 2.006520 & 1.764040 \\ \hline 
-world&1.271990 & 0.997139 & 0.609114 & 0.000000 & 0.481918 & 1.925235 \\ \hline 
+classical& 1.353604 & 0.635353 & 1.031939 & 0.404061 & 0.856190 & 2.221968 \\ \hline
+electronic& 0.000000 & 1.972153 & 0.350510 & 0.404061 & 0.868731 & 1.595402 \\ \hline
+jazz&0.000000 & 0.000000 & 0.769044 & 0.000000 & 0.000000 & 0.350510 \\ \hline
+punk&0.000000 & 0.567486 & 0.000000 & 1.324803 & 1.629323 & 0.328261 \\ \hline
+rock&0.443087 & 1.982062 & 1.124132 & 1.355262 & 2.006520 & 1.764040 \\ \hline
+world&1.271990 & 0.997139 & 0.609114 & 0.000000 & 0.481918 & 1.925235 \\ \hline
 \end{tabular}
-\caption{Standard Deviation of the Confusion Matrices} 
+\caption{Standard Deviation of the Confusion Matrices}
 \label{fig:stdconfMat}
 \end{figure}
 
 The percent correct for each genre are as follows,
-   \[ [98.44\%, 72.73\%,20.00\%,50.00\%,80.00\%,20.00\%]. \] 
+   \[ [98.44\%, 72.73\%,20.00\%,50.00\%,80.00\%,20.00\%]. \]
 
 As expected, this method struggles with classifying jazz and world.\\
 
@@ -241,7 +246,7 @@ As expected, this method struggles with classifying jazz and world.\\
 %_________________________________________________________________
 \section{Discussion}
 
-Our algorithm creates a weighted distance between each test observation to all the training observations. another method would be to project our data into the feature space using a singular value decomposition (SVD). We would create a matrix where each feature that we would like to use to describe the data is represented column wise and the song is represented row wise. SVD then decompose our matrix into its singular values and the left and right singular vectors. We can then project our test data down the the feature space which is described by the SVD. We can reduce the dimensionally as well. We choose the $n$ largest singular values and there corresponding left and right singular vectors and use that as an approximation to our feature space. We can create an approximation of the feature space for each of the genre's and project the test song down on to each and then find the $k$-nearest neighbors to be able to determine the predicted genre. 
+Our algorithm creates a weighted distance between each test observation to all the training observations. another method would be to project our data into the feature space using a singular value decomposition (SVD). We would create a matrix where each feature that we would like to use to describe the data is represented column wise and the song is represented row wise. SVD then decompose our matrix into its singular values and the left and right singular vectors. We can then project our test data down the the feature space which is described by the SVD. We can reduce the dimensionally as well. We choose the $n$ largest singular values and there corresponding left and right singular vectors and use that as an approximation to our feature space. We can create an approximation of the feature space for each of the genre's and project the test song down on to each and then find the $k$-nearest neighbors to be able to determine the predicted genre.
 
 
 % References

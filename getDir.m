@@ -15,6 +15,8 @@ elseif ( strcmp(userName,'james') )
   dataDir = './cd_data/';
 elseif ( strcmp(userName,'alfox') ) %TODO needs correct username here
   dataDir = '/Users/alfox/Documents/Data/';
+elseif ( strcmp(userName,'Dale-LV\Dale') )
+    dataDir = '../cd_data/';
 else
    error('Unknown user name.')
 end

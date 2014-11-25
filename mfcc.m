@@ -64,6 +64,9 @@ melPow = melFilter*pow;
 melPow(melPow<1) = 1;
 melPowDB = 10*log10(melPow);
 
+% trim columns of zeros (most likely from beginning or end of track)
+melPowDB(:,~any(melPowDB,1)) = [];
+
 % Compress the Mel power spectrum
 switch opt.method
    case 'dct'

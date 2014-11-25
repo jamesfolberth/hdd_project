@@ -16,7 +16,6 @@ If you want to listen to any of these groovy tracks, use audioplayer.  For examp
 
 
 
-
 ==========================
 = Fluctuation Parameters =
 ==========================
@@ -48,3 +47,38 @@ matfile
 = References =
 ==============
 http://blogs.mathworks.com/loren/2012/03/26/considering-performance-in-object-oriented-matlab-code/
+
+
+
+==============
+= Cross Vals =
+==============
+
+G1C spectral similarity + a few FPs as described in Pampalk '06.  Clustering with kNN, k=5.
+>> crossValDistMat                 
+
+probCorrect =
+
+    0.7292
+
+
+correctClassRate =
+
+    0.9844
+    0.7273
+    0.2000
+    0.5000
+    0.7619
+    0.2083
+
+
+ans =
+
+    63     0     2     0     1    10
+     0    16     0     0     1     3
+     0     0     1     0     0     0
+     0     0     0     4     3     0
+     0     5     2     4    16     6
+     1     1     0     0     0     5
+
+

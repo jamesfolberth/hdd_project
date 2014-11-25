@@ -11,7 +11,7 @@ function [] = testmfcc()
    wavFile = strcat(dataDir, wavList{randi(nSongs)});
 
    % read in the song
-   if ( isOctave() )
+   if ( ~exist('audioread') )
       [wav,fs] = wavread(wavFile);
    else
       [wav,fs] = audioread(wavFile,'double');

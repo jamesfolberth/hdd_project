@@ -1,15 +1,14 @@
-function [wchFeat] = wch(wav,fs,opt)
+function [wchFeat] = wch(wav,opt)
 % Compute the (Daubechies) Wavelet Coefficient Histogram and return features
 %
 % wav - vector read of WAVE file data
-% fs  - sampling frequency
 % opt - options structure
 %       opt.wName       - wavelet name (default 'db8')
 %       opt.nLevels     - number of levels in decomposition (default 7)
 %       opt.segLength   - length of segment (defaul 2^15 ~ 3 seconds)
 %
 
-if( nargin < 3 )
+if( nargin < 2 )
    %segLength = 2^15; % ~3s for 11025 Hz sampling
    opt = struct('wName','db8',...
                 'nLevels',7,...

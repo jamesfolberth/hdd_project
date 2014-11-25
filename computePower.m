@@ -6,7 +6,8 @@ function [pow, segLength, shiftLength] = computePower(wav,opt)
 %    opt.shiftLength = length of shift (amount of overlap)
 %    opt.rebuild     = 1 to rebuild window; don't define to retain window
 
-persistent wHann
+% Persistent doesnt work with changing segLengths
+%persistent wHann
 
 % set parameters
 if nargin > 1
@@ -24,11 +25,11 @@ end
 nSegs = floor((length(wav) - segLength)/shiftLength) + 1;
 
 % Construct a segment matrix, with hann window applied to segments
-if ( isempty(wHann) ...
-   || ( nargin > 1 && isfield(opt,'rebuild') && opt.rebuild ) )
+%if ( isempty(wHann) ...
+%   || ( nargin > 1 && isfield(opt,'rebuild') && opt.rebuild ) )
    wHann = 0.5*(1-cos(2*pi*(0:segLength-1)/(segLength-1)))';
    wHann = wHann/sum(wHann);
-end
+%end
 segMat = zeros(segLength,nSegs);
 for n = 1:nSegs
    ind = (1:segLength) + shiftLength*(n-1);

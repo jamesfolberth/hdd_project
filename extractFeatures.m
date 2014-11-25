@@ -6,7 +6,7 @@ function features = extractFeatures(wav,fs,opt)
 
     % Zero crossing rate
     zcr = 0.5 * sum(abs(sign(wav(2:N) - sign(wav(1:(N-1))))))/(N*fs);
-    features = [features; mean(zcr); var(zcr)];
+    features = [features; zcr];
     clear zcr;
     
     %% Spectral Analysis features
@@ -24,7 +24,11 @@ function features = extractFeatures(wav,fs,opt)
     clear specC;
 
     % Spectral Rolloff
-    [specR,~] = find(cumsum(melS,1) >= 0.85*repmat(sum(melS,1),size(melS,1),1),1);
+    specR = zeros(size(melS,2),1);
+    for t = 1:size(melS,2)
+        i = find(cumsum(melS(:,t)) >= 0.85*sum(melS(:,t)),1);
+        specR(t) = i;
+    end
     features = [features; mean(specR); var(specR)];
     clear specR;
 

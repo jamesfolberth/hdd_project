@@ -4,7 +4,7 @@ if isunix
     [~, userName] = system('whoami');
     userName = strtrim(userName);
 elseif ispc
-    [~, userName] = system('echo %USERDOMAIN%\%USERNAME%');
+    [~, userName] = system('echo %USERNAME%');
 end
 
 %disp(userName)
@@ -13,9 +13,9 @@ if ( strcmp(userName,'dalekj') )
   dataDir = '/media/removable/SDcard/cd_data/';
 elseif ( strcmp(userName,'james') )
   dataDir = './cd_data/';
-elseif ( strcmp(userName,'alfox') ) %TODO needs correct username here
+elseif ( strcmp(userName,'alfox') ) 
   dataDir = '/Users/alfox/Documents/Data/';
-elseif ( strcmp(userName,'Dale-LV\Dale') )
+elseif ( strcmp(deblank(userName),'Dale') )
     dataDir = '../cd_data/';
 else
    error('Unknown user name.')

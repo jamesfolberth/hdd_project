@@ -42,7 +42,7 @@ case 'G1C'
       fprintf(printFile,'\rMFCC: %d of %d.',i, nSongs);
       wavFile = strcat(dataDir, wavList{i});
       % wavread will be deprecated, so use audioread
-      if ( isOctave() )
+      if ( ~exist('audioread') )
          [wav,fs] = wavread(wavFile);
       else
          [wav,fs] = audioread(wavFile,'double');

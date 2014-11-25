@@ -4,17 +4,22 @@ function [compMelPow, melPowDB, pow] = mfcc(wav,fs,opt)
 % wav - vector read of WAVE file data
 % fs  - sampling frequency
 % opt - options structure
-%       opt.method     - method to compress Mel power spectrum
-%                        values: dct, pca, wav
-%       opt.numTerms   - number of terms to keep in DCT, PCA, etc.
-%       opt.wName      - wavelet name (see wavenames and waveinfo)
+%       opt.segLength   - length of time segments
+%       opt.shiftLength - amount to shift time segments by
+%       opt.method      - method to compress Mel power spectrum
+%                        values: dct, pca, wav, raw
+%       opt.numTerms    - number of terms to keep in DCT, PCA, etc.
+%       opt.wName       - wavelet name (see wavenames and waveinfo)
 %
 
-persistent melFilter; % TODO profile this to make sure persistent is faster
+% Persistent breaks when using different segLengths.
+%persistent melFilter; % TODO profile this to make sure persistent is faster
 
 
 if( nargin < 3 )
-   opt = struct('method','dct',...
+   opt = struct('segLength',512',...
+                'shiftLength',256',...
+                'method','dct',...
                 'numTerms',20);
 end
 
@@ -25,12 +30,13 @@ maxFreq = fs/2;
 %segLength = 512; % 46 ms for 11025 Hz sampling
 %% How much to shift by for each segment
 %shiftLength = segLength/2; % 50% overlap
-computePowerOpt = struct('segLength',512,'shiftLength',512*0.5);
+computePowerOpt = struct('segLength',opt.segLength,...
+                         'shiftLength',opt.shiftLength);
 [pow, segLength, shiftLength] = computePower(wav,computePowerOpt);
 
 % Number of mel frequency bins to use
 nMelFreq = 36; % TODO put this in opt or is it 'optimal'?
-if( isempty(melFilter) )
+%if( isempty(melFilter) )
    % current frequency bins
    freq = linspace(0,maxFreq,segLength/2 + 1);
    % mel frequency bins
@@ -55,7 +61,7 @@ if( isempty(melFilter) )
       (freq > filterCenter(n+1) & freq <= filterCenter(n+2)) .* ...
       filterHeight(n).*(filterCenter(n+2) - freq)/(filterCenter(n+2)-filterCenter(n+1));
    end
-end
+%end
 
 % Apply the triangular mel filters to switch to mel power
 melPow = melFilter*pow;
@@ -91,6 +97,9 @@ switch opt.method
       %fprintf(1,'Wavelet compression: %f\n',nnz(CC)/prod(size(CC)));
       compMelPow = {CC, LC};
 
+   case 'raw'
+      compMelPow = [];
+      
    otherwise
       error(sprintf('Bad MFCC compression option: %s',opt.method))
 end

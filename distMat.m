@@ -34,7 +34,10 @@ switch opt.method
 case 'G1C'
 
    % NOTE: melCoeffs will use about 1GB with DCT compression
-   mfccOpts = struct('method','dct','numTerms',20);
+   mfccOpts = struct('segLength',512',...
+                     'shiftLength',256',...
+                     'method','dct',...
+                     'numTerms',20);
    melCoeffs = cell(nSongs,1);
 
    % Compute MFCCs

@@ -46,8 +46,13 @@ for n =1: 10
       genreTrain = genreValues(trainIndex); 
 
       % train kNN classifier for this subset
-      mdl = fitcknn(transpose(feat(:,trainIndex)),genreTrain,...
-         'NumNeighbors',5,'Distance','seuclidean');
+      if( exist('fitcknn') )
+          mdl = fitcknn(transpose(feat(:,trainIndex)),genreTrain,...
+            'NumNeighbors',5,'Distance','seuclidean');
+      else
+          mdl = ClassificationKNN.fit(transpose(feat(:,trainIndex)),genreTrain,...
+              'NumNeighbors',5,'Distance','seuclidean');
+      end
 
       % make predictions
       confMat = zeros(numel(unique(genreValues))); % 6x6

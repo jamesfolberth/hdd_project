@@ -5,7 +5,8 @@ function [crossValAvg,crossValSD] = crossValkNNFeatVec(savefile)
 % This uses matlab's built-in kNN routines
 
 if nargin == 0
-   savefile = 'featVecsWCH.mat';
+   %savefile = 'featVecsWCH.mat';
+   savefile = 'featVecsDale.mat';
 end 
 
 load(savefile);
@@ -21,6 +22,7 @@ vars = repmat(var(feat, 0, 2), [1 size(feat,2)]);
 feat = (feat - mu)./vars;
 fprintf(1,'Feature vectors standardized\n');
 
+% Begin cross validation
 R = cell(10,5); 
 for n =1: 10
    fprintf(1,'\rn = %d',n);

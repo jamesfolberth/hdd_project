@@ -5,8 +5,8 @@ function [crossValAvg,crossValSD] = crossValkNNFeatVec(savefile, opt)
 % This uses matlab's built-in SVM routines
 
 if nargin == 0
-   %savefile = 'featVecsWCH.mat';
-   savefile = 'featVecsDale.mat';
+   savefile = 'featVecsWCH.mat';
+   %savefile = 'featVecsDale.mat';
 end 
 
 if nargin < 2

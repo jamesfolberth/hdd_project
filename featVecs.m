@@ -20,8 +20,8 @@ end
 
 % populate options structure with default method, etc.
 if nargin < 2
-   %opt = struct('method','WCH','savefile','featVecsWCH.mat');
-   opt = struct('method','Dale','savefile','featVecsDale.mat');
+   opt = struct('method','WCH','savefile','featVecsWCH.mat');
+   %opt = struct('method','Dale','savefile','featVecsDale.mat');
 end
 
 % Set up variables common to all methods
@@ -35,13 +35,16 @@ switch opt.method
 case 'WCH'
 
    mfccOpts = struct('segLength',512,'shiftLength',256,...
+   %mfccOpts = struct('segLength',1024,'shiftLength',1024,...
                      'method','dct','numTerms',20);
+   textureOpts = struct('segLength',11024,'shiftLength',11024/2,...
+                         'method','dct','numTerms',6);
 
    % Compute features
-   feat = zeros([86 nSongs]);
+   feat = zeros([66 nSongs]);
    % 01:10   - assorted simple features
    % 11:46   - mean and var of MFCC DCT coeffs 2:19
-   % 47:86  - wavelet coeff histogram features (1st 3 moments + energy)
+   % 47:86   - wavelet coeff histogram features (1st 3 moments + energy)
 
    for(i = 1:nSongs)
       fprintf(printFile,'\rSong: %d of %d.',i, nSongs);
@@ -61,21 +64,38 @@ case 'WCH'
       sfeat = simpFeat(wav, fs, pow, melPowDB, fpMed);
 
       feat(01,i) = sfeat.zcr;
-      feat(02,i) = mean(sfeat.percussiveness);
-      feat(03,i) = sfeat.specCentroid;
 
-      feat(04,i) = sfeat.fpMax;
-      feat(05,i) = sfeat.fpSum;
-      feat(06,i) = sfeat.fpBass; 
-      feat(07,i) = sfeat.fpAggr;
-      feat(08,i) = sfeat.fpDLF;
-      feat(09,i) = sfeat.fpG;
-      feat(10,i) = sfeat.fpF;
+      % Spectral centroid, rolloff, and flux stolen from Dale
+      specC = (1:36)*melPowDB./sum(melPowDB,1);
+      specR = zeros(size(melPowDB,2),1);
+      for t = 1:size(melPowDB,2)
+         inds = find(cumsum(melPowDB(:,t)) >= 0.85*sum(melPowDB(:,t)),1);
+         specR(t) = inds;
+      end
+      normMS = bsxfun(@times, melPowDB, 1./sum(melPowDB,1));
+      specF = sum( (normMS(:,2:length(melPowDB)) ...
+      - normMS(:,1:length(melPowDB)-1)).^2,1);
+      feat(2:7) = [mean(specC); var(specC);
+                   mean(specR); var(specR);
+                   mean(specF); var(specF)];
 
-      feat(11:28,i) = mean(melCoeffs(2:19,:),2);
-      feat(29:46,i) = var(melCoeffs(2:19,:),0,2);
+      feat(08,i) = sfeat.fpMax;
+      feat(09,i) = sfeat.fpSum;
+      feat(10,i) = sfeat.fpBass; 
+      feat(11,i) = sfeat.fpAggr;
+      feat(12,i) = sfeat.fpDLF;
+      feat(13,i) = sfeat.fpG;
+      feat(14,i) = sfeat.fpF;
 
-      feat(47:86,i) = wch(wav);
+      feat(15:32,i) = mean(melCoeffs(2:19,:),2);
+      feat(33:50,i) = var(melCoeffs(2:19,:),0,2);
+      
+      %melDCT = mfcc(wav, fs, textureOpts);
+      %melDCT = melDCT(2:6,:);
+      %feat(15:24,i) = [mean(melDCT,2); var(melDCT,0,2)];
+
+      %feat(25:40,i) = wch(wav);
+      feat(51:66,i) = wch(wav);
 
    end
    fprintf(printFile, '\n');
@@ -146,7 +166,8 @@ case 'Dale'
       % Spectral flux
       % The mean of the spectral flux is similar to the percusiveness defined
       % in Pampalk '06
-      normMS = melS*diag(1./sum(melS,1));
+      %normMS = melS*diag(1./sum(melS,1));
+      normMS = bsxfun(@times, melPowDB, 1./sum(melPowDB,1));
       specF = sum( (normMS(:,2:length(melS)) ...
       - normMS(:,1:length(melS)-1)).^2,1);
       feat(ind:ind+1,i) = [mean(specF); var(specF)]; ind = ind + 2;

@@ -5,8 +5,8 @@ function [crossValAvg,crossValSD] = crossValkNNFeatVec(savefile)
 % This uses matlab's built-in kNN routines
 
 if nargin == 0
-   %savefile = 'featVecsWCH.mat';
-   savefile = 'featVecsDale.mat';
+   savefile = 'featVecsWCH.mat';
+   %savefile = 'featVecsDale.mat';
 end 
 
 load(savefile);

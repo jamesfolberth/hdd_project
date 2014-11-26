@@ -1,4 +1,21 @@
 function features = extractFeatures(wav,fs,opt)
+%% Extract features from a song
+% 1 - zcr
+% 2 - specC mean
+% 3 - specC var
+% 4 - specR mean
+% 5 - specR var
+% 6 - specF mean
+% 7 - specF var
+% 8 - avg Loudness
+% 9:13 - 5 MFCC means 
+% 14:18 - 5 MFCC vars
+% 19 - fpMax
+% 20 - fpBass
+% 21 - fpAggr
+% 22 - fpDLF
+% 23 - fpGrav
+% 24 - fpFoc
 
     features = [];
 
@@ -11,9 +28,9 @@ function features = extractFeatures(wav,fs,opt)
     
     %% Spectral Analysis features
 
-    % Get the raw mel cepstrum with a 46ms window
-    analysisOpt = struct('segLength',512',...
-                    'shiftLength',512',...
+    % Get the raw mel cepstrum with a 92ms window
+    analysisOpt = struct('segLength',1024',...
+                    'shiftLength',1024',...
                     'method','raw');
     nMelBins = 36;
     [~, melS, powS] = mfcc(wav,fs,analysisOpt);

@@ -24,6 +24,6 @@ end
 
 %wav = wav*10^(96/20);
 
-wch(wav, fs)
+wch(wav)
 
 end

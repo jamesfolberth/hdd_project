@@ -25,8 +25,8 @@ if nargin < 2
 end
 
 % Set up variables common to all methods
-%nSongs = length(wavList);
-nSongs = 10; % for testing
+nSongs = length(wavList);
+%nSongs = 10; % for testing
 
 printFile = 1; % stdout
 %printFile = fopen('/dev/null');
@@ -34,13 +34,14 @@ printFile = 1; % stdout
 switch opt.method
 case 'WCH'
 
-   mfccOpts = struct('method','dct','numTerms',20);
+   mfccOpts = struct('segLength',512,'shiftLength',256,...
+                     'method','dct','numTerms',20);
 
    % Compute features
-   feat = zeros([20+0 nSongs]);
-   % 1:20 - wavlet coeff histogram features (1st 3 moments + energy)
-   %
-   %
+   feat = zeros([86 nSongs]);
+   % 01:10   - assorted simple features
+   % 11:46   - mean and var of MFCC DCT coeffs 2:19
+   % 47:86  - wavelet coeff histogram features (1st 3 moments + energy)
 
    for(i = 1:nSongs)
       fprintf(printFile,'\rSong: %d of %d.',i, nSongs);
@@ -54,9 +55,27 @@ case 'WCH'
 
       wav = wav*10^(96/20);
 
-      melCoeffs = mfcc(wav,fs,mfccOpts); % only store the current MFCCs
+      % only store data for the current song
+      [melCoeffs, melPowDB, pow] = mfcc(wav, fs, mfccOpts);
+      fpMed = flucPat(melPowDB);
+      sfeat = simpFeat(wav, fs, pow, melPowDB, fpMed);
 
-      feat(1:20,i) = wch(wav);
+      feat(01,i) = sfeat.zcr;
+      feat(02,i) = mean(sfeat.percussiveness);
+      feat(03,i) = sfeat.specCentroid;
+
+      feat(04,i) = sfeat.fpMax;
+      feat(05,i) = sfeat.fpSum;
+      feat(06,i) = sfeat.fpBass; 
+      feat(07,i) = sfeat.fpAggr;
+      feat(08,i) = sfeat.fpDLF;
+      feat(09,i) = sfeat.fpG;
+      feat(10,i) = sfeat.fpF;
+
+      feat(11:28,i) = mean(melCoeffs(2:19,:),2);
+      feat(29:46,i) = var(melCoeffs(2:19,:),0,2);
+
+      feat(47:86,i) = wch(wav);
 
    end
    fprintf(printFile, '\n');
@@ -64,7 +83,7 @@ case 'WCH'
    save(opt.savefile,'feat');
 
 otherwise
-   error(sprintf('Unknown method to combine metrics: opt.method = %s',...
+   error(sprintf('Unknown method to make feature vectors: opt.method = %s',...
    opt.method));
 end
 

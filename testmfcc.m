@@ -34,8 +34,10 @@ function [] = testmfcc()
 
    %plotSpectra(pow, melPowDB, recovMelPowDB);
 
-   mfccOpt1 = struct('method','dct','numTerms',20);
-   mfccOpt2 = struct('method','wav','wName','sym5','wLevel',5,'numTerms',10);
+   mfccOpt1 = struct('segLength',512,'shiftLength',256,...
+                     'method','dct','numTerms',20);
+   mfccOpt2 = struct('segLength',512,'shiftLength',256,...
+                     'method','wav','wName','sym5','wLevel',5,'numTerms',10);
    plotSpectraCompare(wav, fs, mfccOpt1, mfccOpt2);
 
 end

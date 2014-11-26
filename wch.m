@@ -12,42 +12,49 @@ if( nargin < 2 )
    %segLength = 2^15; % ~3s for 11025 Hz sampling
    opt = struct('wName','db8',...
                 'nLevels',7,...
-                'segLength',2^15);
+                'segLength',2^16);
 end
 
 % trim out the ends of the signal and work with only the middle
 %segLength = 2^(nextpow2(length(wav))-1);
 %segLength = floor(0.8*length(wav));
-segLength = 2^16;
-startInd = floor((length(wav) -segLength)/2);
+startInd = floor((length(wav) -opt.segLength)/2);
 endInd   = length(wav)-startInd;
 
 [C,L] = wavedec(wav(startInd:endInd), opt.nLevels, opt.wName);
 
-%coeffs = detcoef(C,L, 6);
-%%coeffs = appcoef(C,L, opt.wName, 1);
+%%coeffs = detcoef(C,L, 6);
+%coeffs = appcoef(C,L, opt.wName, 1);
 %[n,x] = hist(coeffs, 60);
 %n = n./trapz(x,n); % normalize
 %plot(n)
 %axis([1 numel(n) 0 0.3*max(n)]);
+%%error('stuff')
 
 %subbands = 1:7;
 subbands = 3:7; % first few don't look useful
-wchFeat = zeros([4*numel(subbands) 1]);
+wchFeat = zeros([8*numel(subbands) 1]);
 for i=1:numel(subbands)
-   coeffs = detcoef(C,L, subbands(i)); % TODO should we also use approx coeffs
-   [n] = hist(coeffs, 60); % compute WCH
+   dcoeffs = detcoef(C,L, subbands(i)); 
+   acoeffs = appcoef(C,L, opt.wName, subbands(i)); % TODO should we use app coeffs?
+   [dn] = hist(dcoeffs, 60); % compute WCH
+   [an] = hist(acoeffs, 60); 
    inds = 1:60; % following Li et al. '03, we think of n going from 1 to 60
-   n = n./trapz(inds,n); % normalize
-   %plot(n); pause(1)
+   dn = dn./trapz(inds,dn); % normalize
+   an = an./trapz(inds,an); 
 
    % moments
-   wchFeat(4*(i-1)+1) = sum(inds.*n);
-   wchFeat(4*(i-1)+2) = sum(inds.^2.*n);
-   wchFeat(4*(i-1)+3) = sum(inds.^3.*n);
+   wchFeat(8*(i-1)+1) = sum(inds.*dn);
+   wchFeat(8*(i-1)+2) = sum(inds.^2.*dn);
+   wchFeat(8*(i-1)+3) = sum(inds.^3.*dn);
+
+   wchFeat(8*(i-1)+5) = sum(inds.*an);
+   wchFeat(8*(i-1)+6) = sum(inds.^2.*an);
+   wchFeat(8*(i-1)+7) = sum(inds.^3.*an);
 
    % subband energy
-   wchFeat(4*(i-1)+4) = mean(abs(coeffs));
+   wchFeat(8*(i-1)+4) = mean(abs(dcoeffs));
+   wchFeat(8*(i-1)+8) = mean(abs(acoeffs));
 
 end
 

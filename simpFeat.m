@@ -32,7 +32,7 @@ sfeat.noisiness = sum(sum(abs(diff(powDBSmooth,1))));
 
 % Mel Power Spectrum
 sfeat.avgLoudness = mean(melPowDB(:));
-%sfeat.percussiveness = mean(abs(diff(melPowDB,1,2)));
+sfeat.percussiveness = mean(abs(diff(melPowDB,1,2)));
 sfeat.specCentroid = sum((1:36).*transpose(sum(melPowDB,2))./...
    max(sum(melPowDB(:)),eps(1)));
 

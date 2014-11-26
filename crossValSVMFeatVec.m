@@ -61,7 +61,10 @@ for n =1: 10
                inds = (genreTrain == g);
                mdls{g} = fitcsvm(transpose(feat(:,trainIndex)),inds,...
                   'ClassNames',[true false],'Standardize',1,...
-                  'KernelFunction','polynomial');
+                  'KernelFunction','polynomial','PolynomialOrder',2,...
+                  'BoxConstraint',10);
+
+               %fprintf(1,'# support vecs = %d of %d\n',nnz(mdls{g}.IsSupportVector),numel(mdls{g}.IsSupportVector)); %sometimes we have lots of support vecs :(
             end
 
          case 'onevone'
@@ -71,7 +74,10 @@ for n =1: 10
                inds = (genreTrain == pairs(g,1)) | (genreTrain == pairs(g,2));
                mdls{g} = fitcsvm(transpose(feat(:,trainIndex(inds))),...
                   genreTrain(inds), 'ClassNames', [pairs(g,1) pairs(g,2)],...
-                  'Standardize',1,'KernelFunction','polynomial');
+                  'Standardize',1,'KernelFunction','polynomial',...
+                  'PolynomialOrder',2,'BoxConstraint',10);
+               
+               %fprintf(1,'# support vecs = %d of %d\n',nnz(mdls{g}.IsSupportVector),numel(mdls{g}.IsSupportVector)); %sometimes we have lots of support vecs :(
             end
 
          case 'ECOC'
@@ -113,7 +119,7 @@ for n =1: 10
          %predGenre = randi([1 6]); % random prediction ~ 17% correct
          confMat(predGenre, trueGenre) = confMat(predGenre, trueGenre) + 1;
       end
-      R{n,k} = confMat; 
+      R{n,k} = confMat;
 
    end
 

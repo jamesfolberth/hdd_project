@@ -16,7 +16,7 @@ function [vacf, t] = FeatureTimeAcfCoeff(x, iBlockLength, iHopLength, f_s, eta)
     % initialization
     % these values are arbitrary - adapt to your use case
     if (nargin < 5)
-        eta         = 20;
+        eta         = 8; %20
     end
 
     % number of results

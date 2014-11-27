@@ -134,8 +134,8 @@ case 'Dale'
                         'TimeStd', ...
                         'TimeZeroCrossingRate'};
                 
-    iHopLength = 512; %1024
-    iBlockLength = 1024; %2048
+    iHopLength = 1024;
+    iBlockLength = 2048;
     afWindow = hann(iBlockLength,'periodic');
    
     for(i = 1:nSongs)

@@ -46,6 +46,10 @@ function [vta, t] = FeatureTimeMaxAcf(x, iBlockLength, iHopLength, f_s)
         eta_min     = max(eta_min, eta_tmp);
     
         % find the maximum in the computed range
-        vta(n)      = max(afCorr(1+eta_min:end));
+        if(eta_min < length(afCorr))
+            vta(n)      = max(afCorr(1+eta_min:end));
+        else
+            vta(n) = 0;
+        end
     end
 end

@@ -20,8 +20,8 @@ end
 
 % populate options structure with default method, etc.
 if nargin < 2
-   opt = struct('method','WCH','savefile','featVecsWCH.mat');
-   %opt = struct('method','Dale','savefile','featVecsDale.mat');
+   %opt = struct('method','WCH','savefile','featVecsWCH.mat');
+   opt = struct('method','Dale','savefile','featVecsDale.mat');
 end
 
 % Set up variables common to all methods
@@ -34,8 +34,8 @@ printFile = 1; % stdout
 switch opt.method
 case 'WCH'
 
-   mfccOpts = struct('segLength',512,'shiftLength',256,...
    %mfccOpts = struct('segLength',1024,'shiftLength',1024,...
+   mfccOpts = struct('segLength',512,'shiftLength',256,...
                      'method','dct','numTerms',20);
    textureOpts = struct('segLength',11024,'shiftLength',11024/2,...
                          'method','dct','numTerms',6);
@@ -103,32 +103,42 @@ case 'WCH'
    save(opt.savefile,'feat');
 
 case 'Dale'
+    addpath('aca_tlbx')
+    %analysisOpts = struct('segLength',1024,'shiftLength',1024,...
+    %                      'method','raw');
+    %textureOpts = struct('segLength',11024,'shiftLength',11024/2,...
+    %                      'method','dct','numTerms',6);
 
-   analysisOpts = struct('segLength',1024,'shiftLength',1024,...
-                         'method','raw');
-   textureOpts = struct('segLength',11024,'shiftLength',11024/2,...
-                         'method','dct','numTerms',6);
+    % Compute features
+    feat = [];
 
-   % Compute features
-   feat = zeros([24 nSongs]);
-   % 1 - zcr
-   % 2 - specC mean
-   % 3 - specC var
-   % 4 - specR mean
-   % 5 - specR var
-   % 6 - specF mean
-   % 7 - specF var
-   % 8 - avg Loudness
-   % 9:13 - 5 MFCC means 
-   % 14:18 - 5 MFCC vars
-   % 19 - fpMax
-   % 20 - fpBass
-   % 21 - fpAggr
-   % 22 - fpDLF
-   % 23 - fpGrav
-   % 24 - fpFoc
+    spectralFeatures = {'SpectralCentroid', ...
+                        'SpectralCrest', ...
+                        'SpectralDecrease', ...
+                        'SpectralFlatness', ...
+                        'SpectralFlux', ...
+                        'SpectralKurtosis', ...
+                        'SpectralMfccs', ...
+                        'SpectralPitchChroma', ...
+                        'SpectralRolloff', ...
+                        'SpectralSkewness', ...
+                        'SpectralSlope', ...
+                        'SpectralSpread', ...
+                        'SpectralTonalPowerRatio'};
 
-   for(i = 1:nSongs)
+    temporalFeatures = {'TimeAcfCoeff', ...
+                        'TimeMaxAcf', ...
+                        'TimePeakEnvelope', ...
+                        'TimePredictivityRatio', ...
+                        'TimeRms', ...
+                        'TimeStd', ...
+                        'TimeZeroCrossingRate'};
+                
+    iHopLength = 1024;
+    iBlockLength = 2048;
+    afWindow = hann(iBlockLength,'periodic');
+   
+    for(i = 1:nSongs)
       fprintf(printFile,'\rSong: %d of %d.',i, nSongs);
       wavFile = strcat(dataDir, wavList{i});
       % wavread will be deprecated, so use audioread
@@ -143,48 +153,38 @@ case 'Dale'
 
       N = length(wav);
 
-      ind = 1;
-      zcr = 0.5 * sum(abs(sign(wav(2:N) - sign(wav(1:(N-1))))))/(N*fs);
-      feat(ind,i) = zcr; ind = ind + 1;
+      % Compute the spectrum
+      [X,~,~] = spectrogram(  wav,...
+                              afWindow,...
+                              iBlockLength-iHopLength,...
+                              iBlockLength,...
+                              fs);
 
-      % raw Mel spectrum with 92ms window
-      nMelBins = 36;
-      [~, melS, powS] = mfcc(wav, fs, analysisOpts);
+      % Compute the magnitude spectrum
+      Xmag = abs(X)*2/iBlockLength;
+      
+      % Compute Spectral Features
+      for( k = 1:length(spectralFeatures) )
+          hFeatureFunc = str2func(['Feature' spectralFeatures{k}]);
 
-      % Spectral centroid
-      specC = (1:nMelBins)*melS./sum(melS,1);
-      feat(ind:ind+1,i) = [mean(specC); var(specC)]; ind = ind + 2;
+          v = hFeatureFunc(Xmag, fs);
 
-      % Spectral rolloff
-      specR = zeros(size(melS,2),1);
-      for t = 1:size(melS,2)
-         inds = find(cumsum(melS(:,t)) >= 0.85*sum(melS(:,t)),1);
-         specR(t) = inds;
+          feat = [feat; mean(v,2); var(v,0,2); ...
+                  skewness(v,1,2); kurtosis(v,1,2)];
       end
-      feat(ind:ind+1,i) = [mean(specR); var(specR)]; ind = ind + 2;
+      % Compute Temporal Features
+      
+      for( k = 1:length(temporalFeatures) )
+          hFeatureFunc = str2func(['Feature' temporalFeatures{k}]);
 
-      % Spectral flux
-      % The mean of the spectral flux is similar to the percusiveness defined
-      % in Pampalk '06
-      %normMS = melS*diag(1./sum(melS,1));
-      normMS = bsxfun(@times, melPowDB, 1./sum(melPowDB,1));
-      specF = sum( (normMS(:,2:length(melS)) ...
-      - normMS(:,1:length(melS)-1)).^2,1);
-      feat(ind:ind+1,i) = [mean(specF); var(specF)]; ind = ind + 2;
+          [v,~] = hFeatureFunc(wav, iBlockLength, iHopLength, fs);
 
-      % Noisiness (unused)
-      %fmax = size(powS,1);
-      %noise = sum(sum(abs(powS(1:(fmax-1),:) - powS(2:fmax,:))));
-
-      % Avg Loudness
-      avgLoud = mean(melS(:));
-      feat(ind,i) = avgLoud; ind = ind + 1;
-
-      % MFCCs
-      melDCT = mfcc(wav, fs, textureOpts);
-      melDCT = melDCT(2:6,:);
-      feat(ind:ind+9,i) = [mean(melDCT,2); var(melDCT,0,2)]; ind = ind + 10;
-
+          feat = [feat; mean(v,2); var(v,0,2); ...
+                      skewness(v,1,2); kurtosis(v,1,2)];
+      end
+      
+      melS = pow2Mel(X,fs,struct('segLength',iBlockLength,'shiftLength',iHopLength));
+      
       % Fluctuation patterns
       fpMed = flucPat(melS);
       fp = reshape(fpMed, [12 30]);
@@ -195,13 +195,12 @@ case 'Dale'
       fpGrav = sum( fp*(1:size(fp,2))' )/sum(fp(:));
       fpFoc = mean(fp(:))/fpMax;
 
-      feat(ind:ind+5,i) = [fpMax; fpBass; fpAggr; fpDLF; fpGrav; fpFoc];
-      ind = ind + 6;
+      feat = [feat; fpMax; fpBass; fpAggr; fpDLF; fpGrav; fpFoc];
 
-   end
-   fprintf(printFile, '\n');
+    end
+    fprintf(printFile, '\n');
 
-   save(opt.savefile,'feat');
+    save(opt.savefile,'feat');
 
 otherwise
    error(sprintf('Unknown method to make feature vectors: opt.method = %s',...

@@ -12,8 +12,8 @@
 % ======================================================================
 function [vstd, t] = FeatureTimeStd(x, iBlockLength, iHopLength, f_s)
 
-    % number of results
-    iNumOfBlocks    = ceil (length(x)/iHopLength);
+    % number of results (ignore last block)
+    iNumOfBlocks    = floor (length(x)/iHopLength);
     
     % compute time stamps
     t               = ((0:iNumOfBlocks-1) * iHopLength + (iBlockLength/2))/f_s;

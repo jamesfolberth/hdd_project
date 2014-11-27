@@ -14,11 +14,11 @@ function [vta, t] = FeatureTimeMaxAcf(x, iBlockLength, iHopLength, f_s)
  
     % initialization
     % these values are arbitrary - adapt to your use case
-    f_max        = 2000;
+    f_max        = 2000; 
     fMinThresh      = 0.35;
 
-    % number of results
-    iNumOfBlocks    = ceil (length(x)/iHopLength);
+    % number of results (ignore last block)
+    iNumOfBlocks    = floor (length(x)/iHopLength);
     
     % compute time stamps
     t               = ((0:iNumOfBlocks-1) * iHopLength + (iBlockLength/2))/f_s;

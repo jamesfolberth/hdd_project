@@ -138,7 +138,11 @@ case 'Dale'
     iBlockLength = 2048;
     afWindow = hann(iBlockLength,'periodic');
    
+    feat = [];
+    
     for(i = 1:nSongs)
+      featV = [];
+      
       fprintf(printFile,'\rSong: %d of %d.',i, nSongs);
       wavFile = strcat(dataDir, wavList{i});
       % wavread will be deprecated, so use audioread
@@ -151,7 +155,7 @@ case 'Dale'
       wav = wav*10^(96/20);
       wav = wav(wav~=0);
 
-      N = length(wav);
+      %N = length(wav);
 
       % Compute the spectrum
       [X,~,~] = spectrogram(  wav,...
@@ -169,7 +173,7 @@ case 'Dale'
 
           v = hFeatureFunc(Xmag, fs);
 
-          feat = [feat; mean(v,2); var(v,0,2); ...
+          featV = [featV; mean(v,2); var(v,0,2); ...
                   skewness(v,1,2); kurtosis(v,1,2)];
       end
       % Compute Temporal Features
@@ -179,7 +183,7 @@ case 'Dale'
 
           [v,~] = hFeatureFunc(wav, iBlockLength, iHopLength, fs);
 
-          feat = [feat; mean(v,2); var(v,0,2); ...
+          featV = [featV; mean(v,2); var(v,0,2); ...
                       skewness(v,1,2); kurtosis(v,1,2)];
       end
       
@@ -195,9 +199,11 @@ case 'Dale'
       fpGrav = sum( fp*(1:size(fp,2))' )/sum(fp(:));
       fpFoc = mean(fp(:))/fpMax;
 
-      feat = [feat; fpMax; fpBass; fpAggr; fpDLF; fpGrav; fpFoc];
-
+      featV = [featV; fpMax; fpBass; fpAggr; fpDLF; fpGrav; fpFoc];
+      
+      feat = [feat, featV];
     end
+    
     fprintf(printFile, '\n');
 
     save(opt.savefile,'feat');

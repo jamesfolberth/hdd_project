@@ -36,5 +36,8 @@ function [vsk] = FeatureSpectralKurtosis (X, f_s)
     % avoid NaN for silence frames
     vsk (sum(X,1) == 0) = 0;
 
+    if(size(vsk,1) > size(vsk,2))
+        vsk = transpose(vsk);
+    end
 end
 

@@ -12,7 +12,8 @@ end
 if nargin < 2
    % MCMethod - multiclass method ('onevall','onevone''ECOC')
    %opt = struct('MCMethod','onevall');
-   opt = struct('MCMethod','onevone');
+   %opt = struct('MCMethod','onevone');
+   opt = struct('MCMethod','ECOC');
 end
 
 load(savefile);
@@ -81,7 +82,27 @@ for n =1: 10
             end
 
          case 'ECOC'
-            error('Not implemented');
+            %C = codeMatrix('hamming1');
+            C = codeMatrix('hammingExhaustive');
+
+            mdls = cell([size(C,2) 1]);
+            for g = 1:size(C,2)
+               inds = zeros([size(genreTrain,1) 1]);
+               for class=1:size(C,1)
+                  if C(class,g) == 1
+                     inds = inds | (genreTrain == class);
+                  end
+               end
+
+               mdls{g} = fitcsvm(transpose(feat(:,trainIndex)),...
+                  inds,...
+                  'Standardize',1,'KernelFunction','polynomial',...
+                  'PolynomialOrder',2,'BoxConstraint',10);
+
+               %fprintf(1,'# support vecs = %d of %d\n',nnz(mdls{g}.IsSupportVector),numel(mdls{g}.IsSupportVector)); %sometimes we have lots of support vecs :(
+
+            end
+
          otherwise
             error('Unknown multiclass method: %s',opt.MCMethod);
          end
@@ -112,7 +133,28 @@ for n =1: 10
             predGenre = mode(pred);
 
          case 'ECOC'
-            error('Not implemented');
+            codeWord = zeros([1 size(C,2)]);
+            for g = 1:size(C,2)
+               codeWord(g) = predict(mdls{g}, transpose(feat(:,testIndex(j))));
+            end
+
+            % find min Hamming distance
+            minDist = inf;
+            minDistLoc = 0;
+            for cw = 1:size(C,1)
+               dist = nnz(codeWord ~= C(cw,:));
+               if dist < minDist
+                  minDist = dist;
+                  minDistLoc = cw;
+               end
+            end
+            predGenre = minDistLoc;
+
+            %genreTest(j)
+            %codeWord
+            %predGenre
+            %error('stop')
+
          otherwise
             error('Unknown multiclass method: %s',opt.MCMethod);
          end
@@ -178,20 +220,56 @@ genreNames = unique(genres);
 codeCmd = 'code = struct(';
 for i=1:numel(genreNames)-1
       codeCmd = strcat(codeCmd, '''', genreNames{i},''',', sprintf('%d,', i));
-   end
-   i = numel(genreNames);
-   codeCmd = strcat(codeCmd, '''', genreNames{i},''',', sprintf('%d);', i));
-   eval(codeCmd);
-   %code
+end
+i = numel(genreNames);
+codeCmd = strcat(codeCmd, '''', genreNames{i},''',', sprintf('%d);', i));
+eval(codeCmd);
+%code
 
-   g = zeros([size(genres,1) 1]);
-   for i=1:size(genres,1);
-      for genreInd=1:numel(genreNames)
-         if strcmp(genres{i}, genreNames{genreInd})
-            g(i) = getfield(code, genreNames{genreInd});
-            break
-         end
+g = zeros([size(genres,1) 1]);
+for i=1:size(genres,1);
+   for genreInd=1:numel(genreNames)
+      if strcmp(genres{i}, genreNames{genreInd})
+         g(i) = getfield(code, genreNames{genreInd});
+         break
       end
    end
-
+end
 end % getGenres
+
+function [C] = codeMatrix(name)
+% return a binary matrix corresponding to the named error-correcting code
+% for six codewords
+switch name
+case 'hamming1'
+   C = [0 0 0 0 0 0 ;
+        0 1 0 1 0 1 ;
+        1 0 0 1 1 0 ;
+        1 1 0 0 1 1 ;
+        1 1 1 0 0 0 ;
+        1 0 1 1 0 1 ];
+
+case 'hammingExhaustive'
+   k = 6;
+   C = zeros([k 2^(k-1)-1]);
+   for level = 1:k
+      segLen = 2^(k-level);
+      numSegs = 2^(level-1);
+
+      for i = 1:numSegs-1
+         if mod(i,2) == 0
+            C(level,segLen*(i-1)+1:segLen*i) = 1;
+         else; 
+            C(level,segLen*(i-1)+1:segLen*i) = 0;
+         end
+      end
+
+      C(level,segLen*(numSegs-1)+1:end) = 1;
+   end
+
+case 'BCH'
+
+otherwise
+   error('Unknown code matrix name %s', name);
+end
+end % codeMatrix

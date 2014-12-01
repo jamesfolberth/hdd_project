@@ -155,6 +155,11 @@ case 'Dale'
       wav = wav*10^(96/20);
       wav = wav(wav~=0);
 
+      % Grab middle 200 seconds
+      if(length(wav) > 2205002)
+          wav = wav((floor(length(wav)/2)-1102500):(floor(length(wav)/2)+1102501));
+      end
+      
       %N = length(wav);
 
       % Compute the spectrum

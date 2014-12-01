@@ -42,6 +42,9 @@ save
 load
 matfile
 
+Since running some of the feature vector code takes a long time (around 2 hours), a feature vector matfile has been pushed.
+featVecsDale.PUSHmat contains a 198x729 feature matrix, with rows corresponding to a feature, and columns corresponding to a song.
+
 
 ==============
 = References =

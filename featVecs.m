@@ -75,7 +75,7 @@ case 'WCH'
       normMS = bsxfun(@times, melPowDB, 1./sum(melPowDB,1));
       specF = sum( (normMS(:,2:length(melPowDB)) ...
       - normMS(:,1:length(melPowDB)-1)).^2,1);
-      feat(2:7) = [mean(specC); var(specC);
+      feat(2:7,i) = [mean(specC); var(specC);
                    mean(specR); var(specR);
                    mean(specF); var(specF)];
 

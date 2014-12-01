@@ -12,14 +12,21 @@ if( nargin < 2 )
    %segLength = 2^15; % ~3s for 11025 Hz sampling
    opt = struct('wName','db8',...
                 'nLevels',7,...
-                'segLength',2^16);
+                'segLength',2^18); 
+                %'segLength',2^16);
 end
 
 % trim out the ends of the signal and work with only the middle
 %segLength = 2^(nextpow2(length(wav))-1);
 %segLength = floor(0.8*length(wav));
-startInd = floor((length(wav) -opt.segLength)/2);
-endInd   = length(wav)-startInd;
+
+if opt.segLength > length(wav)
+   opt.segLength = length(wav);
+end
+
+startInd = max(floor((length(wav) -opt.segLength)/2), 1);
+endInd   = min(length(wav)-startInd, length(wav));
+%disp([startInd endInd length(wav)]);
 
 [C,L] = wavedec(wav(startInd:endInd), opt.nLevels, opt.wName);
 
@@ -43,7 +50,7 @@ for i=1:numel(subbands)
    dn = dn./trapz(inds,dn); % normalize
    %an = an./trapz(inds,an);
 
-   %plot(inds,an)
+   %plot(inds,dn)
    %pause(1)
 
    % moments

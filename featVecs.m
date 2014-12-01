@@ -20,8 +20,8 @@ end
 
 % populate options structure with default method, etc.
 if nargin < 2
-   %opt = struct('method','WCH','savefile','featVecsWCH.mat');
-   opt = struct('method','Dale','savefile','featVecsDale.mat');
+   opt = struct('method','WCH','savefile','featVecsWCH.mat');
+   %opt = struct('method','Dale','savefile','featVecsDale.mat');
 end
 
 % Set up variables common to all methods

@@ -98,15 +98,15 @@ for i =1:6
       R{10,1}(i,j),R{10,2}(i,j),R{10,3}(i,j),R{10,4}(i,j),R{10,5}(i,j)]);                        
 end
 end
-probCorrect = sum(diag(crossValAvg))/sum(sum(sum(crossValAvg)))
 latexTable(crossValAvg, 'crossValAvg.tex', '%i', unique(genre));
 latexTable(crossValSD, 'crossValSD.tex', '%3.2f', unique(genre));
 
-correctClassRate = zeros([6 1]);
-for i=1:6
-   correctClassRate(i) = crossValAvg(i,i)/sum(crossValAvg(:,i));
-end
+correctClassRate = diag(crossValAvg)./reshape(sum(crossValAvg,1), [6 1]);
 
+% scaled percent correct as done in project guide book
+probCorrect = sum(diag(crossValAvg)./reshape(sum(crossValAvg,1), [6 1])*1/6);
+
+probCorrect
 correctClassRate
 
 end

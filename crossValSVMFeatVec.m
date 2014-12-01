@@ -12,8 +12,8 @@ end
 if nargin < 2
    % MCMethod - multiclass method ('onevall','onevone''ECOC')
    %opt = struct('MCMethod','onevall');
-   %opt = struct('MCMethod','onevone');
-   opt = struct('MCMethod','ECOC');
+   opt = struct('MCMethod','onevone');
+   %opt = struct('MCMethod','ECOC');
 end
 
 load(savefile);
@@ -76,7 +76,7 @@ for n =1: 10
                mdls{g} = fitcsvm(transpose(feat(:,trainIndex(inds))),...
                   genreTrain(inds), 'ClassNames', [pairs(g,1) pairs(g,2)],...
                   'Standardize',1,'KernelFunction','polynomial',...
-                  'PolynomialOrder',2,'BoxConstraint',10);
+                  'PolynomialOrder',2.5,'BoxConstraint',10);
                
                %fprintf(1,'# support vecs = %d of %d\n',nnz(mdls{g}.IsSupportVector),numel(mdls{g}.IsSupportVector)); %sometimes we have lots of support vecs :(
             end
@@ -197,16 +197,18 @@ for i =1:6
       R{10,1}(i,j),R{10,2}(i,j),R{10,3}(i,j),R{10,4}(i,j),R{10,5}(i,j)]);                        
 end
 end
-probCorrect = sum(diag(crossValAvg))/sum(sum(sum(crossValAvg)))
 latexTable(crossValAvg, 'crossValAvg.tex', '%i', unique(genre));
 latexTable(crossValSD, 'crossValSD.tex', '%3.2f', unique(genre));
 
-correctClassRate = zeros([6 1]);
-for i=1:6
-   correctClassRate(i) = crossValAvg(i,i)/sum(crossValAvg(:,i));
-end
+correctClassRate = diag(crossValAvg)./reshape(sum(crossValAvg,1), [6 1]);
 
+% scaled percent correct as done in project guide book
+probCorrect = sum(diag(crossValAvg)./reshape(sum(crossValAvg,1), [6 1])*1/6);
+
+probCorrect
 correctClassRate
+
+
 
 end
 

@@ -25,10 +25,19 @@ genreValues = getGenres(genre);
 genreNames = unique(genre);
 
 % Standardize feature vectors
-mu = repmat(mean(feat, 2), [1 size(feat,2)]);
-vars = repmat(var(feat, 0, 2), [1 size(feat,2)]);
-feat = (feat - mu)./vars;
+%mu = repmat(mean(feat, 2), [1 size(feat,2)]);
+%vars = repmat(var(feat, 0, 2), [1 size(feat,2)]);
+%feat = (feat - mu)./vars;
+feat = bsxfun(@minus, feat, mean(feat, 2));
+feat = bsxfun(@rdivide, feat, var(feat, 0, 2));
 fprintf(1,'Feature vectors standardized\n');
+
+% XXX temp do PCA dim reduct
+%[feat, trans, explained] = dimRedPCA(feat, 70);
+%size(feat,1)
+
+% XXX temp do LLE dim reduct: lle(feat, num NN, max dim)
+%[feat] = lle(feat, 5, 60);
 
 % Begin cross validation
 R = cell(10,5); 
@@ -77,6 +86,7 @@ for n =1: 10
                   genreTrain(inds), 'ClassNames', [pairs(g,1) pairs(g,2)],...
                   'Standardize',1,'KernelFunction','polynomial',...
                   'PolynomialOrder',2.5,'BoxConstraint',10);
+                  %'Standardize',1,'KernelFunction','linear','BoxConstraint',1);
                
                %fprintf(1,'# support vecs = %d of %d\n',nnz(mdls{g}.IsSupportVector),numel(mdls{g}.IsSupportVector)); %sometimes we have lots of support vecs :(
             end

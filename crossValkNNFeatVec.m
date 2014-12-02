@@ -1,30 +1,83 @@
-function [crossValAvg,crossValSD] = crossValkNNFeatVec(savefile)
+function [crossValAvg,crossValSD,probCorrect]=crossValkNNFeatVec(savefile,opt)
 % Test the classification algorithm following the ideas of Section 6 of
 % Dr. Meyer's project guide.
 %
 % This uses matlab's built-in kNN routines
 
-if nargin == 0
-   savefile = 'featVecsWCH.mat';
-   %savefile = 'featVecsDale.mat';
+if nargin < 1
+   %savefile = 'featVecsWCH.mat';
+   savefile = 'featVecsDale.mat';
 end 
+
+if nargin < 2 % set all to defaults
+   %opt = struct('XValNum', 10, 'kNNNum',5,'dimRed','lle','lleNum',5,'lleDim',20);
+   %opt = struct('XValNum', 10, 'kNNNum',5,'dimRed','lle','lleNum',31,'lleDim',35);
+   %opt = struct('XValNum', 10, 'kNNNum',5,'dimRed','pca','pcaExp',99);
+   opt = struct('XValNum', 10, 'kNNNum',5,'dimRed','pca','pcaNum',40);
+   %opt = struct('XValNum', 10, 'kNNNum',5,'dimRed','none');
+else % set the needed opts that aren't set to defaults
+   if ~isfield(opt, 'kNNNum')
+      opt.kNNNum = 5;
+   end
+   if ~isfield(opt, 'XValNum')
+      opt.XValNum = 10;
+   end
+   if isfield(opt, 'lle')
+      if ~isfield(opt, 'lleNum')
+         opt.lleNum = 5;
+      end
+      if ~isfield(opt, 'lleDim')
+         opt.lleDim = 20;
+      end
+   end
+   if isfield(opt, 'pca')
+      if ~isfield(opt, 'pcaExp')
+         opt.pcaExp = 95;
+      end
+      if isfield(opt, 'pcaNum')
+         opt = rmfield(opt,'pcaExp');
+      end
+   end
+end
 
 load(savefile);
 dataDir = getDir();
 [wavList,genre] = textread([dataDir,'ground_truth.csv'],'%s %s','delimiter',',');
 nSongs = length(wavList);
 genre   = strrep(genre, '"', '');
-genreValues = getGenres(genre); 
+genreValues = getGenres(genre);
 
-% Standardize feature vectors
-mu = repmat(mean(feat, 2), [1 size(feat,2)]);
-vars = repmat(var(feat, 0, 2), [1 size(feat,2)]);
-feat = (feat - mu)./vars;
+feat = bsxfun(@minus, feat, mean(feat, 2));
+feat = bsxfun(@rdivide, feat, var(feat, 0, 2));
 fprintf(1,'Feature vectors standardized\n');
 
+switch opt.dimRed
+case 'none'
+   % do nothing
+case 'pca'
+   if isfield(opt, 'pcaExp')
+      [feat, trans, explained] = dimRedPCA(feat, opt.pcaExp);
+      size(feat,1)
+   elseif isfield(opt, 'pcaNum')
+      [feat, trans, explained] = dimRedPCA(feat, 101);
+      feat = feat(1:opt.pcaNum,:);
+   else
+      error('bad PCA options');
+   end
+
+case 'lle'
+   [feat] = lle(feat, opt.lleNum, opt.lleDim);
+otherwise
+   error('Unknown dimension reduction method: %s', opt.dimRed);
+end
+
+%feat = bsxfun(@minus, feat, mean(feat, 2));
+%feat = bsxfun(@rdivide, feat, var(feat, 0, 2));
+%fprintf(1,'Reduced feature vectors standardized\n');
+
 % Begin cross validation
-R = cell(10,5); 
-for n =1: 10
+R = cell(opt.XValNum,5); 
+for n =1:size(R,1);
    fprintf(1,'\rn = %d',n);
    G = cell(6,5); 
    for i =1:6
@@ -43,15 +96,15 @@ for n =1: 10
       testIndex = [ G{1,k},G{2,k},G{3,k},G{4,k},G{5,k},G{6,k}] ; 
       trainIndex =setdiff([1:nSongs], unique(testIndex)); 
       genreTest = genreValues(testIndex);
-      genreTrain = genreValues(trainIndex); 
+      genreTrain = genreValues(trainIndex);
 
       % train kNN classifier for this subset
       if( exist('fitcknn') )
           mdl = fitcknn(transpose(feat(:,trainIndex)),genreTrain,...
-            'NumNeighbors',5,'Distance','seuclidean');
+            'NumNeighbors',opt.kNNNum,'Distance','seuclidean');
       else
           mdl = ClassificationKNN.fit(transpose(feat(:,trainIndex)),genreTrain,...
-              'NumNeighbors',5,'Distance','seuclidean');
+              'NumNeighbors',opt.kNNNum,'Distance','seuclidean');
       end
 
       % make predictions
@@ -72,31 +125,16 @@ crossValAvg = zeros(6,6);
 crossValSD = zeros(6,6); 
 
 % compute mean and std dev of confusion matrixes
+accum = zeros([5*size(R,1) 1]);
 for i =1:6
    for j =1:6
-
-      crossValAvg(i,j)  = round(mean([R{1,1}(i,j),R{1,2}(i,j),R{1,3}(i,j),R{1,4}(i,j),R{1,5}(i,j),...
-      R{2,1}(i,j),R{2,2}(i,j),R{2,3}(i,j),R{2,4}(i,j),R{2,5}(i,j),...
-      R{3,1}(i,j),R{3,2}(i,j),R{3,3}(i,j),R{3,4}(i,j),R{3,5}(i,j),...
-      R{4,1}(i,j),R{4,2}(i,j),R{4,3}(i,j),R{4,4}(i,j),R{4,5}(i,j),...
-      R{5,1}(i,j),R{5,2}(i,j),R{5,3}(i,j),R{5,4}(i,j),R{5,5}(i,j),...
-      R{6,1}(i,j),R{6,2}(i,j),R{6,3}(i,j),R{6,4}(i,j),R{6,5}(i,j),...
-      R{7,1}(i,j),R{7,2}(i,j),R{7,3}(i,j),R{7,4}(i,j),R{7,5}(i,j),...
-      R{8,1}(i,j),R{8,2}(i,j),R{8,3}(i,j),R{8,4}(i,j),R{8,5}(i,j),...
-      R{9,1}(i,j),R{9,2}(i,j),R{9,3}(i,j),R{9,4}(i,j),R{9,5}(i,j),...
-      R{10,1}(i,j),R{10,2}(i,j),R{10,3}(i,j),R{10,4}(i,j),R{10,5}(i,j)]));
-
-      crossValSD(i,j) = std([R{1,1}(i,j),R{1,2}(i,j),R{1,3}(i,j),R{1,4}(i,j),R{1,5}(i,j),...
-      R{2,1}(i,j),R{2,2}(i,j),R{2,3}(i,j),R{2,4}(i,j),R{2,5}(i,j),...
-      R{3,1}(i,j),R{3,2}(i,j),R{3,3}(i,j),R{3,4}(i,j),R{3,5}(i,j),...
-      R{4,1}(i,j),R{4,2}(i,j),R{4,3}(i,j),R{4,4}(i,j),R{4,5}(i,j),...
-      R{5,1}(i,j),R{5,2}(i,j),R{5,3}(i,j),R{5,4}(i,j),R{5,5}(i,j),...
-      R{6,1}(i,j),R{6,2}(i,j),R{6,3}(i,j),R{6,4}(i,j),R{6,5}(i,j),...
-      R{7,1}(i,j),R{7,2}(i,j),R{7,3}(i,j),R{7,4}(i,j),R{7,5}(i,j),...
-      R{8,1}(i,j),R{8,2}(i,j),R{8,3}(i,j),R{8,4}(i,j),R{8,5}(i,j),...
-      R{9,1}(i,j),R{9,2}(i,j),R{9,3}(i,j),R{9,4}(i,j),R{9,5}(i,j),...
-      R{10,1}(i,j),R{10,2}(i,j),R{10,3}(i,j),R{10,4}(i,j),R{10,5}(i,j)]);                        
-end
+      for row=1:size(R,1);
+         accum(5*(row-1)+1:5*row) = [R{row,1}(i,j); R{row,2}(i,j); ...
+            R{row,3}(i,j); R{row,4}(i,j); R{row,5}(i,j)];
+      end
+      crossValAvg(i,j) = round(mean(accum));
+      crossValSD(i,j)  = std(accum);
+   end
 end
 latexTable(crossValAvg, 'crossValAvg.tex', '%i', unique(genre));
 latexTable(crossValSD, 'crossValSD.tex', '%3.2f', unique(genre));
@@ -116,10 +154,10 @@ function [g, code] = getGenres(genres)
 % the input genres cell array (entries are strings of genre name)
 % optional output is the coding scheme
 
-genreNames = unique(genres);
+   genreNames = unique(genres);
 
-codeCmd = 'code = struct(';
-for i=1:numel(genreNames)-1
+   codeCmd = 'code = struct(';
+   for i=1:numel(genreNames)-1
       codeCmd = strcat(codeCmd, '''', genreNames{i},''',', sprintf('%d,', i));
    end
    i = numel(genreNames);

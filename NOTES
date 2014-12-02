@@ -86,3 +86,36 @@ ans =
      1     1     0     0     0     5
 
 
+
+
+
+
+
+
+================
+= optim* files =
+================
+James's notes.  These files are local to James's machine.
+
+optimkNNPCA_Dale.mat.save
+   PCA with Dale's feature vec as of commit 6c6caad (01/12/2014)
+   5 samples per number of terms kept in PCA to get error bars
+
+   Good kNN PCA options for Dale:
+   opt = struct('XValNum', 10, 'kNNNum',5,'dimRed','pca','pcaNum',45);
+
+optimkNNPCA_WCH.mat.save
+   PCA with WCH feature vec as of commit 1831670 (01/12/2014)
+   5 samples per number of terms kept in PCA to get error bars
+  
+   Good kNN PCA options for WCH:
+   opt = struct('XValNum', 10, 'kNNNum',5,'dimRed','pca','pcaNum',32);
+
+
+optimkNNLLE_Dale.mat.save
+   LLE with Dale's feature vecs as of commit 6c6caad (01/12/2014)
+   5 samples per kNN in LLE and max dim in LLE to get error bars
+
+   Good kNN LLE options for Dale:
+   opt = struct('XValNum', 10, 'kNNNum',5,'dimRed','lle','lleNum',31,'lleDim',25);
+

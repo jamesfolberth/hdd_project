@@ -10,6 +10,10 @@ devel/*
 *.bbl*
 *.blg*
 *.out*
+*.toc*
+*.nav*
+*.snm*
+*.md5*
 table.tex
 confMat.tex
 crossValAvg.tex

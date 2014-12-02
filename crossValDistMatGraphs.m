@@ -1,13 +1,12 @@
 
-function [crossValAvg,crossValSD] = crossValDistMatGraphs(savefile)
+function [correctClassRate, probCorrect] = crossValDistMatGraphs(NumofEvcs)
 % Test the classification algorithm following the ideas of Section 6 of
 % Dr. Meyer's project guide.
 %clc
 %close all 
 %clear all 
-if nargin == 0
    savefile = 'distG1C.mat';
-end 
+
 
 load(savefile); % load in the distance matrix 'dist'
 %distMatknn(dist, 500, 15)
@@ -40,7 +39,7 @@ for n =1: 10
         genreTrain = genreValues(trainIndex); 
         probCorrect = []; 
         confMat = zeros(numel(unique(genreValues))); % 6x6
-        IDXGraph = normalizeSpectralCustering2(11,3); 
+        IDXGraph = normalizeSpectralCustering2(NumofEvcs,2); 
 
         for j=1:length(testIndex)
            trueGenre = genreTest(j);
@@ -101,11 +100,13 @@ end
 latexTable(crossValAvg, 'crossValAvg.tex', '%i', unique(genre));
 latexTable(crossValSD, 'crossValSD.tex', '%3.2f', unique(genre));
 
-correctClassRate = zeros([6 1]);
-for i=1:6
-   correctClassRate(i) = crossValAvg(i,i)/sum(crossValAvg(:,i));
-end
+correctClassRate = diag(crossValAvg)./reshape(sum(crossValAvg,1), [6 1]);
 
+% scaled percent correct as done in project guide book
+probCorrect = sum(diag(crossValAvg)./reshape(sum(crossValAvg,1), [6 1])*1/6);
+
+correctClassRate
+probCorrect
 end
 
 function [g, code] = getGenres(genres)

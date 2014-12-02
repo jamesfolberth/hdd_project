@@ -8,11 +8,11 @@ savefile = 'distG1C.mat';
 
 distMat = load(savefile,'dist');
  distMat = distMat.dist;
- distMat = distMat - distMat(1,1); 
+%  distMat = distMat - distMat(1,1); 
 dataDir = getDir();
 
-m = min(distMat);
-M = max(distMat);
+m = min(min(distMat));
+M = max(max(distMat));
 
 if opt ==1
     epsilon  = mean(mean(distMat)); 
@@ -22,7 +22,7 @@ if opt ==1
     G = D-S; 
     
 elseif opt ==2
-    K = 15
+    K = 5
     for i = 1:size(distMat,1)
             
         neighbors = distMatknn(distMat, i, K);

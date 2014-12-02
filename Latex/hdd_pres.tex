@@ -1,0 +1,132 @@
+\documentclass[xcolor=dvipsnames,t]{beamer} % position stuff on top of slide
+% Functions, packages, etc.
+%[[[
+\usetheme{Frankfurt}
+\usecolortheme[named=Maroon]{structure}
+
+% Remove Navigation Symbols
+\usenavigationsymbolstemplate{}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{array}
+
+\usepackage{graphicx}
+%\usepackage{subfig}
+\usepackage[labelfont=bf]{caption}
+\usepackage{hyperref}
+
+\newcommand{\diff}[2]{\dfrac{d #1}{d #2}}
+\newcommand{\diffn}[3]{\dfrac{d^{#3} #1}{d {#2}^{#3}}}
+\newcommand{\pdiff}[2]{\dfrac{\partial #1}{\partial #2}}
+\newcommand{\pdiffn}[3]{\dfrac{\partial^{#3} #1}{\partial {#2}^{#3}}}
+\newcommand{\problemline}{\rule{\textwidth}{0.25mm}}
+%\newcommand{\problem}[1]{\problemline\\#1\\\problemline\vspace{10pt}}
+\newcommand{\reals}{\mathbb{R}}
+\newcommand{\qline}[2]{\qbezier(#1)(#1)(#2)}
+\newcommand{\abox}[1]{\begin{center}\fbox{#1}\end{center}}
+%]]]
+
+% Output Control Variables
+\def\true{1}
+\def\false{0}
+\def\figures{1}
+\def\tables{1}
+
+\renewcommand{\UrlFont}{\scriptsize}
+\newcommand{\defeq}{\mathrel{\mathop:}=}
+
+% beamer description align left template
+% http://tex.stackexchange.com/questions/95964/right-description-list-latex-beamer
+\defbeamertemplate{description item}{align left}{\insertdescriptionitem\hfill}
+
+
+\title{Automated Music Genre Classification}
+\date{3 December, 2014}
+\author{James Folberth, Aly Fox, Dale Jennings}
+
+\begin{document}
+
+\begin{frame}
+\maketitle
+\end{frame}
+
+% TODO: these items are in no particular order and might not have the best names.  Please rename them and move them around as you wish.  Make sure that the section names match the names in the outline
+
+\begin{frame}{Outline}
+   %Outline:
+   \setbeamertemplate{description item}[align left] % align left
+   \begin{description}                              % align left
+   %\setbeamertemplate{description item}[default]  % align right
+   %\begin{description}[Clustering/Classification] % align right
+      \item[Features] Spectral, Temporal, Wavelet Coefficient Histograms\\
+      \item[Dimension Reduction] PCA, LLE, PageRank, Graph Laplacian\\
+      \item[Clustering/Classification] kNN, SVM with multi-class, Graph Laplacian\\
+      \item[Discussion]
+   \end{description}
+
+\end{frame}
+
+
+
+\section{Features}
+\begin{frame}{Mel Frequency Cepstral Coefficients}
+   Dale, I guess.  Talk about what we're doing in Mel space
+
+\end{frame}
+
+\begin{frame}{Wavelet Coefficient Histograms}
+James
+\end{frame}
+
+
+
+\section{Dimension Reduction}
+\begin{frame}{PCA with $k$-Nearest Neighbors classifier} % TODO maybe move to classification?
+Optimization of parameters for Dale + WCH
+\end{frame}
+
+\begin{frame}{LLE with $k$-Nearest Neighbors classifier}
+Optimization of parameters for Dale + WCH
+\end{frame}
+
+\begin{frame}{Super awesome PageRank feature selection}
+Dale
+\end{frame}
+
+\begin{frame}{Graph Laplacian}
+Aly
+\end{frame}
+
+
+
+\section{Clustering/Classification}
+\begin{frame}{SVM classifiers}
+James
+\end{frame}
+\begin{frame}{PCA/LLE + SVM classifiers}
+James
+\end{frame}
+
+\begin{frame}{Graph Methods}
+Aly
+\end{frame}
+
+
+\section{Discussion}
+
+\begin{frame}{References}
+   \begin{itemize}
+      \item G. Sussman and J. Wisdom, \emph{Numerical evidence that the motion of pluto is chaotic}, Science, (1988).\\
+      \item J. Wisdom and M. Holman, \emph{Symplectic maps for the n-body problem}, The Astronomical Journal, (1991).\\
+   \end{itemize}
+   ~\\
+   Questions?
+
+\end{frame}
+
+\end{document}
+
+% vim: set spell:
+% vim: foldmarker=[[[,]]]

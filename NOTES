@@ -119,3 +119,11 @@ optimkNNLLE_Dale.mat.save
    Good kNN LLE options for Dale:
    opt = struct('XValNum', 10, 'kNNNum',5,'dimRed','lle','lleNum',31,'lleDim',25);
 
+optimkNNLLE_WCH.mat.save
+   LLE with WCH feature vecs as of commit 1831670 (01/12/2014)
+   5 samples per kNN in LLE and max dim in LLE to get error bars
+
+   Good kNN LLE options for WCH:
+   opt = struct('XValNum', 10, 'kNNNum',5,'dimRed','lle','lleNum',43,'lleDim',25);
+   Note that these values are on the boundary.
+

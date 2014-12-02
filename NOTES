@@ -58,6 +58,8 @@ http://users.cis.fiu.edu/~downeyt/cop3402/hamming.html
 = Cross Vals =
 ==============
 
+There is a bunch of overhead in ClassificationSVM/predict (i.e. predict using an SVM model).  This should be resolved in crossValSVMFeatVec.m.
+
 G1C spectral similarity + a few FPs as described in Pampalk '06.  Clustering with kNN, k=5.
 >> crossValDistMat                 
 

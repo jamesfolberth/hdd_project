@@ -1,19 +1,46 @@
-function [crossValAvg,crossValSD] = crossValkNNFeatVec(savefile, opt)
+function [crossValAvg,crossValSD] = crossValSVMFeatVec(savefile, opt)
 % Test the classification algorithm following the ideas of Section 6 of
 % Dr. Meyer's project guide.
 %
 % This uses matlab's built-in SVM routines
 
-if nargin == 0
+if nargin < 1
    savefile = 'featVecsWCH.mat';
    %savefile = 'featVecsDale.mat';
 end 
 
-if nargin < 2
+if nargin < 2 % set to default values
    % MCMethod - multiclass method ('onevall','onevone''ECOC')
-   %opt = struct('MCMethod','onevall');
-   opt = struct('MCMethod','onevone');
-   %opt = struct('MCMethod','ECOC');
+   %opt = struct('XValNum',10,'MCMethod','onevall','dimRed','none');
+   %opt = struct('XValNum',10,'MCMethod','onevone','dimRed','none');
+   opt = struct('XValNum',10,'MCMethod','ECOC','dimRed','none');
+
+else % populate needed options that aren't set with default values
+   if ~isfield(opt, 'MCMethod')
+      opt.MCMethod = 'onevone';
+   end
+   if ~isfield(opt, 'XValNum')
+      opt.XValNum = 10;
+   end
+   if isfield(opt, 'lle')
+      if ~isfield(opt, 'lleNum')
+         opt.lleNum = 37;
+      end
+      if ~isfield(opt, 'lleDim')
+         opt.lleDim = 25;
+      end
+   end
+   if isfield(opt, 'pca')
+      if ~isfield(opt, 'pcaExp')
+         opt.pcaExp = 95;
+         if ~isfield(opt, 'pcaNum') % no PCA options
+            opt.pcaNum = 38;
+         end
+      end
+      if isfield(opt, 'pcaNum')
+         opt = rmfield(opt,'pcaExp');
+      end
+   end
 end
 
 load(savefile);
@@ -25,23 +52,34 @@ genreValues = getGenres(genre);
 genreNames = unique(genre);
 
 % Standardize feature vectors
-%mu = repmat(mean(feat, 2), [1 size(feat,2)]);
-%vars = repmat(var(feat, 0, 2), [1 size(feat,2)]);
-%feat = (feat - mu)./vars;
 feat = bsxfun(@minus, feat, mean(feat, 2));
 feat = bsxfun(@rdivide, feat, var(feat, 0, 2));
 fprintf(1,'Feature vectors standardized\n');
 
-% XXX temp do PCA dim reduct
-%[feat, trans, explained] = dimRedPCA(feat, 70);
-%size(feat,1)
+switch opt.dimRed
+case 'none'
+   % do nothing
+case 'pca'
+   if isfield(opt, 'pcaExp')
+      [feat, trans, explained] = dimRedPCA(feat, opt.pcaExp);
+      size(feat,1)
+   elseif isfield(opt, 'pcaNum')
+      [feat, trans, explained] = dimRedPCA(feat, 101); % all singular vals
+      feat = feat(1:opt.pcaNum,:);
+   else
+      error('bad PCA options');
+   end
 
-% XXX temp do LLE dim reduct: lle(feat, num NN, max dim)
-%[feat] = lle(feat, 5, 60);
+case 'lle'
+   [feat] = lle(feat, opt.lleNum, opt.lleDim);
+otherwise
+   error('Unknown dimension reduction method: %s', opt.dimRed);
+end
+
 
 % Begin cross validation
-R = cell(10,5); 
-for n =1: 10
+R = cell(opt.XValNum,5); 
+for n =1:size(R,1);
    fprintf(1,'\rn = %d',n);
    G = cell(6,5); 
    for i =1:6
@@ -58,7 +96,7 @@ for n =1: 10
 
    for k = 1:5
       testIndex = [ G{1,k},G{2,k},G{3,k},G{4,k},G{5,k},G{6,k}] ; 
-      trainIndex =setdiff([1:nSongs], unique(testIndex)); 
+      trainIndex = setdiff([1:nSongs], unique(testIndex)); 
       genreTest = genreValues(testIndex);
       genreTrain = genreValues(trainIndex); 
 
@@ -70,9 +108,9 @@ for n =1: 10
             for g = 1:numel(genreNames)
                inds = (genreTrain == g);
                mdls{g} = fitcsvm(transpose(feat(:,trainIndex)),inds,...
-                  'ClassNames',[true false],'Standardize',1,...
-                  'KernelFunction','polynomial','PolynomialOrder',2,...
-                  'BoxConstraint',10);
+               'ClassNames',[true false],'Standardize',1,...
+               'KernelFunction','polynomial','PolynomialOrder',2,...
+               'BoxConstraint',10);
 
                %fprintf(1,'# support vecs = %d of %d\n',nnz(mdls{g}.IsSupportVector),numel(mdls{g}.IsSupportVector)); %sometimes we have lots of support vecs :(
             end
@@ -83,11 +121,11 @@ for n =1: 10
             for g = 1:size(pairs,1)
                inds = (genreTrain == pairs(g,1)) | (genreTrain == pairs(g,2));
                mdls{g} = fitcsvm(transpose(feat(:,trainIndex(inds))),...
-                  genreTrain(inds), 'ClassNames', [pairs(g,1) pairs(g,2)],...
-                  'Standardize',1,'KernelFunction','polynomial',...
-                  'PolynomialOrder',2.5,'BoxConstraint',10);
-                  %'Standardize',1,'KernelFunction','linear','BoxConstraint',1);
-               
+               genreTrain(inds), 'ClassNames', [pairs(g,1) pairs(g,2)],...
+               'Standardize',1,'KernelFunction','polynomial',...
+               'PolynomialOrder',2.5,'BoxConstraint',10);
+               %'Standardize',1,'KernelFunction','linear','BoxConstraint',1);
+
                %fprintf(1,'# support vecs = %d of %d\n',nnz(mdls{g}.IsSupportVector),numel(mdls{g}.IsSupportVector)); %sometimes we have lots of support vecs :(
             end
 
@@ -105,108 +143,95 @@ for n =1: 10
                end
 
                mdls{g} = fitcsvm(transpose(feat(:,trainIndex)),...
-                  inds,...
-                  'Standardize',1,'KernelFunction','polynomial',...
-                  'PolynomialOrder',2,'BoxConstraint',10);
+               inds,...
+               'Standardize',1,'KernelFunction','polynomial',...
+               'PolynomialOrder',2,'BoxConstraint',10);
 
                %fprintf(1,'# support vecs = %d of %d\n',nnz(mdls{g}.IsSupportVector),numel(mdls{g}.IsSupportVector)); %sometimes we have lots of support vecs :(
 
-            end
+            end                               
 
-         otherwise
-            error('Unknown multiclass method: %s',opt.MCMethod);
-         end
-      else
-         error('Old matlab.');
-      end
+         otherwise                            
+            error('Unknown multiclass method:  %s',opt.MCMethod);
+         end                                  
+      else                                    
+         error('Old matlab.');                
+      end                                     
 
-      % make predictions
+      % make predictions                      
       confMat = zeros(numel(unique(genreValues))); % 6x6
-      for j=1:length(testIndex)
-         trueGenre = genreTest(j);
-         
-         switch opt.MCMethod
-         case 'onevall'
-            scores = zeros([numel(genreNames) 1]);
-            for g = 1:numel(genreNames)
-               [~,score] = predict(mdls{g}, transpose(feat(:,testIndex(j))));
-               scores(g) = score(1); % 1st column has positive score
-            end
-            [~,maxScore] = max(scores);
-            predGenre = maxScore;
-
-         case 'onevone'
-            pred = zeros([size(pairs,1) 1]);
-            for g = 1:size(pairs,1)
-               pred(g) = predict(mdls{g}, transpose(feat(:,testIndex(j))));
-            end
-            predGenre = mode(pred);
-
-         case 'ECOC'
-            codeWord = zeros([1 size(C,2)]);
-            for g = 1:size(C,2)
-               codeWord(g) = predict(mdls{g}, transpose(feat(:,testIndex(j))));
-            end
-
-            % find min Hamming distance
-            minDist = inf;
-            minDistLoc = 0;
-            for cw = 1:size(C,1)
-               dist = nnz(codeWord ~= C(cw,:));
-               if dist < minDist
-                  minDist = dist;
-                  minDistLoc = cw;
-               end
-            end
-            predGenre = minDistLoc;
-
-            %genreTest(j)
-            %codeWord
-            %predGenre
-            %error('stop')
-
-         otherwise
-            error('Unknown multiclass method: %s',opt.MCMethod);
+      switch opt.MCMethod     
+      case 'onevall'
+         scores = zeros([numel(testIndex) numel(genreNames)]);
+         for g = 1:numel(genreNames)
+            [~,score] = predict(mdls{g}, transpose(feat(:,testIndex)));
+            scores(:,g) = score(:,1); % 1st column has positive score
          end
-         %predGenre = randi([1 6]); % random prediction ~ 17% correct
-         confMat(predGenre, trueGenre) = confMat(predGenre, trueGenre) + 1;
+         [~,predGenre] = max(scores,[],2);
+
+         for j = 1:numel(testIndex)
+            trueGenre = genreTest(j);
+            confMat(predGenre(j), trueGenre) = ...
+            confMat(predGenre(j), trueGenre) + 1;
+         end
+
+      case 'onevone'
+         pred = zeros([numel(testIndex) size(pairs,1)]);
+         for g = 1:size(pairs,1)
+            pred(:,g) = predict(mdls{g}, transpose(feat(:,testIndex)));
+         end
+         predGenre = mode(pred,2);
+
+         for j = 1:numel(testIndex)
+            trueGenre = genreTest(j);
+            confMat(predGenre(j), trueGenre) = ...
+            confMat(predGenre(j), trueGenre) + 1;
+         end
+
+      case 'ECOC'
+         codeWord = zeros([numel(testIndex) size(C,2)]);
+         for g = 1:size(C,2)
+            codeWord(:,g) = predict(mdls{g}, transpose(feat(:,testIndex)));
+         end
+
+         % find min Hamming distance
+         dist = zeros([numel(testIndex) size(C,1)]);
+         for cw = 1:size(C,1)
+            dist(:,cw) = sum(bsxfun(@ne, codeWord, C(cw,:)),2); % hamming dist
+            %nnz(codeWord ~= C(cw,:));
+         end
+         [~,predGenre] = min(dist,[],2);
+
+         for j = 1:numel(testIndex)
+            trueGenre = genreTest(j);
+            confMat(predGenre(j), trueGenre) = ...
+            confMat(predGenre(j), trueGenre) + 1;
+         end
+
+      otherwise
+         error('Unknown multiclass method: %s',opt.MCMethod);
       end
       R{n,k} = confMat;
 
    end
-
 end
 fprintf(1,'\n');
 crossValAvg = zeros(6,6); 
 crossValSD = zeros(6,6); 
 
 % compute mean and std dev of confusion matrixes
+accum = zeros([5*size(R,1) 1]);
 for i =1:6
    for j =1:6
-
-      crossValAvg(i,j)  = round(mean([R{1,1}(i,j),R{1,2}(i,j),R{1,3}(i,j),R{1,4}(i,j),R{1,5}(i,j),...
-      R{2,1}(i,j),R{2,2}(i,j),R{2,3}(i,j),R{2,4}(i,j),R{2,5}(i,j),...
-      R{3,1}(i,j),R{3,2}(i,j),R{3,3}(i,j),R{3,4}(i,j),R{3,5}(i,j),...
-      R{4,1}(i,j),R{4,2}(i,j),R{4,3}(i,j),R{4,4}(i,j),R{4,5}(i,j),...
-      R{5,1}(i,j),R{5,2}(i,j),R{5,3}(i,j),R{5,4}(i,j),R{5,5}(i,j),...
-      R{6,1}(i,j),R{6,2}(i,j),R{6,3}(i,j),R{6,4}(i,j),R{6,5}(i,j),...
-      R{7,1}(i,j),R{7,2}(i,j),R{7,3}(i,j),R{7,4}(i,j),R{7,5}(i,j),...
-      R{8,1}(i,j),R{8,2}(i,j),R{8,3}(i,j),R{8,4}(i,j),R{8,5}(i,j),...
-      R{9,1}(i,j),R{9,2}(i,j),R{9,3}(i,j),R{9,4}(i,j),R{9,5}(i,j),...
-      R{10,1}(i,j),R{10,2}(i,j),R{10,3}(i,j),R{10,4}(i,j),R{10,5}(i,j)]));
-
-      crossValSD(i,j) = std([R{1,1}(i,j),R{1,2}(i,j),R{1,3}(i,j),R{1,4}(i,j),R{1,5}(i,j),...
-      R{2,1}(i,j),R{2,2}(i,j),R{2,3}(i,j),R{2,4}(i,j),R{2,5}(i,j),...
-      R{3,1}(i,j),R{3,2}(i,j),R{3,3}(i,j),R{3,4}(i,j),R{3,5}(i,j),...
-      R{4,1}(i,j),R{4,2}(i,j),R{4,3}(i,j),R{4,4}(i,j),R{4,5}(i,j),...
-      R{5,1}(i,j),R{5,2}(i,j),R{5,3}(i,j),R{5,4}(i,j),R{5,5}(i,j),...
-      R{6,1}(i,j),R{6,2}(i,j),R{6,3}(i,j),R{6,4}(i,j),R{6,5}(i,j),...
-      R{7,1}(i,j),R{7,2}(i,j),R{7,3}(i,j),R{7,4}(i,j),R{7,5}(i,j),...
-      R{8,1}(i,j),R{8,2}(i,j),R{8,3}(i,j),R{8,4}(i,j),R{8,5}(i,j),...
-      R{9,1}(i,j),R{9,2}(i,j),R{9,3}(i,j),R{9,4}(i,j),R{9,5}(i,j),...
-      R{10,1}(i,j),R{10,2}(i,j),R{10,3}(i,j),R{10,4}(i,j),R{10,5}(i,j)]);                        
+      for row=1:size(R,1);
+         accum(5*(row-1)+1:5*row) = [R{row,1}(i,j); R{row,2}(i,j); ...
+         R{row,3}(i,j); R{row,4}(i,j); R{row,5}(i,j)];
+      end
+      crossValAvg(i,j) = round(mean(accum));
+      crossValSD(i,j)  = std(accum);
+   end
 end
-end
+
 latexTable(crossValAvg, 'crossValAvg.tex', '%i', unique(genre));
 latexTable(crossValSD, 'crossValSD.tex', '%3.2f', unique(genre));
 
@@ -218,8 +243,6 @@ probCorrect = sum(diag(crossValAvg)./reshape(sum(crossValAvg,1), [6 1])*1/6);
 probCorrect
 correctClassRate
 
-
-
 end
 
 function [g, code] = getGenres(genres)
@@ -227,61 +250,61 @@ function [g, code] = getGenres(genres)
 % the input genres cell array (entries are strings of genre name)
 % optional output is the coding scheme
 
-genreNames = unique(genres);
-
-codeCmd = 'code = struct(';
-for i=1:numel(genreNames)-1
+   genreNames = unique(genres);
+   
+   codeCmd = 'code = struct(';
+   for i=1:numel(genreNames)-1
       codeCmd = strcat(codeCmd, '''', genreNames{i},''',', sprintf('%d,', i));
-end
-i = numel(genreNames);
-codeCmd = strcat(codeCmd, '''', genreNames{i},''',', sprintf('%d);', i));
-eval(codeCmd);
-%code
+   end
+   i = numel(genreNames);
+   codeCmd = strcat(codeCmd, '''', genreNames{i},''',', sprintf('%d);', i));
+   eval(codeCmd);
+   %code
 
-g = zeros([size(genres,1) 1]);
-for i=1:size(genres,1);
-   for genreInd=1:numel(genreNames)
-      if strcmp(genres{i}, genreNames{genreInd})
-         g(i) = getfield(code, genreNames{genreInd});
-         break
+   g = zeros([size(genres,1) 1]);
+   for i=1:size(genres,1);
+      for genreInd=1:numel(genreNames)
+         if strcmp(genres{i}, genreNames{genreInd})
+            g(i) = getfield(code, genreNames{genreInd});
+            break
+         end
       end
    end
-end
 end % getGenres
 
 function [C] = codeMatrix(name)
 % return a binary matrix corresponding to the named error-correcting code
 % for six codewords
-switch name
-case 'hamming1'
-   C = [0 0 0 0 0 0 ;
-        0 1 0 1 0 1 ;
-        1 0 0 1 1 0 ;
-        1 1 0 0 1 1 ;
-        1 1 1 0 0 0 ;
-        1 0 1 1 0 1 ];
-
-case 'hammingExhaustive'
-   k = 6;
-   C = zeros([k 2^(k-1)-1]);
-   for level = 1:k
-      segLen = 2^(k-level);
-      numSegs = 2^(level-1);
-
-      for i = 1:numSegs-1
-         if mod(i,2) == 0
-            C(level,segLen*(i-1)+1:segLen*i) = 1;
-         else; 
-            C(level,segLen*(i-1)+1:segLen*i) = 0;
+   switch name
+   case 'hamming1'
+      C = [0 0 0 0 0 0 ;
+           0 1 0 1 0 1 ;
+           1 0 0 1 1 0 ;
+           1 1 0 0 1 1 ;
+           1 1 1 0 0 0 ;
+           1 0 1 1 0 1 ];
+   
+   case 'hammingExhaustive'
+      k = 6;
+      C = zeros([k 2^(k-1)-1]);
+      for level = 1:k
+         segLen = 2^(k-level);
+         numSegs = 2^(level-1);
+   
+         for i = 1:numSegs-1
+            if mod(i,2) == 0
+               C(level,segLen*(i-1)+1:segLen*i) = 1;
+            else; 
+               C(level,segLen*(i-1)+1:segLen*i) = 0;
+            end
          end
+   
+         C(level,segLen*(numSegs-1)+1:end) = 1;
       end
-
-      C(level,segLen*(numSegs-1)+1:end) = 1;
+   
+   case 'BCH'
+   
+   otherwise
+      error('Unknown code matrix name %s', name);
    end
-
-case 'BCH'
-
-otherwise
-   error('Unknown code matrix name %s', name);
-end
 end % codeMatrix

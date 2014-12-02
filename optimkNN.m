@@ -1,4 +1,4 @@
-function [] = kNNOptim(makePlot, plotFile)
+function [] = optimkNN(makePlot, plotFile)
 % since deterministic, only need to take one sample
 featFile = 'featVecsWCH.mat';
 %featFile = 'featVecsDale.mat';

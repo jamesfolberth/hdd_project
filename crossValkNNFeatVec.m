@@ -15,6 +15,7 @@ if nargin < 2 % set all to defaults
    %opt = struct('XValNum', 10, 'kNNNum',5,'dimRed','pca','pcaExp',99);
    opt = struct('XValNum', 10, 'kNNNum',5,'dimRed','pca','pcaNum',40);
    %opt = struct('XValNum', 10, 'kNNNum',5,'dimRed','none');
+
 else % set the needed opts that aren't set to defaults
    if ~isfield(opt, 'kNNNum')
       opt.kNNNum = 5;
@@ -24,15 +25,18 @@ else % set the needed opts that aren't set to defaults
    end
    if isfield(opt, 'lle')
       if ~isfield(opt, 'lleNum')
-         opt.lleNum = 5;
+         opt.lleNum = 37;
       end
       if ~isfield(opt, 'lleDim')
-         opt.lleDim = 20;
+         opt.lleDim = 25;
       end
    end
    if isfield(opt, 'pca')
       if ~isfield(opt, 'pcaExp')
          opt.pcaExp = 95;
+         if ~isfield(opt, 'pcaNum') % no PCA options
+            opt.pcaNum = 38;
+         end
       end
       if isfield(opt, 'pcaNum')
          opt = rmfield(opt,'pcaExp');
@@ -47,6 +51,7 @@ nSongs = length(wavList);
 genre   = strrep(genre, '"', '');
 genreValues = getGenres(genre);
 
+% standardize feature vectors
 feat = bsxfun(@minus, feat, mean(feat, 2));
 feat = bsxfun(@rdivide, feat, var(feat, 0, 2));
 fprintf(1,'Feature vectors standardized\n');

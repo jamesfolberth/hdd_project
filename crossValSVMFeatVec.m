@@ -1,4 +1,4 @@
-function [crossValAvg,crossValSD] = crossValSVMFeatVec(savefile, opt)
+function [crossValAvg,crossValSD,probCorrect]=crossValSVMFeatVec(savefile,opt)
 % Test the classification algorithm following the ideas of Section 6 of
 % Dr. Meyer's project guide.
 %
@@ -11,35 +11,41 @@ end
 
 if nargin < 2 % set to default values
    % MCMethod - multiclass method ('onevall','onevone''ECOC')
-   %opt = struct('XValNum',10,'MCMethod','onevall','dimRed','none');
-   %opt = struct('XValNum',10,'MCMethod','onevone','dimRed','none');
-   opt = struct('XValNum',10,'MCMethod','ECOC','dimRed','none');
+   opt = struct('MCMethod','onevall');
+   %opt = struct('MCMethod','onevone');
+   %opt = struct('MCMethod','ECOC');
+end
 
-else % populate needed options that aren't set with default values
-   if ~isfield(opt, 'MCMethod')
-      opt.MCMethod = 'onevone';
+% populate needed options that aren't set with default values
+if ~isfield(opt, 'dimRed')
+   opt.dimRed = 'none';
+end
+if ~isfield(opt, 'MCMethod')
+   opt.MCMethod = 'onevall';
+end
+if ~isfield(opt, 'SVMOrder')
+   opt.SVMOrder = 2.25;
+end
+if ~isfield(opt, 'XValNum')
+   opt.XValNum = 10;
+end
+if isfield(opt, 'lle')
+   if ~isfield(opt, 'lleNum')
+      opt.lleNum = 37;
    end
-   if ~isfield(opt, 'XValNum')
-      opt.XValNum = 10;
+   if ~isfield(opt, 'lleDim')
+      opt.lleDim = 25;
    end
-   if isfield(opt, 'lle')
-      if ~isfield(opt, 'lleNum')
-         opt.lleNum = 37;
-      end
-      if ~isfield(opt, 'lleDim')
-         opt.lleDim = 25;
+end
+if isfield(opt, 'pca')
+   if ~isfield(opt, 'pcaExp')
+      opt.pcaExp = 95;
+      if ~isfield(opt, 'pcaNum') % no PCA options
+         opt.pcaNum = 38;
       end
    end
-   if isfield(opt, 'pca')
-      if ~isfield(opt, 'pcaExp')
-         opt.pcaExp = 95;
-         if ~isfield(opt, 'pcaNum') % no PCA options
-            opt.pcaNum = 38;
-         end
-      end
-      if isfield(opt, 'pcaNum')
-         opt = rmfield(opt,'pcaExp');
-      end
+   if isfield(opt, 'pcaNum')
+      opt = rmfield(opt,'pcaExp');
    end
 end
 
@@ -109,7 +115,7 @@ for n =1:size(R,1);
                inds = (genreTrain == g);
                mdls{g} = fitcsvm(transpose(feat(:,trainIndex)),inds,...
                'ClassNames',[true false],'Standardize',1,...
-               'KernelFunction','polynomial','PolynomialOrder',2,...
+               'KernelFunction','polynomial','PolynomialOrder',opt.SVMOrder,...
                'BoxConstraint',10);
 
                %fprintf(1,'# support vecs = %d of %d\n',nnz(mdls{g}.IsSupportVector),numel(mdls{g}.IsSupportVector)); %sometimes we have lots of support vecs :(
@@ -123,7 +129,7 @@ for n =1:size(R,1);
                mdls{g} = fitcsvm(transpose(feat(:,trainIndex(inds))),...
                genreTrain(inds), 'ClassNames', [pairs(g,1) pairs(g,2)],...
                'Standardize',1,'KernelFunction','polynomial',...
-               'PolynomialOrder',2.5,'BoxConstraint',10);
+               'PolynomialOrder',opt.SVMOrder,'BoxConstraint',10);
                %'Standardize',1,'KernelFunction','linear','BoxConstraint',1);
 
                %fprintf(1,'# support vecs = %d of %d\n',nnz(mdls{g}.IsSupportVector),numel(mdls{g}.IsSupportVector)); %sometimes we have lots of support vecs :(
@@ -145,7 +151,7 @@ for n =1:size(R,1);
                mdls{g} = fitcsvm(transpose(feat(:,trainIndex)),...
                inds,...
                'Standardize',1,'KernelFunction','polynomial',...
-               'PolynomialOrder',2,'BoxConstraint',10);
+               'PolynomialOrder',opt.SVMOrder,'BoxConstraint',10);
 
                %fprintf(1,'# support vecs = %d of %d\n',nnz(mdls{g}.IsSupportVector),numel(mdls{g}.IsSupportVector)); %sometimes we have lots of support vecs :(
 

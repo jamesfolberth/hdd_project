@@ -71,7 +71,7 @@ else
    case 'pca'
       %plot(nVec, mean(probs),'o');
       errorbar(nVec, mean(probs,2), std(probs,0,2),'o')
-      xlabel('PCA Num Terms'); ylabel('probCorrect');
+      xlabel('PCA Num Terms'); ylabel('Classification Rate');
       
    case 'lle'
       %surf(K,D,reshape(mean(probs,2), size(K)));
@@ -87,7 +87,7 @@ else
             '-k','LineWidth',2);
       end
       hold off
-      xlabel('lleNum'); ylabel('lleDim');
+      xlabel('lleNum'); ylabel('lleDim'); %zlabel('Classification Rate');
 
       [~,ind] = max(mu);
       fprintf(1,'max mean(probCorrect) = %f at lleNum = %d, lleDim = %d\n',...

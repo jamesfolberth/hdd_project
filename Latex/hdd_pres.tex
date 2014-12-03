@@ -80,7 +80,67 @@
 James
 \end{frame}
 
+\begin{frame}{Combining Features into Distances}
 
+\begin{itemize}
+\item Once we have computed various features similarity measures we can combine them into a "distance" in a meaningful way. 
+\item One option is to use a convex combination of the $z$ (standard) scores of the distances. This method gives the combined distance.
+ \[ d = \sum_{i} w_i \left(\dfrac{d_i - \mu_i}{\sigma_i}\right) + \text{offset}, \]
+ where  $w_i\ge 0$, $\sum_i w_i=1$, $d_i$ is the $i$th distance (with a specie feature) to be combined and $\mu_i$ and $\sigma_i$ are the mean and standard deviation of the $i$th distance to standardize. 
+ \end{itemize}
+ \end{frame}
+ \begin{frame}{Combining Features into Distances}
+
+\begin{itemize}
+ \item We compute this over over some reference set of songs (e.g. the entire database of songs), and the offset is chosen to the distance is positive for each pair of songs.
+hen standardize these distances using the mean and standard deviation taken across the en
+ \item This Creates a "Distance" matrix of all the reference songs. 
+  \item We use a single Gaussian to cluster the MFCC frames for each track, and then compare the cluster models between two tracks using the rescaled KL- divergence. We also compute the median fluctuation patterns, bass, and center of gravity. We t
+ \item Pampalk describes a few possible combinations, we chose use is called G1C and combines the about features using the weights 0.7 for the spectral similarity, and 0.1 each for median fluctuation pattern, bass, and center of gravity.
+ \end{itemize}
+\end{frame}
+
+\begin{frame}[shrink=20]{Base Method for Classifying}
+Using K-nearest neighbors with $k=5$ and leave-out-$p$-cross-validation we have the following results:
+\begin{table}[h!]
+\centering
+%\input{../crossValAvg.tex}
+ \begin{tabular}{ l||l | l | l | l | l | l | }
+ & classical & electronic & jazz\_blues & metal\_punk & rock\_pop & world\\\hline
+classical & 63 &1 &2 &0 &1 &10 \\ \hline 
+electronic & 0 &16 &0 &0 &1 &3 \\ \hline 
+jazz\_blues & 0 &0 &1 &0 &0 &0 \\ \hline 
+metal\_punk & 0 &0 &0 &4 &3 &0 \\ \hline 
+rock\_pop & 0 &5 &2 &4 &16 &7 \\ \hline 
+world & 1 &1 &0 &0 &0 &5 \\ \hline 
+\end{tabular}
+
+\caption{(Rounded) Average of the Confusion Matrices}
+\label{fig:avgconfMat}
+\end{table}
+\end{frame}
+
+\begin{frame}[shrink=20]{Base Method for Classifying}
+\begin{table}[h!]
+\centering
+%\input{../crossValSD.tex}
+ \begin{tabular}{ l||l | l | l | l | l | l | }
+ & classical & electronic & jazz\_blues & metal\_punk & rock\_pop & world\\\hline
+classical & 0.77 &0.65 &1.22 &0.40 &0.86 &1.96 \\ \hline 
+electronic & 0.00 &1.97 &0.27 &0.40 &0.80 &1.70 \\ \hline 
+jazz\_blues & 0.00 &0.00 &0.96 &0.00 &0.00 &0.33 \\ \hline 
+metal\_punk & 0.00 &0.47 &0.00 &1.40 &1.67 &0.36 \\ \hline 
+rock\_pop & 0.30 &1.65 &1.14 &1.42 &1.93 &1.83 \\ \hline 
+world & 0.78 &0.88 &0.59 &0.00 &0.35 &1.84 \\ \hline 
+\end{tabular}
+
+\caption{Standard Deviation of the Confusion Matrices}
+\label{fig:stdconfMat}
+\end{table}
+The percent correct for each genre are as follows,
+   \[ [98.44\%, 69.57\%,20.00\%,50.00\%,76.19\%,20.00\%]. \]
+ with the probability correct is $71.92\%$.
+\end{frame}
 
 \section{Dimension Reduction}
 \begin{frame}{PCA with $k$-Nearest Neighbors classifier} % TODO maybe move to classification?
@@ -96,7 +156,9 @@ Dale
 \end{frame}
 
 \begin{frame}{Graph Laplacian}
-Aly
+\begin{itemize}
+\item From the distance matrix that was describe above we can build a graph representation between the songs. 
+\end{itemize}
 \end{frame}
 
 

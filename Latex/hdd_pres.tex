@@ -218,20 +218,19 @@ Extracted from the Mel Frequency Cepstrum.
 \begin{frame}{Combining Features into Distances}
 
 \begin{itemize}
-\item Once we have computed various features similarity measures we can combine them into a "distance" in a meaningful way. 
-\item One option is to use a convex combination of the $z$ (standard) scores of the distances. This method gives the combined distance.
+\item Once we have computed various features and similarity measures we can combine them into a "distance" in a meaningful way. 
+\item One option is to use a convex combination of the $z$ (standard) scores of the distances. This method gives the combined distance:
  \[ d = \sum_{i} w_i \left(\dfrac{d_i - \mu_i}{\sigma_i}\right) + \text{offset}, \]
- where  $w_i\ge 0$, $\sum_i w_i=1$, $d_i$ is the $i$th distance (with a specie feature) to be combined and $\mu_i$ and $\sigma_i$ are the mean and standard deviation of the $i$th distance to standardize. 
+ where  $w_i\ge 0$, $\sum_i w_i=1$, $d_i$ is the $i$th distance (with a specific feature) to be combined and $\mu_i$ and $\sigma_i$ are the mean and standard deviation of the $i$th distance to be able to standardize. 
  \end{itemize}
  \end{frame}
  \begin{frame}{Combining Features into Distances}
 
 \begin{itemize}
- \item We compute this over over some reference set of songs (e.g. the entire database of songs), and the offset is chosen to the distance is positive for each pair of songs.
-hen standardize these distances using the mean and standard deviation taken across the en
- \item This Creates a "Distance" matrix of all the reference songs. 
-  \item We use a single Gaussian to cluster the MFCC frames for each track, and then compare the cluster models between two tracks using the rescaled KL- divergence. We also compute the median fluctuation patterns, bass, and center of gravity. We t
- \item Pampalk describes a few possible combinations, we chose use is called G1C and combines the about features using the weights 0.7 for the spectral similarity, and 0.1 each for median fluctuation pattern, bass, and center of gravity.
+ \item We compute this over over some reference set of songs and the offset is chosen so that the distance is positive for each pair of songs.
+ \item This creates a "Distance" matrix of all the reference songs. 
+  \item We use a single Gaussian to cluster the MFCC frames for each track, and then compare the cluster models between two tracks using the rescaled KL- divergence. We also compute the median fluctuation patterns, bass, and center of gravity. 
+ \item Pampalk describes a few possible combinations, we chose use the combination called G1C. It combines the features using the weights 0.7 for the spectral similarity, and 0.1 each for median fluctuation pattern, bass, and center of gravity.
  \end{itemize}
 \end{frame}
 
@@ -409,13 +408,13 @@ Rank & Feature \\ \hline
 
 \begin{frame}{Graph Representations}
 \begin{itemize}
-\item If we only have some similarity between data points we can represent the data in a similar graph $G = (V,E)$ where $V$ is the set of vertices and $E$ is the weighted edges. 
+\item If we only have some similarity between data points we can represent the data in a similarity graph $G = (V,E)$ where $V$ is the set of vertices and $E$ is the weighted edges. 
 \item From the distance matrix, extracted from the features, we can build a similarity graph between the set of songs. 
-\item Results is a sparse representation of the data.
-\item We normalized the distance matrix so that we each entry is between zero and one. 
-\item There are three methods to attain the similarity {\bf{adjacency}} matrix :
+\item This results is a sparse representation of the data.
+\item Before we create the graph, we normalized the distance matrix so that  each entry is between zero and one. 
+\item There are three methods to attain the similarity {\bf{adjacency}} matrix:
 \begin{itemize}
-\item  $\epsilon$-neighborhood graph = chose only distances that are less than a certain $\epsilon$ and and zero the other entries. 
+\item  $\epsilon$-neighborhood graph = chose only distances that are less than a certain $\epsilon$ and and zeros the other entries. 
 \item $k$-nearest neighbor graph = find $k$ nearest neighbors and only keep those distances.
 \item Fully connected graph= keep all distances. 
 \end{itemize}
@@ -423,11 +422,11 @@ Rank & Feature \\ \hline
 \end{frame}
 
 \begin{frame}{Spectral Clustering with Graph Laplacians}
-Spectral clustering is a method of using the spectrum of a matrix in order to preform dimensionality reduction before clustering. This allows us to cluster in few dimensions. We have three main  methods in which to compute the Spectral Clustering:
+Spectral clustering is a method of using the spectrum of a matrix in order to preform dimensionality reduction before clustering. This allows us to cluster in fewer dimensions. We have three main  methods in which to compute the Spectral Clustering:
 \begin{itemize}
 \item Unnormalized:
 \begin{enumerate}
-\item Computed the unnormalized graph Laplacian $L$ from the similarity adjacency matrix. Second 
+\item Computed the unnormalized graph Laplacian, $L$,from the similarity adjacency matrix.  
 \item Compute the associated eigenvectors of the first (magnitude) $k$ eigenvalues of $L$ and store them in the matrix $V$. 
 \item Using the rows of $V$  as our spectral coordinates for clustering the points. 
 \end{enumerate}
@@ -438,14 +437,14 @@ Spectral clustering is a method of using the spectrum of a matrix in order to pr
 \begin{itemize}
 \item Normalized Method 1:
 \begin{enumerate}
-\item Computed the normalized graph Laplacian $L$ from the similarity adjacency matrix. Second 
-\item Compute the associated eigenvectors of the first (magnitude) $k$ eigenvalues of $L$ and store them in the matrix $V$. 
+\item Computed the unnormalized graph Laplacian $L$ from the similarity adjacency matrix.  
+\item Compute the associated eigenvectors of the first (magnitude) $k$ eigenvalues of the system, $Lv = \lambda Dv$ and store them in the matrix $V$. 
 \item Using the rows of $V$  as our spectral coordinates for clustering the points. 
 \end{enumerate}
 
 \item Normalized Method 2:
 \begin{enumerate}
-\item Computed the normalized graph Laplacian $L$ from the similarity adjacency matrix. Second 
+\item Computed the normalized graph Laplacian $L$ from the similarity adjacency matrix.  
 \item Compute the associated eigenvectors of the first (magnitude) $k$ eigenvalues of $L$ and store them in the matrix $V$. 
 \item Using the rows of $V$ normalize the row sums to have 1 and then use the normalized $V$ as our spectral  coordinates for clustering the points. 
 \end{enumerate}
@@ -734,12 +733,6 @@ Using SVM one-verse-all method we have the following results:
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Graph Colcusions}
-\begin{itemize}
-\item Using Unnormalized Clustering with all-verse-one SVM produced the best results, around $53-54\%$. 
-\item Normalized Method 1 produced the worst results. 
-\end{itemize}
-\end{frame}
 
 
 \section{Discussion}

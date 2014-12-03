@@ -224,23 +224,47 @@ world & 0.78 &0.88 &0.59 &0.00 &0.35 &1.84 \\ \hline
 \end{table}
 The percent correct for each genre are as follows,
    \[ [98.44\%, 69.57\%,20.00\%,50.00\%,76.19\%,20.00\%]. \]
- with the probability correct is $71.92\%$.
+ with the probability correct is $55.7\%$.
 \end{frame}
+
 
 \section{Dimension Reduction}
-\begin{frame}{PCA with $k$-Nearest Neighbors classifier}
-Optimization of parameters for Dale + WCH
+% James
+\begin{frame}{Principal Component Analysis}
+   Some literature suggests that PCA \emph{may} work, but one should be careful.  Clustering with PCs may not work well.
 
-PCA tends to mess up 
+   ~\\[-7em]
+   \begin{figure}
+      \centering
+      \includegraphics[width=0.8\textwidth]{figures/optimkNNPCA.pdf}
+   \end{figure}
 \end{frame}
 
-\begin{frame}{LLE with $k$-Nearest Neighbors classifier}
-Optimization of parameters for Dale + WCH
+% James
+\begin{frame}{Locally Linear Embedding}
+   We also tried LLE.  It doesn't work quite as well as PCA.
+
+   ~\\[-7em]
+   \begin{figure}
+      \centering
+      \includegraphics[width=0.8\textwidth]{figures/optimkNNLLE.pdf}
+   \end{figure}
 \end{frame}
 
+% James
+\begin{frame}{Manually selecting features}
+   \begin{itemize}
+      \item A na\"ive option is to manually select some number of features from a large list of features.
+      \item We combined various simple features, the mean and variance of the MFCCs, and features from WCHs into a length $66$ vector.
+      \item We'll show how this performs when we discuss SVM.
+   \end{itemize}
+\end{frame}
+
+% Dale
 \begin{frame}{Super awesome PageRank feature selection}
 Dale
 \end{frame}
+
 
 \begin{frame}{Graph Laplacian}
 \begin{itemize}
@@ -258,11 +282,7 @@ We use polynomial kernel with varying order $p$:
 
 \[ k(\mathbf{x}_i,\mathbf{x}_j) = \left(1 + \mathbf{x}_i\cdot\mathbf{x}_j\right)^p. \] 
 
-% TODO Try Gaussian again
 \end{frame}
-%\begin{frame}{PCA/LLE + SVM classifiers}
-%James
-%\end{frame}
 
 \begin{frame}{Graph Methods}
 Aly

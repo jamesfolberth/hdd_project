@@ -11,9 +11,9 @@ end
 
 if nargin < 2 % set to default values
    % MCMethod - multiclass method ('onevall','onevone''ECOC')
-   opt = struct('MCMethod','onevall');
+   %opt = struct('MCMethod','onevall');
    %opt = struct('MCMethod','onevone');
-   %opt = struct('MCMethod','ECOC');
+   opt = struct('MCMethod','ECOC');
 end
 
 % populate needed options that aren't set with default values

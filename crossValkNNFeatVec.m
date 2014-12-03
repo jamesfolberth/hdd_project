@@ -10,10 +10,8 @@ if nargin < 1
 end 
 
 if nargin < 2 % set all to defaults
-   %opt = struct('XValNum', 10, 'kNNNum',5,'dimRed','lle','lleNum',5,'lleDim',20);
-   %opt = struct('XValNum', 10, 'kNNNum',5,'dimRed','lle','lleNum',31,'lleDim',35);
-   %opt = struct('XValNum', 10, 'kNNNum',5,'dimRed','pca','pcaExp',99);
-   opt = struct('XValNum', 10, 'kNNNum',5,'dimRed','pca','pcaNum',40);
+   opt = struct('XValNum', 10, 'kNNNum',5,'dimRed','lle','lleNum',33,'lleDim',20);
+   %opt = struct('XValNum', 10, 'kNNNum',5,'dimRed','pca','pcaNum',40);
    %opt = struct('XValNum', 10, 'kNNNum',5,'dimRed','none');
 
 else % set the needed opts that aren't set to defaults
@@ -114,11 +112,11 @@ for n =1:size(R,1);
 
       % make predictions
       confMat = zeros(numel(unique(genreValues))); % 6x6
+      predGenre = predict(mdl, transpose(feat(:,testIndex)));
       for j=1:length(testIndex)
          trueGenre = genreTest(j);
-         predGenre = predict(mdl, transpose(feat(:,testIndex(j))));
          %predGenre = randi([1 6]); % random prediction ~ 17% correct
-         confMat(predGenre, trueGenre) = confMat(predGenre, trueGenre) + 1;
+         confMat(predGenre(j), trueGenre) = confMat(predGenre(j), trueGenre) + 1;
       end
       R{n,k} = confMat; 
 

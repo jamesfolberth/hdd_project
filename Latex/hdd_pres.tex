@@ -12,9 +12,12 @@
 \usepackage{amssymb}
 \usepackage{array}
 
+\usepackage{tikz}
+
 \usepackage{graphicx}
-%\usepackage{subfig}
+\usepackage{subfig}
 \usepackage[labelfont=bf]{caption}
+\captionsetup{font=small}
 \usepackage{hyperref}
 
 \newcommand{\diff}[2]{\dfrac{d #1}{d #2}}
@@ -72,19 +75,102 @@
 
 \section{Features}
 \begin{frame}{Mel Frequency Cepstral Coefficients}
-   Dale, I guess.  Talk about what we're doing in Mel space
+   Dale, I guess.  Talk about what we're doing in the Fourier power, Mel power, temporal domains
 
 \end{frame}
 
+% James
 \begin{frame}{Wavelet Coefficient Histograms}
-James
+   \begin{columns}[T,onlytextwidth]
+      \begin{column}{0.45\textwidth}
+         \begin{itemize}
+            \item The wavelet transform generally has good time and frequency resolution.
+            \item Complex temporal signals become more simple in the wavelet domain.
+            \item We look at the histogram of wavelet coefficients in each sub-band.
+         \end{itemize}
+
+      \end{column}
+
+      \begin{column}{0.45\textwidth}
+         The multiresolution idea:\\[1em]
+         \begin{tikzpicture}
+            \node[draw] (signal) at (0,0) {Signal};
+            \node[draw] (a1) at (1,-1) {$A_1$};
+            \node[draw] (d1) at (-1,-1) {$D_1$};
+
+            \node[draw] (a2) at (2,-2) {$A_2$};
+            \node[draw] (d2) at (0,-2) {$D_2$};
+
+            \node[draw] (a3) at (3,-3) {$A_3$};
+            \node[draw] (d3) at (1,-3) {$D_3$};
+
+            \node (etc) at (3.5,-3.5) {$\ddots$};
+
+            \draw[thick,->] (signal) -- (a1);
+            \draw[thick,->] (signal) -- (d1);
+            \draw[thick,->] (a1) -- (a2);
+            \draw[thick,->] (a1) -- (d2);
+            \draw[thick,->] (a2) -- (a3);
+            \draw[thick,->] (a2) -- (d3);
+
+         \end{tikzpicture}
+      \end{column}
+   \end{columns}
 \end{frame}
 
+% James
+\begin{frame}{Wavelet Coefficient Histograms}
+   Idea: The WCHs are characterized by their moments.
+
+   The WCH features are extracted as follows:
+   \begin{enumerate}
+      \item Compute the wavelet decomposition of the central $~23$ seconds.
+      \item Construct the histogram for each sub-band.
+      \item Compute the first three moments of each histogram (mean, variance, skewness).
+      \item Compute a sub-band energy for each histogram.
+   \end{enumerate}
+
+   % Not all subbands contain useful information
+\end{frame}
+
+% James
+\begin{frame}{Wavelet Coefficient Histograms}
+   Features from detail sub-bands $4,5,6,7$:\\
+
+   ~\\[-10em]
+   \includegraphics[width=\textwidth]{figures/wch_class.pdf}
+
+\end{frame}
+
+% James
+\begin{frame}{Wavelet Coefficient Histograms}
+   Features from detail sub-bands $4,5,6,7$:\\
+
+   ~\\[-10em]
+   \includegraphics[width=\textwidth]{figures/wch_diff.pdf}
+
+\end{frame}
+
+% James
+% Stolen from Li et al. SIGIR 2003
+%\begin{frame}{Wavelet Coefficient Histograms}
+%   \begin{columns}[T,onlytextwidth]
+%      \begin{column}{0.25\textwidth}
+%         From Li et al., \emph{SIGIR} '03.\\
+%      \end{column}
+%
+%      \begin{column}{0.7\textwidth}
+%         \includegraphics[width=\textwidth]{figures/wch_li_1.png}
+%      \end{column}
+%   \end{columns}
+%\end{frame}
 
 
 \section{Dimension Reduction}
-\begin{frame}{PCA with $k$-Nearest Neighbors classifier} % TODO maybe move to classification?
+\begin{frame}{PCA with $k$-Nearest Neighbors classifier}
 Optimization of parameters for Dale + WCH
+
+PCA tends to mess up 
 \end{frame}
 
 \begin{frame}{LLE with $k$-Nearest Neighbors classifier}
@@ -103,11 +189,17 @@ Aly
 
 \section{Clustering/Classification}
 \begin{frame}{SVM classifiers}
-James
+Describe linear SVM.\\
+Use kernel trick (with soft margin).\\
+We use polynomial kernel with varying order $p$:
+
+\[ k(\mathbf{x}_i,\mathbf{x}_j) = \left(1 + \mathbf{x}_i\cdot\mathbf{x}_j\right)^p. \] 
+
+% TODO Try Gaussian again
 \end{frame}
-\begin{frame}{PCA/LLE + SVM classifiers}
-James
-\end{frame}
+%\begin{frame}{PCA/LLE + SVM classifiers}
+%James
+%\end{frame}
 
 \begin{frame}{Graph Methods}
 Aly

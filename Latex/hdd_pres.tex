@@ -407,12 +407,51 @@ Rank & Feature \\ \hline
 %   \end{itemize}
 %\end{frame}
 
-\begin{frame}{Graph Laplacian}
+\begin{frame}{Graph Representations}
 \begin{itemize}
-\item From the distance matrix that was describe above we can build a graph representation between the songs. 
+\item If we only have some similarity between data points we can represent the data in a similar graph $G = (V,E)$ where $V$ is the set of vertices and $E$ is the weighted edges. 
+\item From the distance matrix, extracted from the features, we can build a similarity graph between the set of songs. 
+\item Results is a sparse representation of the data.
+\item We normalized the distance matrix so that we each entry is between zero and one. 
+\item There are three methods to attain the similarity {\bf{adjacency}} matrix :
+\begin{itemize}
+\item  $\epsilon$-neighborhood graph = chose only distances that are less than a certain $\epsilon$ and and zero the other entries. 
+\item $k$-nearest neighbor graph = find $k$ nearest neighbors and only keep those distances.
+\item Fully connected graph= keep all distances. 
+\end{itemize}
 \end{itemize}
 \end{frame}
 
+\begin{frame}{Spectral Clustering with Graph Laplacians}
+Spectral clustering is a method of using the spectrum of a matrix in order to preform dimensionality reduction before clustering. This allows us to cluster in few dimensions. We have three main  methods in which to compute the Spectral Clustering:
+\begin{itemize}
+\item Unnormalized:
+\begin{enumerate}
+\item Computed the unnormalized graph Laplacian $L$ from the similarity adjacency matrix. Second 
+\item Compute the associated eigenvectors of the first (magnitude) $k$ eigenvalues of $L$ and store them in the matrix $V$. 
+\item Using the rows of $V$  as our spectral coordinates for clustering the points. 
+\end{enumerate}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Spectral Clustering with Graph Laplacians}
+\begin{itemize}
+\item Normalized Method 1:
+\begin{enumerate}
+\item Computed the normalized graph Laplacian $L$ from the similarity adjacency matrix. Second 
+\item Compute the associated eigenvectors of the first (magnitude) $k$ eigenvalues of $L$ and store them in the matrix $V$. 
+\item Using the rows of $V$  as our spectral coordinates for clustering the points. 
+\end{enumerate}
+
+\item Normalized Method 2:
+\begin{enumerate}
+\item Computed the normalized graph Laplacian $L$ from the similarity adjacency matrix. Second 
+\item Compute the associated eigenvectors of the first (magnitude) $k$ eigenvalues of $L$ and store them in the matrix $V$. 
+\item Using the rows of $V$ normalize the row sums to have 1 and then use the normalized $V$ as our spectral  coordinates for clustering the points. 
+\end{enumerate}
+\end{itemize}
+Next we will talk about different methods of clustering. 
+\end{frame}
 
 
 \section{Clustering/Classification}
@@ -591,8 +630,115 @@ We have found that a polynomial of order $p$ works:
 
 
 
-\begin{frame}{Graph Methods}
-Aly
+\begin{frame}{Graph Results using SVM}
+Using SVM one-verse-all method we have the following results: 
+\begin{itemize}
+\item Unnormalized Spectral Clustering 
+\begin{itemize}
+\item $\epsilon$-neighborhood: $\epsilon = 0.5$
+\begin{figure}[h!]
+\centering
+  \centering
+    \includegraphics[width=0.7\textwidth]{figures/plotopt1e5.png}
+\end{figure}
+\end{itemize}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Graph Results using SVM}
+\begin{itemize}
+\item $k$-nearest neighbor graph: $k=2$ 
+\begin{figure}[h!]
+  \centering
+    \includegraphics[width=0.7\textwidth]{figures/plotopt2k2.png}
+\end{figure}
+\end{itemize}
+\end{frame}
+\begin{frame}{Graph Results using SVM}
+\begin{itemize}
+\item Connected:  
+\begin{figure}[h!]
+  \centering
+    \includegraphics[width=0.7\textwidth]{figures/plotopt3.png}
+\end{figure}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Graph Results using SVM}
+\begin{itemize}
+\item Normalized Method 1 Spectral Clustering 
+\begin{itemize}
+\item $\epsilon$-neighborhood: $\epsilon = 0.5$
+\begin{figure}[h!]
+\centering
+  \centering
+    \includegraphics[width=0.7\textwidth]{figures/plotopt1n1.png}
+\end{figure}
+\end{itemize}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Graph Results using SVM}
+\begin{itemize}
+\item $k$-nearest neighbor graph: $k=2$ 
+\begin{figure}[h!]
+  \centering
+    \includegraphics[width=0.7\textwidth]{figures/plotopt2k2n1.png}
+\end{figure}
+\end{itemize}
+\end{frame}
+\begin{frame}{Graph Results using SVM}
+\begin{itemize}
+\item Connected:  
+\begin{figure}[h!]
+  \centering
+    \includegraphics[width=0.7\textwidth]{figures/plotopt3n1.png}
+\end{figure}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Graph Results using SVM}
+\begin{itemize}
+\item Normalized Method 2 Spectral Clustering 
+\begin{itemize}
+\item $\epsilon$-neighborhood: $\epsilon = 0.5$
+\begin{figure}[h!]
+\centering
+  \centering
+    \includegraphics[width=0.7\textwidth]{figures/plotopt1n2.png}
+\end{figure}
+\end{itemize}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Graph Results using SVM}
+\begin{itemize}
+\item $k$-nearest neighbor graph: $k=2$ 
+\begin{figure}[h!]
+  \centering
+    \includegraphics[width=0.7\textwidth]{figures/plotopt2k2n2.png}
+\end{figure}
+\end{itemize}
+\end{frame}
+\begin{frame}{Graph Results using SVM}
+\begin{itemize}
+\item Connected:  
+\begin{figure}[h!]
+  \centering
+    \includegraphics[width=0.7\textwidth]{figures/plotopt3n2.png}
+\end{figure}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Graph Colcusions}
+\begin{itemize}
+\item Using Unnormalized Clustering with all-verse-one SVM produced the best results, around $53-54\%$. 
+\item Normalized Method 1 produced the worst results. 
+\end{itemize}
 \end{frame}
 
 

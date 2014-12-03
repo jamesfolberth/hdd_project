@@ -201,12 +201,12 @@ case 'Dale'
       % Fluctuation patterns
       fpMed = flucPat(melS);
       fp = reshape(fpMed, [12 30]);
-      fpMax = max(fp(:));
-      fpBass = sum(sum(fp(1:2,3:end)));
-      fpAggr = sum(sum(fp(2:end,1:4)))/fpMax;
-      fpDLF = sum(sum(fp(1:3,:)))/sum(sum(fp(9:end,:)));
-      fpGrav = sum( fp*(1:size(fp,2))' )/sum(fp(:));
-      fpFoc = mean(fp(:))/fpMax;
+      fpMax = max(fp(:)); %177
+      fpBass = sum(sum(fp(1:2,3:end))); %178
+      fpAggr = sum(sum(fp(2:end,1:4)))/fpMax; %179
+      fpDLF = sum(sum(fp(1:3,:)))/sum(sum(fp(9:end,:))); %180
+      fpGrav = sum( fp*(1:size(fp,2))' )/sum(fp(:)); %181
+      fpFoc = mean(fp(:))/fpMax; %182
 
       featV = [featV; fpMax; fpBass; fpAggr; fpDLF; fpGrav; fpFoc];
       

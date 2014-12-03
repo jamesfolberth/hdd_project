@@ -1,4 +1,88 @@
-function [wchFeat] = wch(wav,opt)
+function [] = plotwch(songIndex)
+
+method = 2;
+
+switch method
+case 1
+   % pick a random song
+   dataDir = getDir();
+   [wavList,genre] = textread([dataDir,'ground_truth.csv'],'%s %s','delimiter',',');
+   nSongs = length(wavList);
+   % Fix the names
+   wavList = strrep( wavList, '"', '');
+   wavList = strrep( wavList, 'mp3','wav');
+   
+   if nargin == 0
+      songIndex = randi(nSongs);
+   end
+   
+   wavFile = strcat(dataDir, wavList{songIndex});
+   
+   % read in the song
+   if ( isOctave() )
+      [wav,fs] = wavread(wavFile);
+   else
+      [wav,fs] = audioread(wavFile,'double');
+   end
+   
+   wav = wav*10^(96/20);
+   
+   feat = localwch(wav);
+      
+   %plot(1:numel(feat), feat)
+
+case 2
+
+   dataDir = getDir();
+   [wavList,genre] = textread([dataDir,'ground_truth.csv'],'%s %s','delimiter',',');
+
+   genre = strrep(genre, '_', '\_'); % fix for latex
+   %load('featVecsWCH_approx.mat.save','-mat');
+   load('featVecsWCH.mat','-mat');
+
+   mode = 'class';
+   mode = 'diff';
+   switch mode
+   case 'class'
+      inds = 1:6;
+   case 'diff'
+      inds = [1 321 435 461 506 608];
+   end
+
+   % Standardize feature vectors
+   %feat = bsxfun(@minus, feat, mean(feat, 2));
+   %feat = bsxfun(@rdivide, feat, var(feat, 0, 2));
+   %fprintf(1,'Feature vectors standardized\n');
+
+   for i=1:numel(inds)
+      subplot(2,3,i)
+      %plot(51:66,feat(51:66,inds(i)),'o');
+      plot(51:66,feat(51:66,inds(i))/10^5);
+      axis([51 66 0 1])
+
+      %class(char(genre(inds(i))))
+      xlabel('WCH Feature index');
+      title(sprintf('%s - Track %03d',char(genre(inds(i))), inds(i)));
+      %switch mode
+      %case 'class'
+      %   print(sprintf('Latex/figures/wch_class_%02d.pdf',i),'-dpdf')
+      %case 'diff'
+      %   print(sprintf('Latex/figures/wch_diff_%02d.pdf',i),'-dpdf')
+      %end
+   end
+
+   switch mode
+   case 'class'
+      print(sprintf('Latex/figures/wch_class.pdf'),'-dpdf')
+   case 'diff'
+      print(sprintf('Latex/figures/wch_diff.pdf'),'-dpdf')
+   end
+
+end
+
+end % plotwch
+
+function [wchFeat] = localwch(wav,opt)
 % Compute the (Daubechies) Wavelet Coefficient Histogram and return features
 %
 % wav - vector read of WAVE file data
@@ -40,7 +124,6 @@ endInd   = min(length(wav)-startInd, length(wav));
 
 %subbands = 1:7;
 subbands = 4:7; % first few don't look useful
-%subbands = 1:7; % first few don't look useful
 wchFeat = zeros([4*numel(subbands) 1]);
 for i=1:numel(subbands)
    dcoeffs = detcoef(C,L, subbands(i)); 
@@ -58,10 +141,6 @@ for i=1:numel(subbands)
    wchFeat(4*(i-1)+1) = sum(inds.*dn);
    wchFeat(4*(i-1)+2) = sum(inds.^2.*dn);
    wchFeat(4*(i-1)+3) = sum(inds.^3.*dn);
-   %wchFeat(4*(i-1)+1) = sum(inds.*an);
-   %wchFeat(4*(i-1)+2) = sum(inds.^2.*an);
-   %wchFeat(4*(i-1)+3) = sum(inds.^3.*an);
-
 
    %wchFeat(8*(i-1)+5) = sum(inds.*an);
    %wchFeat(8*(i-1)+6) = sum(inds.^2.*an);
@@ -69,8 +148,6 @@ for i=1:numel(subbands)
 
    % subband energy
    wchFeat(4*(i-1)+4) = mean(abs(dcoeffs));
-   %wchFeat(4*(i-1)+4) = mean(abs(acoeffs));
-
    %wchFeat(8*(i-1)+8) = mean(abs(acoeffs));
 
 end

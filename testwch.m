@@ -22,8 +22,13 @@ else
    [wav,fs] = audioread(wavFile,'double');
 end
 
+fs
+2^18/fs
+
 %wav = wav*10^(96/20);
 
-wch(wav)
+feat = wch(wav);
+
+plot(1:numel(feat), feat)
 
 end

@@ -120,11 +120,12 @@
 
 % James
 \begin{frame}{Wavelet Coefficient Histograms}
-   Idea: The WCHs are characterized by their moments.
+   Idea: The WCHs are characterized by their moments.\\
 
+   ~\\
    The WCH features are extracted as follows:
    \begin{enumerate}
-      \item Compute the wavelet decomposition of the central $~23$ seconds.
+      \item Compute the wavelet decomposition of a central segment of the signal.
       \item Construct the histogram for each sub-band.
       \item Compute the first three moments of each histogram (mean, variance, skewness).
       \item Compute a sub-band energy for each histogram.
@@ -251,19 +252,21 @@ The percent correct for each genre are as follows,
    \end{figure}
 \end{frame}
 
-% James
-\begin{frame}{Manually selecting features}
-   \begin{itemize}
-      \item A na\"ive option is to manually select some number of features from a large list of features.
-      \item We combined various simple features, the mean and variance of the MFCCs, and features from WCHs into a length $66$ vector.
-      \item We'll show how this performs when we discuss SVM.
-   \end{itemize}
-\end{frame}
-
 % Dale
 \begin{frame}{Super awesome PageRank feature selection}
 Dale
 \end{frame}
+
+% Dale
+\begin{frame}{Manually selecting features}
+   \begin{itemize}
+      \item A na\"ive option is to manually select some number of features from a large list of features.  We use this mainly for testing.
+      \item We combined various simple features, the mean and variance of the MFCCs, and features from the WCHs into a length $66$ vector.
+      \item We'll show how this performs when we discuss SVM.
+   \end{itemize}
+\end{frame}
+
+
 
 
 \begin{frame}{Graph Laplacian}
@@ -275,14 +278,180 @@ Dale
 
 
 \section{Clustering/Classification}
-\begin{frame}{SVM classifiers}
-Describe linear SVM.\\
-Use kernel trick (with soft margin).\\
-We use polynomial kernel with varying order $p$:
+% James
+\begin{frame}[shrink=20]{$k$-Nearest Neighbors}
+   We have found that $k$-nearest neighbors with $k=5$ works well.\\
+
+   ~\\
+   Example: manually selected features (MFCC, FP, WCH), $k=5$, leave-out-$p$-cross-validation.  This has a classification rate of $62.0\%$.
+
+   \begin{table}[h!]
+      \centering
+      \begin{tabular}{ l||l | l | l | l | l | l | }
+      & classical & electronic & jazz\_blues & metal\_punk & rock\_pop & world\\\hline
+      classical & 63 &1 &2 &0 &1 &10 \\ \hline 
+      electronic & 0 &16 &0 &0 &2 &3 \\ \hline 
+      jazz\_blues & 0 &0 &2 &0 &0 &0 \\ \hline 
+      metal\_punk & 0 &0 &0 &6 &4 &0 \\ \hline 
+      rock\_pop & 0 &4 &1 &3 &13 &4 \\ \hline 
+      world & 1 &1 &0 &0 &0 &7 \\ \hline 
+      \end{tabular}
+      \caption{(Rounded) Average of the Confusion Matrices}
+   \end{table}
+
+\end{frame}
+
+% James
+\begin{frame}{Support Vector Machines}
+   The basic idea is to draw the ``best'' plane between the data, resulting in a binary classification.\\
+
+~\\[3em] % hack hack hack
+\begin{figure}[b]
+   \centering
+   \includegraphics[width=\textwidth]{figures/Kernel_Machine_public.png}
+\end{figure}
+\end{frame}
+
+% James
+\begin{frame}{Support Vector Machines}
+It is standard to use the kernel trick to attempt to separate non-linearly separable data without much extra work.\\
+
+We have found that a polynomial of order $p$ works:
 
 \[ k(\mathbf{x}_i,\mathbf{x}_j) = \left(1 + \mathbf{x}_i\cdot\mathbf{x}_j\right)^p. \] 
 
+\begin{figure}[b]
+   \centering
+   \includegraphics[width=\textwidth]{figures/Kernel_Machine_public.png}
+\end{figure}
 \end{frame}
+
+% James
+\begin{frame}{Support Vector Machines}
+   SVMs (as stated) naturally lead to binary classification.  There are a number of ways to extend SVMs to support multiple classes (genres).\\
+
+   ~\\
+   One idea is to build $n$ SVM classifiers $f_i$, $i=1,...,n$ that can (hopefully) distinguish between certain subsets of the classes.  By using each of these classifiers, we can hopefully distinguish between multiple classes.\\
+   
+\end{frame}
+
+% James
+\begin{frame}{Support Vector Machines - One vs. All}
+   In our context, perhaps the simplest method is compare classical against everything else, electronic against everything else, etc.  The classifier $f_i$ attempts to determine if the test track is of genre $i$ or not.
+
+\begin{table}
+   \centering
+   \begin{tabular}{|c|cccccc|}
+      \hline
+      class&$f_1$ & $f_2$ & $f_3$ & $f_4$ & $f_5$ & $f_6$\\\hline
+      1 & 1 & 0 & 0 & 0 &0 &0\\\hline
+      2 & 0 & 1 & 0 & 0 & 0 & 0\\\hline
+      3 & 0 & 0 & 1 & 0 & 0 & 0\\\hline
+      4 & 0 & 0 & 0 & 1 & 0 & 0\\\hline
+      5 & 0 & 0 & 0 & 0 & 1 & 0\\\hline
+      6 & 0 & 0 & 0 & 0 & 0 & 1\\\hline
+   \end{tabular}
+\end{table}
+
+   Each $f_i$ will give a classification and a score.  We classify the track based on the $f_i$ that gives the optimal score.
+
+\end{frame}
+
+% James
+\begin{frame}{Support Vector Machines - One vs. One}
+   We can also compare each genre against every other genre.
+
+\begin{table}
+   \centering
+   \begin{tabular}{|c|ccccccc|}
+      \hline
+      class&$f_{12}$ & $f_{13}$ & $f_{14}$ & $f_{15}$ & $f_{16}$ & $f_{23}$ & $\cdots$ \\\hline
+      1 & 1 & 1 & 1 & 1 & 1 &   & $\cdots$ \\\hline
+      2 & 0 &   &   &   &   & 1 & $\cdots$ \\\hline
+      3 &   & 0 &   &   &   & 0 & $\cdots$ \\\hline
+      4 &   &   & 0 &   &   &   & $\cdots$ \\\hline
+      5 &   &   &   & 0 &   &   & $\cdots$ \\\hline
+      6 &   &   &   &   & 0 &   & $\cdots$ \\\hline
+   \end{tabular}
+\end{table}
+   
+   Each classifier $f_{ij}$ gets a vote for either genre $i$ or genre $j$.  We pick the genre with the most votes.
+
+\end{frame}
+
+% James
+\begin{frame}{Support Vector Machines - Error Correcting Output Codes}
+   We can also use Error Correcting codes.  The method below is based on a Hamming code.  Each genre is assigned a unique codeword.
+
+\begin{table}
+   \centering
+   \begin{tabular}{|c|cccccc|}
+      \hline
+      class&$f_{1}$ & $f_{2}$ & $f_{3}$ & $f_{4}$ & $f_{5}$ & $f_{6}$ \\\hline
+      1 & 0 & 0 & 0 & 0 & 0 & 0 \\\hline
+      2 & 0 & 1 & 0 & 1 & 0 & 1 \\\hline
+      3 & 1 & 0 & 0 & 1 & 1 & 0 \\\hline
+      4 & 1 & 1 & 0 & 0 & 1 & 1 \\\hline
+      5 & 1 & 1 & 1 & 0 & 0 & 0 \\\hline
+      6 & 1 & 0 & 1 & 1 & 0 & 1 \\\hline
+   \end{tabular}
+\end{table}
+
+   Evaluate each $f_i$ to get a row vector; find the codeword that minimizes the Hamming distance.\\
+
+\end{frame}
+
+% James
+\begin{frame}{Support Vector Machines - One vs. All}
+   Manually selected features (MFCC, FP, WCH).
+   ~\\[-9em]
+   \begin{figure}
+      \centering
+      \includegraphics[width=\textwidth]{figures/optimSVMOVAOrder_WCH.pdf}
+   \end{figure}
+\end{frame}
+
+% James
+\begin{frame}{Support Vector Machines - One vs. One}
+   Manually selected features (MFCC, FP, WCH).
+   ~\\[-9em]
+   \begin{figure}
+      \centering
+      \includegraphics[width=\textwidth]{figures/optimSVMOVOOrder_WCH.pdf}
+   \end{figure}
+\end{frame}
+
+% James
+\begin{frame}{Support Vector Machines - ECOC}
+   Manually selected features (MFCC, FP, WCH).  Hamming code.
+   ~\\[-9em]
+   \begin{figure}
+      \centering
+      \includegraphics[width=\textwidth]{figures/optimSVMECOCOrder_WCH.pdf}
+   \end{figure}
+\end{frame}
+
+% James
+\begin{frame}[shrink=20]{Support Vector Machines}
+   We choose the polynomial order $p=2.25$ with a Hamming-like ECOC.  For this example, we use the manually selected features (MFCC, FP, WCH).  This gives a classification rate of $69.1\%$.
+
+   \begin{table}[h!]
+      \centering
+         \begin{tabular}{ l||l | l | l | l | l | l | }
+         & classical & electronic & jazz\_blues & metal\_punk & rock\_pop & world\\\hline
+         classical & 60 &1 &0 &0 &1 &5 \\ \hline 
+         electronic & 0 &16 &0 &0 &2 &3 \\ \hline 
+         jazz\_blues & 0 &0 &3 &0 &0 &0 \\ \hline 
+         metal\_punk & 0 &0 &0 &6 &3 &1 \\ \hline 
+         rock\_pop & 1 &3 &1 &2 &14 &3 \\ \hline 
+         world & 3 &3 &1 &0 &1 &12 \\ \hline 
+         \end{tabular}
+      \caption{(Rounded) Average of the Confusion Matrices}
+   \end{table}
+\end{frame}
+
+
+
 
 \begin{frame}{Graph Methods}
 Aly
@@ -290,12 +459,20 @@ Aly
 
 
 \section{Discussion}
+\begin{frame}{Future Directions}
+   \begin{itemize}
+      %\item SVM with One vs. All tends to classify world better than the error-correcting codes we've used.  It would be nice to combine One vs. All and an ECOC to get the ``best of both worlds''.\\
+      \item The PageRank feature selection lends itself quite naturally to multi-class SVM.  We think it is possible to build a multi-class SVM method tailored to the features selected by the PageRank feature selection.
+   \end{itemize}
+
+\end{frame}
 
 \begin{frame}{References}
-   \begin{itemize}
-      \item G. Sussman and J. Wisdom, \emph{Numerical evidence that the motion of pluto is chaotic}, Science, (1988).\\
-      \item J. Wisdom and M. Holman, \emph{Symplectic maps for the n-body problem}, The Astronomical Journal, (1991).\\
-   \end{itemize}
+   % TODO feel free to remove the references
+   \setbeamertemplate{description item}[align left] % align left
+   \begin{description}                              % align left
+      \item[WCH] T. Li, M. Ogihara, Q. Li, \emph{A Comparative Study on Content-Based Music Genre Classification}, SIGIR, (2003).\\
+   \end{description}
    ~\\
    Questions?
 

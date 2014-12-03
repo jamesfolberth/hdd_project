@@ -85,18 +85,24 @@ else
    switch method
    case 'onevall - order'
       errorbar(order, mean(probs,2), std(probs,0,2),'o')
+      axis([1.9 2.85 0.6 0.75]);
       xlabel('SVM Poly Kernel Order'); ylabel('Classification Rate');
       title('Classification Rate - One vs. All');
+      print('Latex/figures/optimSVMOVAOrder_WCH.pdf','-dpdf')
 
    case 'onevone - order'
       errorbar(order, mean(probs,2), std(probs,0,2),'o')
+      axis([1.9 2.85 0.6 0.75]);
       xlabel('SVM Poly Kernel Order'); ylabel('Classification Rate');
       title('Classification Rate - One vs. One');
+      print('Latex/figures/optimSVMOVOOrder_WCH.pdf','-dpdf')
 
    case 'ECOC - order'
       errorbar(order, mean(probs,2), std(probs,0,2),'o')
+      axis([1.9 2.85 0.6 0.75]);
       xlabel('SVM Poly Kernel Order'); ylabel('Classification Rate');
       title('Classification Rate - Error Correcting');
+      print('Latex/figures/optimSVMECOCOrder_WCH.pdf','-dpdf')
  
    otherwise
       error('bad method: %s', method);

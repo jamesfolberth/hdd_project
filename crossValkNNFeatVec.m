@@ -5,14 +5,14 @@ function [crossValAvg,crossValSD,probCorrect]=crossValkNNFeatVec(savefile,opt)
 % This uses matlab's built-in kNN routines
 
 if nargin < 1
-   %savefile = 'featVecsWCH.mat';
-   savefile = 'featVecsDale.mat';
+   savefile = 'featVecsWCH.mat';
+   %savefile = 'featVecsDale.mat';
 end 
 
 if nargin < 2 % set all to defaults
-   opt = struct('XValNum', 10, 'kNNNum',5,'dimRed','lle','lleNum',33,'lleDim',20);
+   %opt = struct('XValNum', 10, 'kNNNum',5,'dimRed','lle','lleNum',33,'lleDim',20);
    %opt = struct('XValNum', 10, 'kNNNum',5,'dimRed','pca','pcaNum',40);
-   %opt = struct('XValNum', 10, 'kNNNum',5,'dimRed','none');
+   opt = struct('XValNum', 10, 'kNNNum',5,'dimRed','none');
 
 else % set the needed opts that aren't set to defaults
    if ~isfield(opt, 'kNNNum')

@@ -27,7 +27,7 @@ fs
 
 %wav = wav*10^(96/20);
 
-feat = wch(wav);
+feat = wch(wav)
 
 plot(1:numel(feat), feat)
 

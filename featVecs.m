@@ -112,27 +112,31 @@ case 'Dale'
     % Compute features
     feat = [];
 
-    spectralFeatures = {'SpectralCentroid', ...
-                        'SpectralCrest', ...
-                        'SpectralDecrease', ...
-                        'SpectralFlatness', ...
-                        'SpectralFlux', ...
-                        'SpectralKurtosis', ...
-                        'SpectralMfccs', ...
-                        'SpectralPitchChroma', ...
-                        'SpectralRolloff', ...
-                        'SpectralSkewness', ...
-                        'SpectralSlope', ...
-                        'SpectralSpread', ...
-                        'SpectralTonalPowerRatio'};
+    spectralFeatures = {'SpectralCentroid', ...     %1:4
+                        'SpectralCrest', ...        %5:8
+                        'SpectralDecrease', ...     %9:12
+                        'SpectralFlatness', ...     %13:16
+                        'SpectralFlux', ...         %17:20
+                        'SpectralKurtosis', ...     %21:24
+                        'SpectralMfccs', ...        %25:76
+                        'SpectralPitchChroma', ...  %77:124
+                        'SpectralRolloff', ...      %125:128
+                        'SpectralSkewness', ...     %129:132
+                        'SpectralSlope', ...        %133:136
+                        'SpectralSpread', ...       %137:140
+                        'SpectralTonalPowerRatio'}; %141:144
 
-    temporalFeatures = {'TimeAcfCoeff', ...
-                        'TimeMaxAcf', ...
-                        'TimePeakEnvelope', ...
-                        'TimePredictivityRatio', ...
-                        'TimeRms', ...
-                        'TimeStd', ...
-                        'TimeZeroCrossingRate'};
+    temporalFeatures = {'TimeAcfCoeff', ...         %145:148
+                        'TimeMaxAcf', ...           %149:152
+                        'TimePeakEnvelope', ...     %153:160
+                        'TimePredictivityRatio', ...%161:164
+                        'TimeRms', ...              %165:168
+                        'TimeStd', ...              %169:172
+                        'TimeZeroCrossingRate'};    %173:176
+                    
+                        %Fluctation Patterns        %177:182
+                        
+                        %WCH                        %183:198
                 
     iHopLength = 1024;
     iBlockLength = 2048;
@@ -205,6 +209,8 @@ case 'Dale'
       fpFoc = mean(fp(:))/fpMax;
 
       featV = [featV; fpMax; fpBass; fpAggr; fpDLF; fpGrav; fpFoc];
+      
+      featV = [featV; wch(wav)];
       
       feat = [feat, featV];
     end

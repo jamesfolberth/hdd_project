@@ -20,6 +20,8 @@
 \captionsetup{font=small}
 \usepackage{hyperref}
 
+\newcommand{\tss}[1]{\textsuperscript{#1}}
+
 \newcommand{\diff}[2]{\dfrac{d #1}{d #2}}
 \newcommand{\diffn}[3]{\dfrac{d^{#3} #1}{d {#2}^{#3}}}
 \newcommand{\pdiff}[2]{\dfrac{\partial #1}{\partial #2}}
@@ -72,10 +74,57 @@
 \end{frame}
 
 
+% Dale
+\begin{frame}{Simple Features}
+Time based features extracted from the raw wav vector.  For each feature, the mean, variance, skewness, and kurtosis is calculated.
+\begin{itemize}
+\item Autocorrelation Coefficient 20
+\item Autocorrelation Maximum
+\item Peak Envelope
+\item Predictivity Ratio
+\item Root Mean Square
+\item Standard Deviation
+\item Zero Crossing Rate
+\end{itemize}
+\end{frame}
 
-\section{Features}
-\begin{frame}{Mel Frequency Cepstral Coefficients}
-   Dale, I guess.  Talk about what we're doing in the Fourier power, Mel power, temporal domains
+% Dale
+\begin{frame}{Spectral Features}
+Extracted from the power spectrum of the song.  For each feature, the mean, variance, skewness, and kurtosis is calculated.
+\begin{columns}[t]
+\column{.5\textwidth}
+\begin{itemize}
+\item Spectral Centroid
+\item Spectral Crest
+\item Spectral Decrease
+\item Spectral Flatness
+\item Spectral Flux
+\item Spectral Kurtosis
+\item Spectral Rolloff
+\end{itemize}
+\column{.5\textwidth}
+\begin{itemize}
+\item Spectral Skewness
+\item Spectral Slope
+\item Spectral Spread
+\item Tonal Power Ratio
+\item Mel Frequency Cepstrum Coefficients (1-13)
+\item Pitch Chroma (12 notes)
+\end{itemize}
+\end{columns}
+
+% Dale
+\end{frame}
+\begin{frame}{Fluctuation Patterns}
+Extracted from the Mel Frequency Cepstrum.
+\begin{itemize}
+\item Maximum Fluctuation Strength
+\item Bass
+\item Aggressiveness
+\item Domination of Low Frequencies
+\item Gravity
+\item Focus
+\end{itemize}
 
 \end{frame}
 
@@ -253,21 +302,110 @@ The percent correct for each genre are as follows,
 \end{frame}
 
 % Dale
-\begin{frame}{Super awesome PageRank feature selection}
-Dale
+\begin{frame}{PageRank feature selection}
+\begin{itemize}
+\item Most dimension reduction techniques require a projection from higher dimensional space
+\item In the music context, this means extracting all originally considered features
+\item No reduction in feature extraction cost
+\item Ideally, want to choose a subset of all possible features that can be used to accurately classify the data
+\end{itemize}
+\end{frame}
+
+\begin{frame}{PageRank feature selection}
+\textbf{Idea:} Construct a graph with nodes as features.  Edge weights are squared Spearman correlations between the features. Run the page rank algorithm to find the ``best'' features.
+
+\begin{figure}
+\centering
+\includegraphics[width=0.4\textwidth]{figures/featGraph.pdf}
+\end{figure}
+\end{frame}
+
+\begin{frame}{PageRank feature selection}
+\begin{itemize}
+\item Correlation creates a dense graph, no need for arbitrary escape probabilities
+\item Damping can still be included, but wasn't for these experiments
+\item In a naive approach, all songs are considered when calculating the correlations
+\end{itemize}
+
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+Rank & Feature \\ \hline
+1 & Mfcc 1\tss{(1)} \\ \hline
+2 & Spectral Flatness\tss{(1)} \\ \hline
+3 & Peak Envelope Max\tss{(1)} \\ \hline
+4 & Spectral Slope\tss{(1)} \\ \hline
+5 & Autocorrelation Max\tss{(1)} \\ \hline
+\end{tabular}
+\end{center}
+
+\end{frame}
+
+\begin{frame}{PageRank feature selection}
+\begin{itemize}
+\item Considering all songs together assumes that the best features are independent of genre
+\item In a more sophisticated approach, the features are ranked for each genre individually
+\end{itemize}
+
+\begin{columns}[t]
+\column{.5\textwidth}
+\begin{center}
+\textbf{Classical:}
+\begin{tabular}{|l|l|}
+\hline
+Rank & Feature \\ \hline
+1 & Zero Crossing Rate\tss{(1)} \\ \hline
+2 & Spectral Centroid\tss{(1)} \\ \hline
+3 & Spectral Spread\tss{(1)} \\ \hline
+4 & Spectral Rolloff\tss{(1)} \\ \hline
+5 & Spectral Crest\tss{(1)} \\ \hline
+\end{tabular}
+\end{center}
+\column{.5\textwidth}
+\begin{center}
+\textbf{Jazz/Blues:}
+\begin{tabular}{|l|l|}
+\hline
+Rank & Feature \\ \hline
+1 & Spectral Rolloff\tss{(2)} \\ \hline
+2 & Mfcc 3\tss{(2)} \\ \hline
+3 & FP DLF \\ \hline
+4 & Mfcc 5\tss{(1)} \\ \hline
+5 & FP Bass \\ \hline
+\end{tabular}
+\end{center}
+\end{columns}
+\end{frame}
+
+\begin{frame}{PageRank feature extraction}
+\textbf{Combined Method:}
+\vspace{-1in}
+\begin{figure}
+\centering
+\includegraphics[width=0.9\textwidth]{figures/fullPR.pdf}
+\end{figure}
+
+\end{frame}
+
+\begin{frame}{PageRank feature extraction}
+
+\textbf{Genre Divided Method:}
+\vspace{-1in}
+\begin{figure}
+\centering
+\includegraphics[width=0.9\textwidth]{figures/genrePR.pdf}
+\end{figure}
+
 \end{frame}
 
 % Dale
-\begin{frame}{Manually selecting features}
-   \begin{itemize}
-      \item A na\"ive option is to manually select some number of features from a large list of features.  We use this mainly for testing.
-      \item We combined various simple features, the mean and variance of the MFCCs, and features from the WCHs into a length $66$ vector.
-      \item We'll show how this performs when we discuss SVM.
-   \end{itemize}
-\end{frame}
-
-
-
+%\begin{frame}{Manually selecting features}
+%   \begin{itemize}
+%      \item A na\"ive option is to manually select some number of features from a large list of features.  We use this mainly for testing.
+%      \item We combined various simple features, the mean and variance of the MFCCs, and features from the WCHs into a length $66$ vector.
+%      \item We'll show how this performs when we discuss SVM.
+%   \end{itemize}
+%\end{frame}
 
 \begin{frame}{Graph Laplacian}
 \begin{itemize}

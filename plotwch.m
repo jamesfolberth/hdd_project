@@ -1,6 +1,6 @@
 function [] = plotwch(songIndex)
 
-method = 2;
+method = 3;
 
 switch method
 case 1
@@ -32,6 +32,8 @@ case 1
    %plot(1:numel(feat), feat)
 
 case 2
+
+   warning('Don''t use this.  Use method 3');
 
    dataDir = getDir();
    [wavList,genre] = textread([dataDir,'ground_truth.csv'],'%s %s','delimiter',',');
@@ -77,6 +79,35 @@ case 2
    case 'diff'
       print(sprintf('Latex/figures/wch_diff.pdf'),'-dpdf')
    end
+
+case 3
+
+   dataDir = getDir();
+   [wavList,genre] = textread([dataDir,'ground_truth.csv'],'%s %s','delimiter',',');
+
+   %genre = strrep(genre, '_', '\_'); % fix for latex
+   %load('featVecsWCH_approx.mat.save','-mat');
+   load('featVecsWCH.mat','-mat');
+
+   plotInds = [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16];
+   %plotInds = [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16];
+
+   % Standardize feature vectors
+   feat = bsxfun(@minus, feat, mean(feat, 2));
+   feat = bsxfun(@rdivide, feat, var(feat, 0, 2));
+   fprintf(1,'Feature vectors standardized\n');
+
+   for i = 1:numel(plotInds)
+      boxplot(feat(51-1+plotInds(i),:), genre);
+      ylabel('Standard score (based on all tracks)');
+      title(char(wchFeatureName(plotInds(i))))
+      
+      print(sprintf('Latex/figures/wch_box_%02i.pdf',plotInds(i)),'-dpdf')
+      %plotInds(i), pause(1);
+
+   end
+
+   close
 
 end
 
@@ -151,5 +182,27 @@ for i=1:numel(subbands)
    %wchFeat(8*(i-1)+8) = mean(abs(acoeffs));
 
 end
+
+end
+
+function [name] = wchFeatureName(ind)
+   names = {'Detail 4 - Mean';
+            'Detail 4 - Variance';
+            'Detail 4 - Skewness';
+            'Detail 4 - Energy';
+            'Detail 5 - Mean';
+            'Detail 5 - Variance';
+            'Detail 5 - Skewness';
+            'Detail 5 - Energy';
+            'Detail 6 - Mean';
+            'Detail 6 - Variance';
+            'Detail 6 - Skewness';
+            'Detail 6 - Energy';
+            'Detail 7 - Mean';
+            'Detail 7 - Variance';
+            'Detail 7 - Skewness';
+            'Detail 7 - Energy'};
+
+   name = names{ind};
 
 end

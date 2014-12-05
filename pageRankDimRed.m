@@ -1,4 +1,4 @@
-function ranks = pageRankDimRed(saveFile)
+function ranks = pageRankDimRed(feat)
 % Takes a training feature matrix and returns a matrix of feature rankings
 % Each genre is considered separately to attempt to grab the best features
 % for that genre
@@ -8,13 +8,13 @@ function ranks = pageRankDimRed(saveFile)
 
 
 if nargin == 0
-    %savefile = 'featVecsWCH.mat';
-    saveFile = 'featVecsDale.mat';
-end
+   %savefile = 'featVecsWCH.mat';
+   saveFile = 'featVecsDale.mat';
+   load(saveFile, '-mat');
 
-load(saveFile);
-if ~exist('feat')
-    error('Error: feat not found in saveFile');
+   if ~exist('feat')
+      error('Feature matrix ''feat'' not found in savefile: %s',saveFile);
+   end
 end
 
 % Indices for where the genre switches

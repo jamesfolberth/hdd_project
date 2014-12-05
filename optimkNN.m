@@ -1,7 +1,9 @@
 function [] = optimkNN(makePlot, plotFile)
-% since deterministic, only need to take one sample
-%featFile = 'featVecsWCH.mat';
-featFile = 'featVecsDale.mat';
+%featFile = 'featVecsWCH.mat'; featType = 'WCH';
+featFile = 'featVecsDale.mat'; featType = 'Dale';
+featFile = 'distG1C.mat'; featType = 'dist';
+
+
 
 if nargin < 1
    makePlot = 0;
@@ -15,12 +17,17 @@ end
 if ~makePlot
 
    method = 'pca';
-   method = 'lle';
+   %method = 'lle';
+   method = 'lda';
+
+   %method = 'prDim';
+   %prMode = 'genre0.5';
 
    switch method
    case 'pca'
-      nVec = 5:3:50; % WCH
+      %nVec = 5:3:50; % WCH
       %nVec = 5:5:80; % Dale
+      nVec = 5:5:150; % dist
       nSamples = 5;
       probs = zeros([numel(nVec) nSamples]);
       for i=1:numel(nVec)
@@ -59,7 +66,43 @@ if ~makePlot
       clear makePlot
       save('optimkNNLLE.mat');
       return
-   
+  
+   case 'prDim'
+      dim = 20:5:150;
+      nSamples = 5;
+      probs = zeros([numel(dim) nSamples]);
+      genreClassRate = zeros([6 numel(dim) nSamples]);
+      for i=1:numel(dim)
+         for j=1:nSamples
+            switch featType
+            case 'WCH'
+               kNNOpt = struct('XValNum',10,'dimRed','pr','prMode',prMode,...
+                  'prDim',dim(i));
+            case 'Dale'
+               kNNOpt = struct('XValNum',10,'dimRed','pr','prMode',prMode,...
+                  'prDim',dim(i));
+            case 'dist'
+               kNNOpt = struct('XValNum',10,'dimRed','pr','prMode',prMode,...
+                  'prDim',dim(i));
+            otherwise
+               error('Bad feature type: %s.  Specify along with featFile',...
+                  featType);
+            end
+           
+            [confAvg,confSD,probCorrect]=crossValkNNFeatVec(featFile, kNNOpt);
+            %probCorrect = rand(); confAvg = rand([6 6]);
+
+            genreClassRate(:,i,j) = diag(confAvg)... 
+               ./reshape(sum(confAvg,1), [6 1]);
+            probs(i,j) = probCorrect;
+            fprintf(1, 'prDim = %d, probCorrect = %f\n', dim(i), probCorrect);
+         end
+      end
+
+      clear makePlot
+      save('optimkNNprDim.mat');
+      return
+
    otherwise
       error('bad method: %s', method);
    end
@@ -106,6 +149,14 @@ else
       ylabel('Classification Rate');
       title(sprintf('kNN Clustering after LLE into %d dims',D(1,1)));
       print('Latex/figures/optimkNNLLE.pdf','-dpdf');
+
+   case 'prDim'
+      errorbar(dim, mean(probs,2), std(probs,0,2), 'o');
+      xlabel('Dimension'); ylabel('Classification Rate');
+      title('Classification Rate - kNN, k=5');
+      print('Latex/figures/optimkNNprDim.pdf','-dpdf');
+
+
    otherwise
       error('bad method: %s', method);
    end

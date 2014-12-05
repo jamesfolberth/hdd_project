@@ -2,11 +2,16 @@
 saveFile = 'featVecsDale.mat';
 
 load(saveFile);
+
+if ~exist('feat')
+   error('Feature matrix ''feat'' not found');
+end
+
 featFull = feat;
 
 cvrep = 5;
 
-ranks = pageRankDimRed(saveFile);
+ranks = pageRankDimRed(featFull);
 
 % Reduce with the overall rankings
 mydims = [1 2 4 6 8 10 15 20 25 30 40 50 60 70 80 100 120 140 160 180 198];
@@ -18,11 +23,12 @@ for n = mydims
     ind = ranks(1:n,7);
     ind = unique(ind(:));
     feat = featFull(ind,:);
-    
+
     save('featRedTemp.mat','feat');
     for k = 1:cvrep
-        [a,s] = crossValkNNFeatVec('featRedTemp.mat');
-    
+        xvalOpt = struct('XValNum', 10, 'dimRed','none', 'kNNNum',5);
+        [a,s] = crossValkNNFeatVec('featRedTemp.mat',xvalOpt);
+
         acc(c,k) = sum(diag(a)./reshape(sum(a,1), [6 1])*1/6);
     end
 end
@@ -45,16 +51,17 @@ accg = zeros(length(nrows),cvrep);
 counts = zeros(length(nrows),1);
 c = 0;
 for n = nrows
-c = c+1;
-    fprintf(1,'\rrow = %d',n);
-    ind = ranks(1:n,1:6);
-    ind = unique(ind(:));
-    feat = featFull(ind,:);
-    
-    save('featRedTemp.mat','feat');
-    for k = 1:cvrep
-        [a,s] = crossValkNNFeatVec('featRedTemp.mat');
-    
+   c = c+1;
+   fprintf(1,'\rrow = %d',n);
+   ind = ranks(1:n,1:6);
+   ind = unique(ind(:));
+   feat = featFull(ind,:);
+
+   save('featRedTemp.mat','feat');
+   for k = 1:cvrep
+        xvalOpt = struct('XValNum', 10, 'dimRed','none', 'kNNNum',5);
+        [a,s] = crossValkNNFeatVec('featRedTemp.mat',xvalOpt);
+
         accg(c,k) = sum(diag(a)./reshape(sum(a,1), [6 1])*1/6);
     end
     counts(c) = length(ind);

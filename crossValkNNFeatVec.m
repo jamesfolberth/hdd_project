@@ -7,6 +7,7 @@ function [crossValAvg,crossValSD,probCorrect]=crossValkNNFeatVec(savefile,opt)
 if nargin < 1
    %savefile = 'featVecsWCH.mat';
    savefile = 'featVecsDale.mat';
+   savefile = 'distG1C.mat'; % this is a distance matrix, not feature matrix
 end 
 
 if nargin < 2 % set all to defaults
@@ -50,7 +51,7 @@ if strcmp(opt.dimRed, 'pr')
    if ~isfield(opt, 'prMode')
       opt.prMode = 'all';
       %opt.prMode = 'genre0';
-      opt.prMode = 'genre0.5';
+      %opt.prMode = 'genre0.5';
       %opt.prMode = 'genre1';
       %opt.prMode = 'genre2';
    end
@@ -59,6 +60,19 @@ end
 opt
 
 load(savefile);
+
+% check if we have a feature matrix or a distance matrix
+% if distance matrix, use columns (or rows) as the feature vectors
+if exist('dist') && ~exist('feat')
+   fprintf(1, 'Using columns of distance matrix as features\n');
+   feat = dist;
+end
+
+if ~exist('feat')
+   error('Feature matrix ''feat'' not found');
+end
+
+
 dataDir = getDir();
 [wavList,genre] = textread([dataDir,'ground_truth.csv'],'%s %s','delimiter',',');
 nSongs = length(wavList);
@@ -89,7 +103,7 @@ case 'lle'
 
 case 'pr' % XXX this was just copied from crossValSVMFeatVec
           %     this could be outdated; use with caution
-   [ranks] = pageRankDimRed(savefile);
+   [ranks] = pageRankDimRed(feat);
 
    switch opt.prMode
    case 'all' % use ranking based on all tracks

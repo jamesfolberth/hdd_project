@@ -5,42 +5,58 @@ function [crossValAvg,crossValSD,probCorrect]=crossValkNNFeatVec(savefile,opt)
 % This uses matlab's built-in kNN routines
 
 if nargin < 1
-   savefile = 'featVecsWCH.mat';
-   %savefile = 'featVecsDale.mat';
+   %savefile = 'featVecsWCH.mat';
+   savefile = 'featVecsDale.mat';
 end 
 
 if nargin < 2 % set all to defaults
    %opt = struct('XValNum', 10, 'kNNNum',5,'dimRed','lle','lleNum',33,'lleDim',20);
    %opt = struct('XValNum', 10, 'kNNNum',5,'dimRed','pca','pcaNum',40);
-   opt = struct('XValNum', 10, 'kNNNum',5,'dimRed','none');
+   %opt = struct('XValNum', 10, 'kNNNum',5,'dimRed','none');
+   opt = struct('XValNum', 10, 'kNNNum',5,'dimRed','pr');
 
-else % set the needed opts that aren't set to defaults
-   if ~isfield(opt, 'kNNNum')
-      opt.kNNNum = 5;
+end
+% set the needed opts that aren't set to defaults
+if ~isfield(opt, 'kNNNum')
+   opt.kNNNum = 5;
+end
+if ~isfield(opt, 'XValNum')
+   opt.XValNum = 10;
+end
+if strcmp(opt.dimRed, 'lle')
+   if ~isfield(opt, 'lleNum')
+      opt.lleNum = 37;
    end
-   if ~isfield(opt, 'XValNum')
-      opt.XValNum = 10;
-   end
-   if isfield(opt, 'lle')
-      if ~isfield(opt, 'lleNum')
-         opt.lleNum = 37;
-      end
-      if ~isfield(opt, 'lleDim')
-         opt.lleDim = 25;
-      end
-   end
-   if isfield(opt, 'pca')
-      if ~isfield(opt, 'pcaExp')
-         opt.pcaExp = 95;
-         if ~isfield(opt, 'pcaNum') % no PCA options
-            opt.pcaNum = 38;
-         end
-      end
-      if isfield(opt, 'pcaNum')
-         opt = rmfield(opt,'pcaExp');
-      end
+   if ~isfield(opt, 'lleDim')
+      opt.lleDim = 25;
    end
 end
+if strcmp(opt.dimRed, 'pca')
+   if ~isfield(opt, 'pcaExp')
+      opt.pcaExp = 95;
+      if ~isfield(opt, 'pcaNum') % no PCA options
+         opt.pcaNum = 38;
+      end
+   end
+   if isfield(opt, 'pcaNum')
+      opt = rmfield(opt,'pcaExp');
+   end
+end
+if strcmp(opt.dimRed, 'pr')
+   if ~isfield(opt, 'prDim')
+      opt.prDim = 67;
+      %opt.prDim = 21;
+   end
+   if ~isfield(opt, 'prMode')
+      opt.prMode = 'all';
+      %opt.prMode = 'genre0';
+      opt.prMode = 'genre0.5';
+      %opt.prMode = 'genre1';
+      %opt.prMode = 'genre2';
+   end
+end
+
+opt
 
 load(savefile);
 dataDir = getDir();
@@ -70,6 +86,67 @@ case 'pca'
 
 case 'lle'
    [feat] = lle(feat, opt.lleNum, opt.lleDim);
+
+case 'pr' % XXX this was just copied from crossValSVMFeatVec
+          %     this could be outdated; use with caution
+   [ranks] = pageRankDimRed(savefile);
+
+   switch opt.prMode
+   case 'all' % use ranking based on all tracks
+      feat = feat(ranks(1:opt.prDim,7),:);
+
+   % use ranking based on genres, and combine up to prDim features
+   % TODO how to give preference to certain genres when combining rankings
+   %      for onevall, build SVM classifiers based on best features for 
+   %        that genre
+   %      for onevone, ?
+   %      for ECOC, ?
+   case 'genre0'
+      % Method 0
+      % ==========================================
+      % Use all the features in the first opt.prDim rows of the rank matrix
+      % note that this typically will _not_ use a feature vector of length
+      % opt.prDim
+      selRanks = ranks(1:opt.prDim,1:6);
+      allRanks = unique(selRanks(:));
+      fprintf(1,'Number of dimensions used = %d\n', numel(allRanks));
+      feat = feat(allRanks,:);
+
+      %allRanks
+
+   case 'genre0.5'
+      % Method 0.5
+      % ==========================================
+      % Use highest ranked features in the order genrePref up to
+      % opt.prDim features.  Similar to 'genre0' except we set the number
+      % of dimensions and we selected features in order, though this only
+      % affects the last few features
+      genrePref = [6 4 5 3 2 1];
+
+      % reorderedRanks(:) indexes across the rows of ranks in the order
+      % of genrePref
+      reorderedRanks = transpose(ranks(:,genrePref));
+      allRanks = zeros([opt.prDim 1]);
+      numFilled = 0; i = 1;
+      while numFilled < opt.prDim
+         % try to add feature if not already added
+         if ~any(allRanks == reorderedRanks(i))
+            numFilled = numFilled + 1;
+            allRanks(numFilled) = reorderedRanks(i);
+         end
+
+         i = i+1;
+         if i > numel(reorderedRanks)
+            error('Something terrible has happened');
+         end
+      end
+      %fprintf(1,'Number of dimensions requested = %d\n', opt.prDim);
+      %fprintf(1,'Number of dimensions used      = %d\n', numel(allRanks));
+      feat = feat(allRanks,:);
+      
+      %sort(allRanks,'ascend')
+   end
+
 otherwise
    error('Unknown dimension reduction method: %s', opt.dimRed);
 end
@@ -135,11 +212,12 @@ for i =1:6
          accum(5*(row-1)+1:5*row) = [R{row,1}(i,j); R{row,2}(i,j); ...
             R{row,3}(i,j); R{row,4}(i,j); R{row,5}(i,j)];
       end
-      crossValAvg(i,j) = round(mean(accum));
+      crossValAvg(i,j) = mean(accum);
       crossValSD(i,j)  = std(accum);
    end
 end
-latexTable(crossValAvg, 'crossValAvg.tex', '%i', unique(genre));
+%latexTable(round(crossValAvg), 'crossValAvg.tex', '%i', unique(genre));
+latexTable(crossValAvg, 'crossValAvg.tex', '%3.2f', unique(genre));
 latexTable(crossValSD, 'crossValSD.tex', '%3.2f', unique(genre));
 
 correctClassRate = diag(crossValAvg)./reshape(sum(crossValAvg,1), [6 1]);

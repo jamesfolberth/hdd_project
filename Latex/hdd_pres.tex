@@ -459,20 +459,25 @@ Next we will talk about different methods of clustering.
    We have found that $k$-nearest neighbors with $k=5$ works well.\\
 
    ~\\
-   Example: manually selected features (MFCC, FP, WCH), $k=5$, leave-out-$p$-cross-validation.  This has a classification rate of $62.0\%$.
+   Example: $67$ features from genre based PageRank, $k=5$, leave-out-$p$-cross-validation.
+
+   The percent correct for each genre are as follows,
+      \[ [98.28\%, 69.47\%,50.00\%,46.89\%,63.82\%,46.64\%], \]
+   with classification rate $62.5\%$.
+
 
    \begin{table}[h!]
       \centering
-      \begin{tabular}{ l||l | l | l | l | l | l | }
-      & classical & electronic & jazz\_blues & metal\_punk & rock\_pop & world\\\hline
-      classical & 63 &1 &2 &0 &1 &10 \\ \hline 
-      electronic & 0 &16 &0 &0 &2 &3 \\ \hline 
-      jazz\_blues & 0 &0 &2 &0 &0 &0 \\ \hline 
-      metal\_punk & 0 &0 &0 &6 &4 &0 \\ \hline 
-      rock\_pop & 0 &4 &1 &3 &13 &4 \\ \hline 
-      world & 1 &1 &0 &0 &0 &7 \\ \hline 
-      \end{tabular}
-      \caption{(Rounded) Average of the Confusion Matrices}
+ \begin{tabular}{ l||l | l | l | l | l | l | }
+ & classical & electronic & jazz\_blues & metal\_punk & rock\_pop & world\\\hline
+classical & 62.90 &0.64 &0.64 &0.00 &1.48 &7.14 \\ \hline 
+electronic & 0.20 &15.84 &0.30 &0.14 &1.34 &2.74 \\ \hline 
+jazz\_blues & 0.00 &0.10 &2.60 &0.00 &0.38 &0.24 \\ \hline 
+metal\_punk & 0.00 &0.44 &0.00 &4.22 &2.92 &0.46 \\ \hline 
+rock\_pop & 0.00 &3.36 &1.22 &4.62 &13.02 &2.44 \\ \hline 
+world & 0.90 &2.42 &0.44 &0.02 &1.26 &11.38 \\ \hline 
+\end{tabular}
+      \caption{Average of the Confusion Matrices}
    \end{table}
 
 \end{frame}
@@ -492,7 +497,7 @@ Next we will talk about different methods of clustering.
 \begin{frame}{Support Vector Machines}
 It is standard to use the kernel trick to attempt to separate non-linearly separable data without much extra work.\\
 
-We have found that a polynomial of order $p$ works:
+We have found that a polynomial of order $p$ works well:
 
 \[ k(\mathbf{x}_i,\mathbf{x}_j) = \left(1 + \mathbf{x}_i\cdot\mathbf{x}_j\right)^p. \] 
 
@@ -507,7 +512,7 @@ We have found that a polynomial of order $p$ works:
    SVMs (as stated) naturally lead to binary classification.  There are a number of ways to extend SVMs to support multiple classes (genres).\\
 
    ~\\
-   One idea is to build $n$ SVM classifiers $f_i$, $i=1,...,n$ that can (hopefully) distinguish between certain subsets of the classes.  By using each of these classifiers, we can hopefully distinguish between multiple classes.\\
+   One idea is to build $n$ SVM classifiers $f_i$, $i=1,...,n$ that can (hopefully) distinguish between certain subsets of the classes.  By using each of these classifiers, we can distinguish between multiple classes.\\
    
 \end{frame}
 
@@ -579,54 +584,95 @@ We have found that a polynomial of order $p$ works:
 
 % James
 \begin{frame}{Support Vector Machines - One vs. All}
-   Manually selected features (MFCC, FP, WCH).
+   $67$ features from genre based PageRank.
    ~\\[-9em]
    \begin{figure}
       \centering
-      \includegraphics[width=\textwidth]{figures/optimSVMOVAOrder_WCH.pdf}
+      %\includegraphics[width=\textwidth]{figures/optimSVMOVAOrder_WCH.pdf}
+      \includegraphics[width=\textwidth]{figures/optimSVMOVAOrder_Dale.pdf}
    \end{figure}
 \end{frame}
 
 % James
 \begin{frame}{Support Vector Machines - One vs. One}
-   Manually selected features (MFCC, FP, WCH).
+   $67$ features from genre based PageRank.
    ~\\[-9em]
    \begin{figure}
       \centering
-      \includegraphics[width=\textwidth]{figures/optimSVMOVOOrder_WCH.pdf}
+      %\includegraphics[width=\textwidth]{figures/optimSVMOVOOrder_WCH.pdf}
+      \includegraphics[width=\textwidth]{figures/optimSVMOVOOrder_Dale.pdf}
    \end{figure}
 \end{frame}
 
 % James
 \begin{frame}{Support Vector Machines - ECOC}
-   Manually selected features (MFCC, FP, WCH).  Hamming code.
+   $67$ features from genre based PageRank.  Hamming code.
    ~\\[-9em]
    \begin{figure}
       \centering
-      \includegraphics[width=\textwidth]{figures/optimSVMECOCOrder_WCH.pdf}
+      %\includegraphics[width=\textwidth]{figures/optimSVMECOCOrder_WCH.pdf}
+      \includegraphics[width=\textwidth]{figures/optimSVMECOCOrder_Dale.pdf}
    \end{figure}
 \end{frame}
 
 % James
-\begin{frame}[shrink=20]{Support Vector Machines}
-   We choose the polynomial order $p=2.25$ with a Hamming-like ECOC.  For this example, we use the manually selected features (MFCC, FP, WCH).  This gives a classification rate of $69.1\%$.
+\begin{frame}{Support Vector Machines - One vs. All}
+   Genre based PageRank feature selection.
+   ~\\[-9em]
+   \begin{figure}
+      \centering
+      %\includegraphics[width=\textwidth]{figures/optimSVMOVAprDim_Dale.pdf}
+      \includegraphics[width=\textwidth]{figures/optimSVMOVAprDim_genre05_Dale.pdf}
+   \end{figure}
+\end{frame}
+
+%% James
+%\begin{frame}[shrink=20]{Support Vector Machines - Example}
+%   We choose the polynomial order $p=2.25$ with a Hamming-like ECOC.  $90$ features from genre based PageRank. % genre0.5
+%
+%   The percent correct for each genre are as follows,
+%      \[ [94.63\%, 71.49\%,76.92\%,51.56\%,66.27\%,60.82\%], \]
+%   with classification rate $70.3\%$.
+%
+%   \begin{table}[h!]
+%      \centering
+%\begin{tabular}{ l||l | l | l | l | l | l | }
+%& classical & electronic & jazz\_blues & metal\_punk & rock\_pop & world\\\hline
+%classical & 60.56 &0.86 &0.04 &0.06 &0.60 &3.98 \\ \hline 
+%electronic & 0.24 &16.30 &0.02 &0.38 &1.48 &1.86 \\ \hline 
+%jazz\_blues & 0.06 &0.14 &4.00 &0.04 &0.20 &0.24 \\ \hline 
+%metal\_punk & 0.50 &0.50 &0.00 &4.64 &2.10 &1.00 \\ \hline 
+%rock\_pop & 0.44 &1.84 &0.80 &3.48 &13.52 &2.48 \\ \hline 
+%world & 2.20 &3.16 &0.34 &0.40 &2.50 &14.84 \\ \hline 
+%\end{tabular}
+%      \caption{Average of the Confusion Matrices}
+%   \end{table}
+%
+%\end{frame}
+
+% James
+\begin{frame}[shrink=20]{Support Vector Machines - Example}
+   We choose the polynomial order $p=2.25$ with one vs. all classification.  $125$ features from genre based PageRank.
+
+   The percent correct for each genre are as follows,
+      \[ [93.19\%, 72.11\%,80.77\%,59.11\%,67.84\%,62.70\%], \]
+   with classification rate $72.6\%$.
 
    \begin{table}[h!]
       \centering
-         \begin{tabular}{ l||l | l | l | l | l | l | }
-         & classical & electronic & jazz\_blues & metal\_punk & rock\_pop & world\\\hline
-         classical & 60 &1 &0 &0 &1 &5 \\ \hline 
-         electronic & 0 &16 &0 &0 &2 &3 \\ \hline 
-         jazz\_blues & 0 &0 &3 &0 &0 &0 \\ \hline 
-         metal\_punk & 0 &0 &0 &6 &3 &1 \\ \hline 
-         rock\_pop & 1 &3 &1 &2 &14 &3 \\ \hline 
-         world & 3 &3 &1 &0 &1 &12 \\ \hline 
-         \end{tabular}
-      \caption{(Rounded) Average of the Confusion Matrices}
+\begin{tabular}{ l||l | l | l | l | l | l | }
+& classical & electronic & jazz\_blues & metal\_punk & rock\_pop & world\\\hline
+classical & 59.64 &0.84 &0.00 &0.00 &0.76 &4.68 \\ \hline 
+electronic & 0.30 &16.44 &0.02 &0.54 &1.60 &1.30 \\ \hline 
+jazz\_blues & 0.08 &0.00 &4.20 &0.00 &0.28 &0.34 \\ \hline 
+metal\_punk & 0.40 &0.58 &0.00 &5.32 &1.78 &0.96 \\ \hline 
+rock\_pop & 0.62 &2.36 &0.64 &2.90 &13.84 &1.82 \\ \hline 
+world & 2.96 &2.58 &0.34 &0.24 &2.14 &15.30 \\ \hline 
+\end{tabular}
+      \caption{Average of the Confusion Matrices}
    \end{table}
+
 \end{frame}
-
-
 
 
 \begin{frame}{Graph Results using SVM}
@@ -736,16 +782,14 @@ Using SVM one-verse-all method we have the following results:
 
 
 \section{Discussion}
-\begin{frame}{Future Directions}
+\begin{frame}{Future Directions and References}
    \begin{itemize}
       %\item SVM with One vs. All tends to classify world better than the error-correcting codes we've used.  It would be nice to combine One vs. All and an ECOC to get the ``best of both worlds''.\\
       \item The PageRank feature selection lends itself quite naturally to multi-class SVM.  We think it is possible to build a multi-class SVM method tailored to the features selected by the PageRank feature selection.
    \end{itemize}
 
-\end{frame}
-
-\begin{frame}{References}
    % TODO feel free to remove the references
+   ~\\
    \setbeamertemplate{description item}[align left] % align left
    \begin{description}                              % align left
       \item[WCH] T. Li, M. Ogihara, Q. Li, \emph{A Comparative Study on Content-Based Music Genre Classification}, SIGIR, (2003).\\

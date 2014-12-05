@@ -5,7 +5,6 @@ cd_data/*
 devel/*
 *.log*
 *.aux*
-*.pdf*
 *.gz*
 *.bbl*
 *.blg*
@@ -19,3 +18,5 @@ table.tex
 confMat.tex
 crossValAvg.tex
 crossValSD.tex
+Latex/hdd_proposal.pdf
+Latex/hdd_pres.pdf

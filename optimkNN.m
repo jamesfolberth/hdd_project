@@ -1,7 +1,8 @@
 function [] = optimkNN(makePlot, plotFile)
 %featFile = 'featVecsWCH.mat'; featType = 'WCH';
-featFile = 'featVecsDale.mat'; featType = 'Dale';
-featFile = 'distG1C.mat'; featType = 'dist';
+%featFile = 'featVecsDale.mat'; featType = 'Dale';
+featFile = 'featVecsAppend.mat'; featType = 'Dale';
+%featFile = 'distG1C.mat'; featType = 'dist';
 
 
 
@@ -16,12 +17,12 @@ end
 
 if ~makePlot
 
-   method = 'pca';
+   %method = 'pca';
    %method = 'lle';
-   method = 'lda';
+   %method = 'lda';
 
-   %method = 'prDim';
-   %prMode = 'genre0.5';
+   method = 'prDim';
+   prMode = 'genre0.5';
 
    switch method
    case 'pca'
@@ -154,11 +155,42 @@ else
       errorbar(dim, mean(probs,2), std(probs,0,2), 'o');
       xlabel('Dimension'); ylabel('Classification Rate');
       title('Classification Rate - kNN, k=5');
-      print('Latex/figures/optimkNNprDim.pdf','-dpdf');
+      preparePrint()
+      print('Latex/figures/optimkNNprDim_genre0.5_swt.pdf','-dpdf');
+
+      %errorbar(repmat(transpose(dim), [1 6]), transpose(mean(genreClassRate,3)),...
+      %   transpose(std(genreClassRate,0,3)));
+      %%axis([min(dim)-1 max(dim)+1 0.4 1])
+      %xlabel('Dimension'); ylabel('Classification Rate');
+      %title('Classification Rate - One vs. All');
+      %legend('c','e','j\_b','m\_p','r\_p','w','Orientation','horizonta',...
+      %   'Location','SouthEast');
+      %print('Latex/figures/optimSVMOVAprDimClass_Dale.pdf','-dpdf');
+
+
 
 
    otherwise
       error('bad method: %s', method);
    end
+
+end
+
+end % optimkNN
+
+function [] = preparePrint()
+
+% Stolen from http://tipstrickshowtos.blogspot.com/2010/08/how-to-get-rid-of-white-margin-in.html
+ti = get(gca,'TightInset');
+set(gca,'Position',[ti(1) ti(2) 1-ti(3)-ti(1) 1-ti(4)-ti(2)]);
+
+set(gca,'units','centimeters')
+pos = get(gca,'Position');
+ti = get(gca,'TightInset');
+
+set(gcf, 'PaperUnits','centimeters');
+set(gcf, 'PaperSize', [pos(3)+ti(1)+ti(3) pos(4)+ti(2)+ti(4)]);
+set(gcf, 'PaperPositionMode', 'manual');
+set(gcf, 'PaperPosition',[0 0 pos(3)+ti(1)+ti(3) pos(4)+ti(2)+ti(4)]);
 
 end

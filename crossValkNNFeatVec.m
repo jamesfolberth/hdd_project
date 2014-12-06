@@ -7,7 +7,8 @@ function [crossValAvg,crossValSD,probCorrect]=crossValkNNFeatVec(savefile,opt)
 if nargin < 1
    %savefile = 'featVecsWCH.mat';
    savefile = 'featVecsDale.mat';
-   savefile = 'distG1C.mat'; % this is a distance matrix, not feature matrix
+   %savefile = 'distG1C.mat'; % this is a distance matrix, not feature matrix
+   savefile = 'featVecsAppend.mat';
 end 
 
 if nargin < 2 % set all to defaults
@@ -45,13 +46,14 @@ if strcmp(opt.dimRed, 'pca')
 end
 if strcmp(opt.dimRed, 'pr')
    if ~isfield(opt, 'prDim')
-      opt.prDim = 67;
+      %opt.prDim = 67;
+      opt.prDim = 118;
       %opt.prDim = 21;
    end
    if ~isfield(opt, 'prMode')
-      opt.prMode = 'all';
+      %opt.prMode = 'all';
       %opt.prMode = 'genre0';
-      %opt.prMode = 'genre0.5';
+      opt.prMode = 'genre0.5';
       %opt.prMode = 'genre1';
       %opt.prMode = 'genre2';
    end
@@ -157,7 +159,8 @@ case 'pr' % XXX this was just copied from crossValSVMFeatVec
       %fprintf(1,'Number of dimensions requested = %d\n', opt.prDim);
       %fprintf(1,'Number of dimensions used      = %d\n', numel(allRanks));
       feat = feat(allRanks,:);
-      
+     
+      allRanks
       %sort(allRanks,'ascend')
    end
 

@@ -32,8 +32,8 @@ case 1
    %plot(1:numel(feat), feat)
 
 case 2
-
-   warning('Don''t use this.  Use method 3');
+   warning('Don''t use this.  Use method 3.');
+   % {{{
 
    dataDir = getDir();
    [wavList,genre] = textread([dataDir,'ground_truth.csv'],'%s %s','delimiter',',');
@@ -79,6 +79,7 @@ case 2
    case 'diff'
       print(sprintf('Latex/figures/wch_diff.pdf'),'-dpdf')
    end
+   % }}}
 
 case 3
 
@@ -87,9 +88,12 @@ case 3
 
    %genre = strrep(genre, '_', '\_'); % fix for latex
    %load('featVecsWCH_approx.mat.save','-mat');
-   load('featVecsWCH.mat','-mat');
+   %load('featVecsWCH.mat','-mat'); indStart = 51;
+   %load('wchFeatVecs.mat','-mat'); indStart = 1;
+   load('featVecsAppend.mat','-mat'); indStart = 182;
 
-   plotInds = [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16];
+   plotInds = 1:7*8;
+   %plotInds = [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16];
    %plotInds = [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16];
 
    % Standardize feature vectors
@@ -98,12 +102,12 @@ case 3
    fprintf(1,'Feature vectors standardized\n');
 
    for i = 1:numel(plotInds)
-      boxplot(feat(51-1+plotInds(i),:), genre);
+      boxplot(feat(indStart-1+plotInds(i),:), genre);
       ylabel('Standard score (based on all tracks)');
       title(char(wchFeatureName(plotInds(i))))
       
       print(sprintf('Latex/figures/wch_box_%02i.pdf',plotInds(i)),'-dpdf')
-      %plotInds(i), pause(1);
+      %wchFeatureName(plotInds(i)), pause(1);
 
    end
 
@@ -114,6 +118,7 @@ end
 end % plotwch
 
 function [wchFeat] = localwch(wav,opt)
+% {{{
 % Compute the (Daubechies) Wavelet Coefficient Histogram and return features
 %
 % wav - vector read of WAVE file data
@@ -182,11 +187,71 @@ for i=1:numel(subbands)
    %wchFeat(8*(i-1)+8) = mean(abs(acoeffs));
 
 end
-
+% }}}
 end
 
 function [name] = wchFeatureName(ind)
-   names = {'Detail 4 - Mean';
+% {{{
+%     names = {'Detail 4 - Mean';
+%              'Detail 4 - Variance';
+%              'Detail 4 - Skewness';
+%              'Detail 4 - Energy';
+%              'Detail 5 - Mean';
+%              'Detail 5 - Variance';
+%              'Detail 5 - Skewness';
+%              'Detail 5 - Energy';
+%              'Detail 6 - Mean';
+%              'Detail 6 - Variance';
+%              'Detail 6 - Skewness';
+%              'Detail 6 - Energy';
+%              'Detail 7 - Mean';
+%              'Detail 7 - Variance';
+%              'Detail 7 - Skewness';
+%              'Detail 7 - Energy'};
+% }}}
+
+% {{{
+   names = {'Approx 1 - Mean';
+            'Approx 1 - Variance';
+            'Approx 1 - Skewness';
+            'Approx 1 - Energy';
+            'Approx 2 - Mean';
+            'Approx 2 - Variance';
+            'Approx 2 - Skewness';
+            'Approx 2 - Energy';
+            'Approx 3 - Mean';
+            'Approx 3 - Variance';
+            'Approx 3 - Skewness';
+            'Approx 3 - Energy';
+            'Approx 4 - Mean';
+            'Approx 4 - Variance';
+            'Approx 4 - Skewness';
+            'Approx 4 - Energy';
+            'Approx 5 - Mean';
+            'Approx 5 - Variance';
+            'Approx 5 - Skewness';
+            'Approx 5 - Energy';
+            'Approx 6 - Mean';
+            'Approx 6 - Variance';
+            'Approx 6 - Skewness';
+            'Approx 6 - Energy';
+            'Approx 7 - Mean';
+            'Approx 7 - Variance';
+            'Approx 7 - Skewness';
+            'Approx 7 - Energy';
+            'Detail 1 - Mean';
+            'Detail 1 - Variance';
+            'Detail 1 - Skewness';
+            'Detail 1 - Energy';
+            'Detail 2 - Mean';
+            'Detail 2 - Variance';
+            'Detail 2 - Skewness';
+            'Detail 2 - Energy';
+            'Detail 3 - Mean';
+            'Detail 3 - Variance';
+            'Detail 3 - Skewness';
+            'Detail 3 - Energy';
+            'Detail 4 - Mean';
             'Detail 4 - Variance';
             'Detail 4 - Skewness';
             'Detail 4 - Energy';
@@ -202,6 +267,7 @@ function [name] = wchFeatureName(ind)
             'Detail 7 - Variance';
             'Detail 7 - Skewness';
             'Detail 7 - Energy'};
+% }}}
 
    name = names{ind};
 

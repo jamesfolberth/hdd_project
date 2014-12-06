@@ -39,6 +39,7 @@ case 'WCH'
                      'method','dct','numTerms',20);
    textureOpts = struct('segLength',11024,'shiftLength',11024/2,...
                          'method','dct','numTerms',6);
+   wchOpts = struct('wName','db8','nLevels',7,'segLength',2^18);
 
    % Compute features
    feat = zeros([66 nSongs]);

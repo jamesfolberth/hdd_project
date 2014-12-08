@@ -50,7 +50,7 @@ for(f = 0:0.1:1)
 end
     
 figure;
-errorbar(counts,accm,accg);
+errorbar(counts,accm,accs);
 title('Genre Based PR')
 xlabel('Dimension')
 ylabel('Adj classification rate')
@@ -59,4 +59,4 @@ ylim([.3 .7])
 legend('0.0','0.1','0.2','0.3','0.4','0.5','0.6','0.7','0.8','0.9','1.0');
 print('adjPR.pdf','-dpdf')
 
-save('dimresults.mat','accm','accs','counts','mydims','nrows')
+save('dimresults.mat','accm','accs','counts','nrows')

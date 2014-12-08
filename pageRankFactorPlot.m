@@ -41,12 +41,12 @@ for(f = 0:0.1:1)
 
             accg(c,k) = sum(diag(a)./reshape(sum(a,1), [6 1])*1/6);
         end
-        counts(c,10*f+1) = length(ind);
+        counts(c,round(10*f+1)) = length(ind);
     end
     fprintf(1,'\n');
 
-    accm(:,f*10+1) = mean(accg,2);
-    accs(:,f*10+1) = std(accg,0,2);
+    accm(:,round(f*10+1)) = mean(accg,2);
+    accs(:,round(f*10+1)) = std(accg,0,2);
 end
     
 figure;

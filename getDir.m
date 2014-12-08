@@ -17,6 +17,8 @@ elseif ( strcmp(userName,'alfox') )
   dataDir = '/Users/alfox/Documents/Data/';
 elseif ( strcmp(deblank(userName),'Dale') )
     dataDir = '../cd_data/';
+elseif ( strcmp(userName,'daje3299') )
+    dataDir = '';
 else
    error('Unknown user name.')
 end

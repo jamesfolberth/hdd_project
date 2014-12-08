@@ -96,7 +96,8 @@ switch opts.method
                 rInd(mI) = [];
 %                 vInd(k) = mI;
                 
-                rsq = bsxfun(@times, rsq, (1-opts.factor*rsq(:,mI)));
+                %rsq = bsxfun(@times, rsq, (1-opts.factor*rsq(:,mI)));
+                rsq = rsq*diag(1-opts.factor*rsq(:,mI));
                 rsq(mI,:) = [];
                 rsq(:,mI) = [];
             end
@@ -130,7 +131,8 @@ switch opts.method
             ranks(k,n) = rInd(mI);
             rInd(mI) = [];
 
-            rsq = bsxfun(@times, rsq, (1-opts.factor*rsq(:,mI)));
+            %rsq = bsxfun(@times, rsq, (1-opts.factor*rsq(:,mI)));
+            rsq = rsq*diag(1-opts.factor*rsq(:,mI));
             rsq(mI,:) = [];
             rsq(:,mI) = [];
         end

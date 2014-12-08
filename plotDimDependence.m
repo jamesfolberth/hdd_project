@@ -12,7 +12,7 @@ featFull = feat;
 cvrep = 5;
 
 %ranks = pageRankDimRed(featFull,struct('method','basic'));
-ranks = pageRankDimRed(featFull,struct('method','adjusted'));
+ranks = pageRankDimRed(featFull,struct('method','adjusted','factor',0.3));
 
 % % Reduce with the overall rankings
 % %mydims = [1 2 4 6 8 10 15 20 25 30 40 50 60 70 80 100 120 140 160 180 198];
@@ -48,8 +48,8 @@ ranks = pageRankDimRed(featFull,struct('method','adjusted'));
 
 
 % Reduce with genre specific rankings
-%nrows = [1 2 3 4 6 8 10 12 14 16 18 20 25 30 35 40 45 50 55 60 70 80 90 100];
-nrows = [1 2 4 6 8 10 12 14 20 25 30 35 40 45 50];
+nrows = [1 2 3 4 6 8 10 12 14 16 18 20 25 30 35 40 45 50 55 60 70 80 90 100 130 160 198];
+%nrows = [1 2 4 6 8 10 12 14 20 25 30 35 40 45 50];
 accg = zeros(length(nrows),cvrep);
 counts = zeros(length(nrows),1);
 c = 0;

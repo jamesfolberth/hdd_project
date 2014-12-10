@@ -19,11 +19,11 @@ end
 
 if nargin < 2
     %opts = struct('method','basic');
-    opts = struct('method','adjusted','factor',1);
+    opts = struct('method','adjusted','factor',0.3);
 end
 
 if strcmp(opts.method,'adjusted') && ~isfield(opts,'factor')
-    opts.factor = 1;
+    opts.factor = 0.3;
 end
 
 % Indices for where the genre switches
@@ -64,7 +64,40 @@ switch opts.method
 
         [~,I] = sort(r,'descend');
         ranks(:,7) = I;
-        
+
+    case 'cross'
+	W = cell(6,1);
+	for n = 1:6
+	    rsq = corr(feat(:,gInd(n)+1:gInd(n+1))','type','Spearman').^2;
+	    rsq(isnan(rsq)) = 0;
+	    rsq = rsq - eye(size(feat,1));
+	    W{n} = rsq;
+	end
+
+	for n = 1:6
+	    H = W{n} + opts.factor*(ones(size(W{n})) - (W{1}+W{2}+W{3}+W{4}+W{5}+W{6}-W{n}));
+	    H = diag(1./sum(H,2))*H;
+
+	    [r,~] = eigs(H',1);
+	    r = -r;
+
+	    [~,I] = sort(r,'descend');
+	    ranks(:,n) = I;
+	end
+
+	% For the entire collection, find the "best" features
+        rsq = corr(feat','type','Spearman').^2;
+        rsq = rsq - eye(size(feat,1));
+
+        H = diag(1./sum(rsq,2))*rsq;
+
+        [r,~] = eigs(H',1);
+        r = -r;
+
+        [~,I] = sort(r,'descend');
+        ranks(:,7) = I;
+
+	    
     case 'adjusted'
         ranks = zeros(size(feat,1),7);
         

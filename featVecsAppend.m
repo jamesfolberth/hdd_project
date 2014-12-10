@@ -38,9 +38,11 @@ if nFeats == 198
    wchOpts = struct('wName','bior4.4','nLevels',7,'segLength',2^18);
    
    % copy non-WCH features first
-   feat = zeros([182 + wchOpts.nLevels*8 nSongs]);
+   %feat = zeros([182 + wchOpts.nLevels*8 nSongs]);
+   feat = zeros([182 + 16 nSongs]);
    feat(1:182,:) = oldFeat(1:182,:);
 
+   % now append WCH features
    for(i = 1:nSongs)
       fprintf(printFile,'\rSong: %d of %d.',i, nSongs);
       wavFile = strcat(dataDir, wavList{i});
@@ -55,8 +57,10 @@ if nFeats == 198
    
       [aFeat,dFeat] = wch(wav);
 
-      feat(182+1:182+wchOpts.nLevels*4,i) = aFeat; 
-      feat(182+1+wchOpts.nLevels*4:182+wchOpts.nLevels*8,i) = dFeat;
+      %feat(182+1:182+wchOpts.nLevels*4,i) = aFeat; 
+      %feat(182+1+wchOpts.nLevels*4:182+wchOpts.nLevels*8,i) = dFeat;
+      feat(182+1:182+8,i) = aFeat(end-7:end); 
+      feat(182+1+8:182+16,i) = dFeat(end-7:end);
    
    end
    fprintf(printFile, '\n');

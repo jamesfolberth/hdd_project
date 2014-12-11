@@ -1,27 +1,43 @@
-function []=classifykNNFeatVec(opt)
+function []=classifySVMFeatVec(opt)
 % attempt to classify the songs in the test data using the songs in the
 % training data
 %
-% This uses matlab's built-in kNN routines
+% This uses matlab's built-in SVM routines
 
 if nargin < 1 % set all to defaults
-   %opt = struct('XValNum', 10, 'kNNNum',5,'dimRed','lle','lleNum',33,'lleDim',20);
-   %opt = struct('XValNum', 10, 'kNNNum',5,'dimRed','pca','pcaNum',40);
-   %opt = struct('XValNum', 10, 'kNNNum',5,'dimRed','none');
-   opt = struct('XValNum', 10, 'kNNNum',5,'dimRed','pr');
+   %opt = struct('MCMethod','onevall','dimRed','none');
+
+   %opt = struct('MCMethod','onevall');
+   %opt = struct('MCMethod','onevone');
+   %opt = struct('MCMethod','ECOC');
+
+   %opt = struct('MCMethod','onevall','dimRed','pr');
+   %opt = struct('MCMethod','onevone','dimRed','pr');
+   %opt = struct('MCMethod','ECOC','dimRed','pr');
+
+   opt = struct('MCMethod','onevall','dimRed','pr','SVMOrder',2.5,...
+      'prDim',125,'prMode','genre0.5');
+   %opt = struct('MCMethod','ECOC','dimRed','pr','SVMOrder',2.25,...
+   %   'prDim',125,'prMode','genre0.5');
 
 end
 % set the needed opts that aren't set to defaults
 if ~isfield(opt, 'trainFile')
-   %opt.trainFile = 'featVecsWCH.mat';
+   opt.trainFile = 'featVecsWCH.mat';
    opt.trainFile = 'featVecsDale.mat';
 end
 if ~isfield(opt, 'testFile')
-   %opt.testFile = 'featVecsTestWCH.mat';
+   opt.testFile = 'featVecsTestWCH.mat';
    opt.testFile = 'featVecsTestDale.mat';
 end
-if ~isfield(opt, 'kNNNum')
-   opt.kNNNum = 5;
+if ~isfield(opt, 'dimRed')
+   opt.dimRed = 'none';
+end
+if ~isfield(opt, 'MCMethod')
+   opt.MCMethod = 'onevall';
+end
+if ~isfield(opt, 'SVMOrder')
+   opt.SVMOrder = 2.25;
 end
 if strcmp(opt.dimRed, 'lle')
    if ~isfield(opt, 'lleNum')
@@ -45,7 +61,7 @@ end
 if strcmp(opt.dimRed, 'pr')
    if ~isfield(opt, 'prDim')
       %opt.prDim = 67;
-      opt.prDim = 118;
+      opt.prDim = 125;
       %opt.prDim = 40;
    end
    if ~isfield(opt, 'prMode')
@@ -79,6 +95,7 @@ trainDataDir = getDir();
 nTrain = length(trainWavList);
 trainGenre = strrep(trainGenre, '"', '');
 trainGenreValues = getGenres(trainGenre);
+nGenre = numel(unique(trainGenreValues));
 
 [testWavList, testGenreValues] = getTestData();
 
@@ -115,8 +132,7 @@ case 'lle'
    trainFeat = feat(:,1:nTrain);
    testFeat = feat(:,nTrain+1:nTrain+nTest);
 
-case 'pr' % XXX this was just copied from crossValSVMFeatVec
-          %     this could be outdated; use with caution
+case 'pr'
 
    [ranks] = pageRankDimRed(trainFeat,opt.prOpt);
 
@@ -245,27 +261,126 @@ otherwise
    error('Unknown dimension reduction method: %s', opt.dimRed);
 end
 
-% train kNN classifier for this subset
-if( exist('fitcknn') )
-    mdl = fitcknn(transpose(trainFeat),trainGenreValues,...
-      'NumNeighbors',opt.kNNNum,'Distance','seuclidean');
-else
-    mdl = ClassificationKNN.fit(transpose(trainFeat),genreTrainValues,...
-        'NumNeighbors',opt.kNNNum,'Distance','seuclidean');
-end
 
-% make predictions
-confMat = zeros(numel(unique(trainGenreValues))); % 6x6
-predGenre = predict(mdl, transpose(testFeat));
-for j=1:length(testGenreValues)
-   trueGenre = testGenreValues(j);
-   %predGenre = randi([1 6]); % random prediction ~ 17% correct
-   confMat(predGenre(j), trueGenre) = confMat(predGenre(j), trueGenre) + 1;
+% train SVM classifiers for this subset
+if exist('fitcsvm') 
+   switch opt.MCMethod
+   case 'onevall'
+      mdls = cell([nGenre 1]);
+      for g = 1:nGenre
+         inds = (trainGenreValues == g);
+         mdls{g} = fitcsvm(transpose(trainFeat),inds,...
+         'ClassNames',[true false],'Standardize',1,...
+         'KernelFunction','polynomial','PolynomialOrder',opt.SVMOrder,...
+         'BoxConstraint',10);
+
+         %fprintf(1,'# support vecs = %d of %d\n',nnz(mdls{g}.IsSupportVector),numel(mdls{g}.IsSupportVector)); %sometimes we have lots of support vecs :(
+      end
+
+   case 'onevone'
+      pairs = nchoosek(1:nGenre,2);
+      mdls = cell([size(pairs,1) 1]);
+      for g = 1:size(pairs,1)
+         inds = (trainGenreValues == pairs(g,1)) | ...
+            (trainGenreValues == pairs(g,2));
+         mdls{g} = fitcsvm(transpose(trainFeat(:,inds)),...
+         trainGenreValues(inds), 'ClassNames', [pairs(g,1) pairs(g,2)],...
+         'Standardize',1,'KernelFunction','polynomial',...
+         'PolynomialOrder',opt.SVMOrder,'BoxConstraint',10);
+         %'Standardize',1,'KernelFunction','linear','BoxConstraint',1);
+
+         %fprintf(1,'# support vecs = %d of %d\n',nnz(mdls{g}.IsSupportVector),numel(mdls{g}.IsSupportVector)); %sometimes we have lots of support vecs :(
+      end
+
+   case 'ECOC'
+      %C = codeMatrix('hamming1');
+      C = codeMatrix('hammingExhaustive');
+
+      mdls = cell([size(C,2) 1]);
+      for g = 1:size(C,2)
+         inds = zeros([size(trainGenreValues,1) 1]);
+         for class=1:size(C,1)
+            if C(class,g) == 1
+               inds = inds | (trainGenreValues == class);
+            end
+         end
+
+         mdls{g} = fitcsvm(transpose(trainFeat),...
+         inds,...
+         'Standardize',1,'KernelFunction','polynomial',...
+         'PolynomialOrder',opt.SVMOrder,'BoxConstraint',10);
+
+         %fprintf(1,'# support vecs = %d of %d\n',nnz(mdls{g}.IsSupportVector),numel(mdls{g}.IsSupportVector)); %sometimes we have lots of support vecs :(
+
+      end                               
+
+   otherwise                            
+      error('Unknown multiclass method:  %s',opt.MCMethod);
+   end                                  
+else                                    
+   error('Old matlab.');                
+end                                     
+
+% make predictions                      
+confMat = zeros([nGenre nGenre]); % 6x6
+switch opt.MCMethod     
+case 'onevall'
+   scores = zeros([size(testFeat,2) nGenre]);
+   for g = 1:nGenre
+      [~,score] = predict(mdls{g}, transpose(testFeat));
+      scores(:,g) = score(:,1); % 1st column has positive score
+   end
+   [~,predGenre] = max(scores,[],2);
+  
+   %% randomly select predicted genre
+   %g = repmat(transpose(1:6), [25 1]);
+   %predGenre = g(randperm(150));
+
+   for j = 1:size(testFeat,2)
+      trueGenre = testGenreValues(j);
+      confMat(predGenre(j), trueGenre) = ...
+         confMat(predGenre(j), trueGenre) + 1;
+   end
+
+case 'onevone'
+   pred = zeros([size(testFeat,2) size(pairs,1)]);
+   for g = 1:size(pairs,1)
+      pred(:,g) = predict(mdls{g}, transpose(testFeat));
+   end
+   predGenre = mode(pred,2);
+
+   for j = 1:size(testFeat,2)
+      trueGenre = testGenreValues(j);
+      confMat(predGenre(j), trueGenre) = ...
+         confMat(predGenre(j), trueGenre) + 1;
+   end
+
+case 'ECOC'
+   codeWord = zeros([size(testFeat,2) size(C,2)]);
+   for g = 1:size(C,2)
+      codeWord(:,g) = predict(mdls{g}, transpose(testFeat));
+   end
+
+   % find min Hamming distance
+   dist = zeros([size(testFeat,2) size(C,1)]);
+   for cw = 1:size(C,1)
+      dist(:,cw) = sum(bsxfun(@ne, codeWord, C(cw,:)),2); % hamming dist
+      %nnz(codeWord ~= C(cw,:));
+   end
+   [~,predGenre] = min(dist,[],2);
+
+   for j = 1:size(testFeat,2)
+      trueGenre = testGenreValues(j);
+      confMat(predGenre(j), trueGenre) = ...
+         confMat(predGenre(j), trueGenre) + 1;
+   end
+
+otherwise
+   error('Unknown multiclass method: %s',opt.MCMethod);
 end
 
 % print results
 %latexTable(crossValAvg, 'crossValAvg.tex', '%3.2f', unique(genre));
-
 correctClassRate = diag(confMat)./reshape(sum(confMat,1), [6 1]);
 
 % scaled percent correct as done in project guide book
@@ -303,3 +418,40 @@ function [g, code] = getGenres(genres)
    end
 
 end % getGenres
+
+function [C] = codeMatrix(name)
+% return a binary matrix corresponding to the named error-correcting code
+% for six codewords
+   switch name
+   case 'hamming1'
+      C = [0 0 0 0 0 0 ;
+           0 1 0 1 0 1 ;
+           1 0 0 1 1 0 ;
+           1 1 0 0 1 1 ;
+           1 1 1 0 0 0 ;
+           1 0 1 1 0 1 ];
+   
+   case 'hammingExhaustive'
+      k = 6;
+      C = zeros([k 2^(k-1)-1]);
+      for level = 1:k
+         segLen = 2^(k-level);
+         numSegs = 2^(level-1);
+   
+         for i = 1:numSegs-1
+            if mod(i,2) == 0
+               C(level,segLen*(i-1)+1:segLen*i) = 1;
+            else; 
+               C(level,segLen*(i-1)+1:segLen*i) = 0;
+            end
+         end
+   
+         C(level,segLen*(numSegs-1)+1:end) = 1;
+      end
+   
+   case 'BCH'
+   
+   otherwise
+      error('Unknown code matrix name %s', name);
+   end
+end % codeMatrix

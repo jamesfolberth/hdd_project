@@ -16,13 +16,13 @@ if nargin < 2 % set to default values
    %opt = struct('MCMethod','onevone');
    %opt = struct('MCMethod','ECOC');
 
-   opt = struct('MCMethod','onevall','dimRed','pr');
+   %opt = struct('MCMethod','onevall','dimRed','pr');
    %opt = struct('MCMethod','onevone','dimRed','pr');
    %opt = struct('MCMethod','ECOC','dimRed','pr');
 
-   opt = struct('MCMEthod','onevall','dimRed','pr','SVMOrder',2.5,...
+   opt = struct('MCMethod','onevall','dimRed','pr','SVMOrder',2.5,...
       'prDim',125,'prMode','genre0.5');
-   %opt = struct('MCMEthod','ECOC','dimRed','pr','SVMOrder',2.25,...
+   %opt = struct('MCMethod','ECOC','dimRed','pr','SVMOrder',2.25,...
    %   'prDim',125,'prMode','genre0.5');
 
 end
@@ -71,6 +71,10 @@ if strcmp(opt.dimRed, 'pr')
       %opt.prMode = 'genre1';
       %opt.prMode = 'genre2';
    end
+   if ~isfield(opt, 'prOpt')
+      opt.prOpt = struct('method','basic');
+      %opt.prOpt = struct('method','adjusted','factor',0.3);
+   end
 end
 
 opt
@@ -95,7 +99,7 @@ genreNames = unique(genre);
 
 % Standardize feature vectors
 feat = bsxfun(@minus, feat, mean(feat, 2));
-feat = bsxfun(@rdivide, feat, var(feat, 0, 2));
+feat = bsxfun(@rdivide, feat, std(feat, 0, 2));
 fprintf(1,'Feature vectors standardized\n');
 
 switch opt.dimRed
@@ -116,7 +120,7 @@ case 'lle'
    [feat] = lle(feat, opt.lleNum, opt.lleDim);
 
 case 'pr'
-   [ranks] = pageRankDimRed(feat);
+   [ranks] = pageRankDimRed(feat,opt.prOpt);
 
    switch opt.prMode
    case 'all' % use ranking based on all tracks

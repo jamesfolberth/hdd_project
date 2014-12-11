@@ -5,17 +5,17 @@ function [crossValAvg,crossValSD,probCorrect]=crossValkNNFeatVec(savefile,opt)
 % This uses matlab's built-in kNN routines
 
 if nargin < 1
-   %savefile = 'featVecsWCH.mat';
-   savefile = 'featVecsDale.mat';
+   savefile = 'featVecsWCH.mat';
+   %savefile = 'featVecsDale.mat';
    %savefile = 'distG1C.mat'; % this is a distance matrix, not feature matrix
-   savefile = 'featVecsAppend.mat';
+   %savefile = 'featVecsAppend.mat';
 end 
 
 if nargin < 2 % set all to defaults
    %opt = struct('XValNum', 10, 'kNNNum',5,'dimRed','lle','lleNum',33,'lleDim',20);
    %opt = struct('XValNum', 10, 'kNNNum',5,'dimRed','pca','pcaNum',40);
-   %opt = struct('XValNum', 10, 'kNNNum',5,'dimRed','none');
-   opt = struct('XValNum', 10, 'kNNNum',5,'dimRed','pr');
+   opt = struct('XValNum', 10, 'kNNNum',5,'dimRed','none');
+   %opt = struct('XValNum', 10, 'kNNNum',5,'dimRed','pr');
 
 end
 % set the needed opts that aren't set to defaults
@@ -83,7 +83,7 @@ genreValues = getGenres(genre);
 
 % standardize feature vectors
 feat = bsxfun(@minus, feat, mean(feat, 2));
-feat = bsxfun(@rdivide, feat, var(feat, 0, 2));
+feat = bsxfun(@rdivide, feat, std(feat, 0, 2));
 fprintf(1,'Feature vectors standardized\n');
 
 switch opt.dimRed

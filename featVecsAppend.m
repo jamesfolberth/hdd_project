@@ -57,8 +57,8 @@ if nFeats == 198
    
       [aFeat,dFeat] = wch(wav);
 
-      %feat(182+1:182+wchOpts.nLevels*4,i) = aFeat; 
-      %feat(182+1+wchOpts.nLevels*4:182+wchOpts.nLevels*8,i) = dFeat;
+      %%feat(182+1:182+wchOpts.nLevels*4,i) = aFeat; 
+      %%feat(182+1+wchOpts.nLevels*4:182+wchOpts.nLevels*8,i) = dFeat;
       feat(182+1:182+8,i) = aFeat(end-7:end); 
       feat(182+1+8:182+16,i) = dFeat(end-7:end);
    

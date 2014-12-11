@@ -90,9 +90,9 @@ case 3
    %load('featVecsWCH_approx.mat.save','-mat');
    %load('featVecsWCH.mat','-mat'); indStart = 51;
    %load('wchFeatVecs.mat','-mat'); indStart = 1;
-   load('featVecsAppend.mat','-mat'); indStart = 182;
+   load('featVecsDale.mat','-mat'); indStart = 183;
 
-   plotInds = 1:7*8;
+   plotInds = 1:4*4;
    %plotInds = [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16];
    %plotInds = [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16];
 
@@ -259,6 +259,25 @@ function [name] = wchFeatureName(ind)
             'Detail 5 - Variance';
             'Detail 5 - Skewness';
             'Detail 5 - Energy';
+            'Detail 6 - Mean';
+            'Detail 6 - Variance';
+            'Detail 6 - Skewness';
+            'Detail 6 - Energy';
+            'Detail 7 - Mean';
+            'Detail 7 - Variance';
+            'Detail 7 - Skewness';
+            'Detail 7 - Energy'};
+% }}}
+
+% {{{
+   names = {'Approx 6 - Mean';
+            'Approx 6 - Variance';
+            'Approx 6 - Skewness';
+            'Approx 6 - Energy';
+            'Approx 7 - Mean';
+            'Approx 7 - Variance';
+            'Approx 7 - Skewness';
+            'Approx 7 - Energy';
             'Detail 6 - Mean';
             'Detail 6 - Variance';
             'Detail 6 - Skewness';

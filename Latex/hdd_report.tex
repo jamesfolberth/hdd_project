@@ -35,7 +35,7 @@ When trying to define a distance in song-space for genre classification, it is n
 
 \subsection{Preprocessing}
 
-The first step in feature extraction is in preprocessing the song, where the raw pulse code modulation form of the song is transformed into segments of spectral information.  The preprocessing improves the accessibility of the features and is also the first step in dimensionality reduction.
+One step in feature extraction is in preprocessing the song, where the raw pulse code modulation form of the song is transformed into segments of spectral information.  The preprocessing improves the accessibility of the features and is also the first step in dimensionality reduction.
 
 \subsubsection{Power Spectrum}
 The power spectrum of an audio signal is a frequency-domain representation of the signal.  More specifically, we use a short-time Fourier transform to transform the signal to the frequency-domain, while maintaining some temporal locality.  The signal is broken up into many small, possibly overlapping segments, each of which then is windowed and passed through a Fourier transform.  Once in the frequency domain, the square magnitude is calculated, to get the power spectrum.
@@ -48,8 +48,36 @@ Instead of looking at a linear spread of frequencies, the Mel-scale frequencies 
 The frequency scales are not the only difference with how the ear perceives audio.  The loudness is also perceived in a non-linear way.  The perceived loudness of sounds approximately follows the Decibel (dB) logarithmic scale.  The logarithm of Mel power is calculated to convert to this dB representation.  Using the power spectrum in the Mel scale, we have various methods to compute a spectral similarity measure between songs.  There are also many other features that can be extracted from the Mel power spectrum.
 
 \subsection{Temporal Features}
+The first set of features that can extracted from a song are temporal features, that do not require any spectrum preprocessing.  These features are calculated over a moving window for the entire song.  In order to capture the distribution of each of these temporal features, the first four moments (mean, variance, skewness, and kurtosis) are calculated and stored.  For details on the calculations and meaning of each of these temporal features, refer to \cite{lerch:aca}.
+
+\begin{itemize}
+\item Autocorrelation Coefficients
+\item Autocorrelation Maximum
+\item Peak Envelope
+\item Predictivity Ratio
+\item Root Mean Square
+\item Standard Deviation
+\item Zero Crossing Rate
+\end{itemize}
 
 \subsection{Spectral Features}
+The next set of features require the previously discussed preprocessing steps.  These features are considered spectral features, as they rely on the spectrum, or Mel cepstrum, of the song.  As with the temporal features, the spectral features are calculated over moving time windows, and in order to capture the distribution of these features, the first four moments are calculated and stored.  For details of the calculations and meaning, refer to \cite{lerch:aca} and \cite{pampalk:dissertation}.
+
+\begin{itemize}
+\item Spectral Centroid
+\item Spectral Crest
+\item Spectral Decrease
+\item Spectral Flatness
+\item Spectral Flux
+\item Spectral Kurtosis
+\item Spectral Rolloff
+\item Spectral Skewness
+\item Spectral Slope
+\item Spectral Spread
+\item Tonal Power Ratio
+\item Mel Frequency Cepstrum Coefficients (1-13)
+\item Pitch Chroma (12 notes)
+\end{itemize}
 
 %\subsection{Available Simple Features}
 %
@@ -212,9 +240,9 @@ Consider a graph whose nodes represent specific features that can be extracted f
 $$w_{ij} = \text{corr}(f_i,f_j)^2$$
 We take the square correlation since we want both correlated and anti-correlated features to be considered similar.  The correlation we used is a Spearman correlation.  The benefit of Spearman over Pearson is that the Pearson correlation assumes a linear relationship, whereas Spearman is nonparametric and better accounts for nonlinearities.
 
-Once we have constructed a matrix, $W$, containing all of the weights of our feature graph, we normalize the rows to sum to $1$, giving a normalized matrix $H$.  Our graph is naturally (nearly) fully connected with our choice of weights, so no escape probabilities need to be added to our matrix.  This also means that we do not need to include any damping that is often used with Page Rank.  Finding the rankings of the features is then just a simple eigenvalue problem, solving $r^T = r^T H$.  Running this ranking method on the full set of training songs gave us the following top 5 features:
+Once we have constructed a matrix, $W$, containing all of the weights of our feature graph, we normalize the rows to sum to $1$, giving a normalized matrix $H$.  Our graph is naturally (nearly) fully connected with our choice of weights, so no escape probabilities need to be added to our matrix.  This also means that we do not need to include any damping that is often used with Page Rank.  Finding the rankings of the features is then just a simple eigenvalue problem, solving $r^T = r^T H$.  Running this ranking method on the full set of training songs gave us top 5 features shown in table \ref{tab:all_pr}
 
-\begin{table}[!ht]
+\begin{table}[!h]
 \begin{center}
 \begin{tabular}{|l|l|}
 \hline
@@ -227,11 +255,12 @@ Rank & Feature \\ \hline
 \end{tabular}
 \caption{Top 5 features extracted using Page Rank with the entire feature set.  Superscripts refer to which moment of the feature is being considered (1-mean, 2-variance, 3-skewness, 4-kurtosis).}
 \end{center}
+\label{tab:all_pr}
 \end{table}
 
-One potential problem with this implementation is that all songs are considered to be representable by the same features.  In general, this is not true as different genres exhibit different behaviors of features.  To capture this difference between features, we can instead run the feature selection considering a single genre at a time.  The top 5 features for each genre are shown in the following table.
+One potential problem with this implementation is that all songs are considered to be representable by the same features.  In general, this is not true as different genres exhibit different behaviors of features.  To capture this difference between features, we can instead run the feature selection considering a single genre at a time.  The top 5 features for each genre are shown in \ref{tab:genre_pr}.
 
-\begin{table}[!ht]
+\begin{table}[!h]
 \begin{center}
 \begin{tabular}{|l|l|l|l|}
 \hline
@@ -252,6 +281,7 @@ Rank & Metal/Punk & Rock/Pop & World \\ \hline
 
 \caption{Top 5 features extracted using Page Rank with the genres considered separately.  Superscripts refer to which moment of the feature is being considered (1-mean, 2-variance, 3-skewness, 4-kurtosis).}
 \end{center}
+\label{tab:genre_pr}
 \end{table}
 
 %\begin{figure}[!ht]
@@ -284,7 +314,7 @@ The downside to using correlation as a similarity measure is that highly correla
 
 Unfortunately, this adjustment generally performs worse.  Initially it gives slightly better performance, but then quickly drops below the all at once Page Rank method.
 
-\begin{figure}
+\begin{figure}[!h]
 \begin{center}
 \vspace{-1in}
 \includegraphics[width=0.6\textwidth]{figures/adjPR.pdf}

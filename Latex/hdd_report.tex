@@ -8,6 +8,10 @@
 \oddsidemargin  0mm
 \evensidemargin 0mm
 \topmargin -20mm
+
+\DeclareMathOperator*{\argmin}{argmin}
+\DeclareMathOperator*{\argmax}{argmax}
+\newcommand{\tss}[1]{\textsuperscript{#1}}
 \begin{document}
 %_________________________________________________________________
 \title{Automated Music Genre Classification}
@@ -43,48 +47,52 @@ Instead of looking at a linear spread of frequencies, the Mel-scale frequencies 
 
 The frequency scales are not the only difference with how the ear perceives audio.  The loudness is also perceived in a non-linear way.  The perceived loudness of sounds approximately follows the Decibel (dB) logarithmic scale.  The logarithm of Mel power is calculated to convert to this dB representation.  Using the power spectrum in the Mel scale, we have various methods to compute a spectral similarity measure between songs.  There are also many other features that can be extracted from the Mel power spectrum.
 
-\subsection{Available Simple Features}
+\subsection{Temporal Features}
 
-After this preprocessing has been performed, many simpler features are easily extracted.  With these features, a distance can be constructed between songs, with the metric depending on which features are of interest.  Below, some of the possible features are described.  This list is in no way exhaustive, as many other features exist.
+\subsection{Spectral Features}
 
-\subsubsection{Zero Crossing Rate}
+%\subsection{Available Simple Features}
+%
+%After this preprocessing has been performed, many simpler features are easily extracted.  With these features, a distance can be constructed between songs, with the metric depending on which features are of interest.  Below, some of the possible features are described.  This list is in no way exhaustive, as many other features exist.
+%
+%\subsubsection{Zero Crossing Rate}
+%
+%The zero crossing rate (ZCR) is one of the easiest features to extract, as it does not require any preprocessing.  The ZCR measures the average number of times a signal crosses zero, normalized to some unit time.  Generally speaking the ZCR can be used to help classify the noisiness of a signal, although perceived noisiness and perceived ZCR may differ for certain signals (as noted in Pampalk's thesis).  Mathematically, the ZCR is given by
+%$$ \text{zcr} = \frac{\sum_{i=1}^{N-1} \vert w_{i+1} - w_{i} \vert}{2 N f_s} $$
+%where $\mathbf{w}$ is the raw data, $N$ is the length of the data, and $f_s$ is the sampling frequency.
+%
+%\subsubsection{Root Mean Square Energy}
+%
+%The Root Mean Square (RMS) energy is another feature that comes directly from the audio signal.  The RMS energy gives a measure of overall loudness of an audio signal, and is given by
+%$$ \text{rms} = \sqrt{\frac{1}{N}\sum_{i=1}^N w_i^2} $$
+%
+%
+%\subsubsection{Noisiness}
+%
+%As mentioned earlier, the ZCR gives one attempt at classifying noisiness, although it can differ from perceived noisiness.  To improve the measure of noisiness, the dB scale power spectrum of the audio signal can be used.  One measure of this spectrum based noisiness is based off of differences between frequency bins for a given time segment.  Let $\mathbf{P}$ represent the power spectrum of a signal, with rows corresponding to frequency bins, and columns corresponding to time segments.  Then,
+%$$ \text{noisiness}  = \sum_{t} \sum_{f} \vert P_{f+1,t} - P_{f,t} \vert $$
+%In practice, frequencies below 800Hz are ignored in this calculation for noisiness.  Low values for this noisiness measure correspond to noisy sound.
+%
+%\subsubsection{Average Loudness}
+%
+%When looking at the average loudness of an audio signal, it is useful to refer to the Mel frequencies, as we want to measure perceived average loudness. Let $\mathbf{M}$ represent the matrix of the dB scale mel frequency ceptstrum, then
+%
+%$$ \text{Avg Loudness} = \frac{1}{N T} \sum_{f,t} M_{f,t} $$
+%
+%\subsubsection{Percussiveness}
+%
+%A simple measure for percussiveness comes from the difference between successive time segments of the Mel ceptstrum.
+%$$ \text{percussiveness} = \frac{1}{N(T-1)} \sum_{f,t} \vert M_{f,t+1} - M_{f,t}  \vert $$
+%
+%Other measures of percussiveness or rhythmic features can be calculated based on the wavelet transform of the audio signal.  The autocorrelation of a discrete wavelet representation of the audio signal presents periodicity information of the signal, which is related to the percussiveness of the signal.
+%
+%\subsubsection{Spectral Centroid}
+%
+%In an attempt to measure the brightness of the signal, the spectral centroid is used.  Heuristically, if a signal has a brighter sound, it is likely to have a lot of energy in the higher frequencies.  Thus, the spectral centroid might be higher.  One limitation, however, is if the signal has a full range of sounds, combining bright high pitch sounds with strong low pitched sounds (e.g. strong drums).
+%$$ \text{Spectral Centroid} = \frac{\sum_f f*M_{f,t}}{\sum_f M_{f,t}} $$
+%Note that this spectral centroid measure is for each time segment, and the mean across the entire song is usually used as a comparison feature.
 
-The zero crossing rate (ZCR) is one of the easiest features to extract, as it does not require any preprocessing.  The ZCR measures the average number of times a signal crosses zero, normalized to some unit time.  Generally speaking the ZCR can be used to help classify the noisiness of a signal, although perceived noisiness and perceived ZCR may differ for certain signals (as noted in Pampalk's thesis).  Mathematically, the ZCR is given by
-$$ \text{zcr} = \frac{\sum_{i=1}^{N-1} \vert w_{i+1} - w_{i} \vert}{2 N f_s} $$
-where $\mathbf{w}$ is the raw data, $N$ is the length of the data, and $f_s$ is the sampling frequency.
-
-\subsubsection{Root Mean Square Energy}
-
-The Root Mean Square (RMS) energy is another feature that comes directly from the audio signal.  The RMS energy gives a measure of overall loudness of an audio signal, and is given by
-$$ \text{rms} = \sqrt{\frac{1}{N}\sum_{i=1}^N w_i^2} $$
-
-
-\subsubsection{Noisiness}
-
-As mentioned earlier, the ZCR gives one attempt at classifying noisiness, although it can differ from perceived noisiness.  To improve the measure of noisiness, the dB scale power spectrum of the audio signal can be used.  One measure of this spectrum based noisiness is based off of differences between frequency bins for a given time segment.  Let $\mathbf{P}$ represent the power spectrum of a signal, with rows corresponding to frequency bins, and columns corresponding to time segments.  Then,
-$$ \text{noisiness}  = \sum_{t} \sum_{f} \vert P_{f+1,t} - P_{f,t} \vert $$
-In practice, frequencies below 800Hz are ignored in this calculation for noisiness.  Low values for this noisiness measure correspond to noisy sound.
-
-\subsubsection{Average Loudness}
-
-When looking at the average loudness of an audio signal, it is useful to refer to the Mel frequencies, as we want to measure perceived average loudness. Let $\mathbf{M}$ represent the matrix of the dB scale mel frequency ceptstrum, then
-
-$$ \text{Avg Loudness} = \frac{1}{N T} \sum_{f,t} M_{f,t} $$
-
-\subsubsection{Percussiveness}
-
-A simple measure for percussiveness comes from the difference between successive time segments of the Mel ceptstrum.
-$$ \text{percussiveness} = \frac{1}{N(T-1)} \sum_{f,t} \vert M_{f,t+1} - M_{f,t}  \vert $$
-
-Other measures of percussiveness or rhythmic features can be calculated based on the wavelet transform of the audio signal.  The autocorrelation of a discrete wavelet representation of the audio signal presents periodicity information of the signal, which is related to the percussiveness of the signal.
-
-\subsubsection{Spectral Centroid}
-
-In an attempt to measure the brightness of the signal, the spectral centroid is used.  Heuristically, if a signal has a brighter sound, it is likely to have a lot of energy in the higher frequencies.  Thus, the spectral centroid might be higher.  One limitation, however, is if the signal has a full range of sounds, combining bright high pitch sounds with strong low pitched sounds (e.g. strong drums).
-$$ \text{Spectral Centroid} = \frac{\sum_f f*M_{f,t}}{\sum_f M_{f,t}} $$
-Note that this spectral centroid measure is for each time segment, and the mean across the entire song is usually used as a comparison feature.
-
-\subsubsection{Fluctuation Patterns}
+\subsection{Fluctuation Patterns}
 
 Fluctuation patterns are useful measures for describing features not captured by spectral similarities.  Fluctuation patterns are descriptors of the loudness modulation in the spectrogram (i.e. loudness modulation per frequency band).  In essence, fluctuation patterns are smoothed loudness modulation frequencies per frequency band.  Although fluctuation patterns can be defined for the Fourier power spectrum, we compute fluctuation patterns in the Mel power spectrum.\\
 
@@ -194,7 +202,96 @@ We first employed a simple PCA algorithm.  This method projects the feature vect
 We also used LLE to reduce dimension.  This method has the benefit that it will work with data that live on a non-linear manifold.  Although there are more sophisticated manifold learning methods, LLE is a reasonably cheap starting point.  One possible downside to LLE is that to bring a new song into the lower dimensional space, we must recompute the embedding for all songs in the training set plus the new song.  For larger data sets, this could become quite expensive.  We would like our dimension reduction method to admit new songs into the test set with minimal computational expense.\\
 
 \subsection*{PageRank Feature Selection}
-% TODO Dale
+One problem with most dimensionality reduction techniques is that they do not reduce the amount of feature extraction.  Although all dimensionality reduction methods allow for classification to take place in a lower dimensional space, they rely on starting in the higher dimensional space, and then projecting down to the lower dimensional space.  In the context of song classification, this mean that the entire feature vector needs to be computed for any new song.  This calculation can be more time consuming than desired.  As such, it is of interest to attempt to pick out the important features.  To do this, we implemented a Page Rank inspired technique similar to what Ienco et al. used for document classification in \cite{ieonco:pagerank}.
+
+\begin{center}
+\includegraphics[width=0.3\textwidth]{figures/featGraph.pdf}
+\end{center}
+
+Consider a graph whose nodes represent specific features that can be extracted from a song, e.g. spectral centroid, rolloff, etc.  The goal is to connect the nodes with weighted edges such that features can vote for other features if they believe it is important.  More specifically, we look for a similarity measure between features.  If two features are similar, then they will vote for each other.  Features with a lot of votes will then be selected with the page rank algorithm.  Since each song acts as an observation of the feature set, perhaps the most obvious choice for a similarity measure is correlation.  If two features are highly correlated (or anti-correlated), then we can say that they are similar.  Let $e_{ij}$ represent the edge from node $i$, corresponding to feature $f_i$, to node $j$, corresponding to feature $f_j$, and $w_{ij}$ be the corresponding weight of the edge, then
+$$w_{ij} = \text{corr}(f_i,f_j)^2$$
+We take the square correlation since we want both correlated and anti-correlated features to be considered similar.  The correlation we used is a Spearman correlation.  The benefit of Spearman over Pearson is that the Pearson correlation assumes a linear relationship, whereas Spearman is nonparametric and better accounts for nonlinearities.
+
+Once we have constructed a matrix, $W$, containing all of the weights of our feature graph, we normalize the rows to sum to $1$, giving a normalized matrix $H$.  Our graph is naturally (nearly) fully connected with our choice of weights, so no escape probabilities need to be added to our matrix.  This also means that we do not need to include any damping that is often used with Page Rank.  Finding the rankings of the features is then just a simple eigenvalue problem, solving $r^T = r^T H$.  Running this ranking method on the full set of training songs gave us the following top 5 features:
+
+\begin{table}[!ht]
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+Rank & Feature \\ \hline
+1 & Mfcc 1\tss{(1)} \\ \hline
+2 & Spectral Flatness\tss{(1)} \\ \hline
+3 & Peak Envelope Max\tss{(1)} \\ \hline
+4 & Spectral Slope\tss{(1)} \\ \hline
+5 & Autocorrelation Max\tss{(1)} \\ \hline
+\end{tabular}
+\caption{Top 5 features extracted using Page Rank with the entire feature set.  Superscripts refer to which moment of the feature is being considered (1-mean, 2-variance, 3-skewness, 4-kurtosis).}
+\end{center}
+\end{table}
+
+One potential problem with this implementation is that all songs are considered to be representable by the same features.  In general, this is not true as different genres exhibit different behaviors of features.  To capture this difference between features, we can instead run the feature selection considering a single genre at a time.  The top 5 features for each genre are shown in the following table.
+
+\begin{table}[!ht]
+\begin{center}
+\begin{tabular}{|l|l|l|l|}
+\hline
+Rank & Classical & Electronic & Jazz/Blues \\ \hline
+1 & Zero Crossing Rate\tss{(1)} & Spectral Slope\tss{(1)} & Spectral Rolloff\tss{(2)} \\ \hline
+2 & Spectral Centroid\tss{(1)} & MFCC 1\tss{(1)} & MFCC 3\tss{(2)} \\ \hline
+3 & Spectral Spread\tss{(1)} & RMS\tss{(1)} & FP DLF \\ \hline
+4 & Spectral Rolloff\tss{(1)} & Peak Envelope\tss{(1)} & MFCC 5\tss{(1)} \\ \hline
+5 & Spectral Crest\tss{(1)} & Spectral Flux\tss{(1)} & FP Bass \\ \hline
+\hline
+Rank & Metal/Punk & Rock/Pop & World \\ \hline
+1 & MFCC 4\tss{(2)} & Spectral Flatness\tss{(1)} & MFCC 1\tss{(1)} \\ \hline
+2 & Spectral Crest\tss{(1)} & MFCC 1\tss{(1)} & Predicitivity Ratio\tss{(1)} \\ \hline
+3 & Predictivity Ratio\tss{(1)} & Predictivity Ratio\tss{(1)} & Spectral Flatness\tss{(1)}\\ \hline
+4 & Peak Envelope\tss{(4)} & Spectral Crest\tss{(1)} & Spectral Crest\tss{(1)} \\ \hline
+5 & MFCC 1\tss{(4)} & Spectral Spread\tss{(1)} & Spectral Spread\tss{(1)} \\ \hline
+\end{tabular}
+
+\caption{Top 5 features extracted using Page Rank with the genres considered separately.  Superscripts refer to which moment of the feature is being considered (1-mean, 2-variance, 3-skewness, 4-kurtosis).}
+\end{center}
+\end{table}
+
+%\begin{figure}[!ht]
+%\begin{center}
+%\vspace{-1in}
+%\includegraphics[width=0.6\textwidth]{figures/genrePR.pdf}
+%\vspace{-1in}
+%\caption{Relationship between dimension and classification accuracy using features selected with Page Rank and a kNN classifier.}
+%\end{center}
+%\end{figure}
+
+The downside to using correlation as a similarity measure is that highly correlated features will often be selected around similar times.  This is less than ideal as we would want to select features that have a lot of information, and exclude features that contain the same information.  In order to attempt to solve this issue, we tried a step-by-step feature selection method, where after a feature is selected, the corresponding node is removed from the graph, and a penalty added to features that have high correlation to the selected feature.
+
+\hrulefill
+
+\textbf{Algorithm:} Feature at a time Page Rank
+\begin{itemize}
+\item Construct a matrix, $W$, of edge weights, where $W_{ij} = \text{corr}(f_i,f_j)^2$
+\item Create a matrix, $H$, with rows being the normalized (sum to 1) rows of $W$
+\item Repeat:
+\begin{itemize}
+\item Calculate the left eigenvector, $r^T = r^T H$
+\item Find the feature with the highest ranking, $\ell = \argmax_i\{r_i\}$
+\item Rescale $W$ by $W_{ij} = W_{ij} (1 - \alpha W_{j\ell})$
+\item Remove row and column $\ell$ from $W$
+\item Recalculate $H$
+\end{itemize}
+\end{itemize}
+\hrulefill
+
+Unfortunately, this adjustment generally performs worse.  Initially it gives slightly better performance, but then quickly drops below the all at once Page Rank method.
+
+\begin{figure}
+\begin{center}
+\vspace{-1in}
+\includegraphics[width=0.6\textwidth]{figures/adjPR.pdf}
+\vspace{-1in}
+\caption{Accuracy vs Dimension with both the all at once Page Rank and the feature at a time Page Rank (with optimal $\alpha$)}
+\end{center}
+\end{figure}
 
 \subsection*{Graph Methods}
 % TODO Aly

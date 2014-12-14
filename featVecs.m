@@ -254,7 +254,7 @@ case 'testWCH'
 
       % downsample to 11025 Hz
       fs = fs/2;
-      wav = wav(1:2:end);
+      wav = resample(wav,1,2);
 
       wav = wav*10^(96/20);
 
@@ -363,7 +363,7 @@ case 'testDale'
 
       % downsample to 11025 Hz
       fs = fs/2;
-      wav = wav(1:2:end);
+      wav = resample(wav,1,2);
 
       wav = wav*10^(96/20);
       wav = wav(wav~=0);

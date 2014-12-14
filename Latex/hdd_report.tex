@@ -146,7 +146,7 @@ To extract features from a song, we first decompose the song waveform using a di
 
 In our implementation, we use only the central $2^{18}$ samples of each song, which, with a sampling frequency of $11025\,\text{Hz}$, corresponds to about $23$ seconds.  We used the stationary wavelet transform due to its time-invariance property, which the discrete wavelet transform does not have.  We used the biorthogonal wavelet with reconstruction and decomposition filters with $4$ vanishing moments (\texttt{bior4.4} in {\sc matlab}).  We use {\texttt bior4.4} because the associated filters have linear phase.  Seven levels of decomposition are used in the analysis.  Li et al. used the central $3$ seconds of each song, the discrete wavelet transform, the Daubechies wavelet \texttt{db8}, and seven levels of decomposition.  In our experiments, we did not find a significant difference between the two methods, although we expect our approach to perform better than that of Li et al.\\
 
-To motivate the inclusion of WCH features in our methods, we now show the results of a few quick experiments with the training data set.  First we compute the WCH features for all the training songs.  Computing these features for all $729$ training songs in serial on a $1.6\,\text{GHz}$ took approximately $6$ minutes, not including the time spend loading the songs.  Figure \ref{fig:wch_box} shows a box plot of WCH energy feature from the $7$th approximation and detail sub-bands.  Note that the features are standardized across all songs.  We can see clearly from Figure \ref{fig:wch_box} that classical, world, and jazz/blues songs have a tendency to have less WCH ``energy'' than the other genres, which gives us hope that certain WCH features will add useful information to our feature set.  We use only a subset of sub-bands to produce WCH features as not all sub-bands produce useful features.
+To motivate the inclusion of WCH features in our methods, we now show the results of a few quick experiments with the training data set.  First we compute the WCH features for all the training songs.  Computing these features for all $729$ training songs in serial on a $1.6\,\text{GHz}$ CPU took approximately $6$ minutes, not including the time spend loading the songs.  Figure \ref{fig:wch_box} shows a box plot of WCH energy feature from the $7$th approximation and detail sub-bands.  Note that the features are standardized across all songs.  We can see clearly from Figure \ref{fig:wch_box} that classical, world, and jazz/blues songs have a tendency to have less WCH ``energy'' than the other genres, which gives us hope that certain WCH features will add useful information to our feature set.  We use only a subset of sub-bands to produce WCH features as not all sub-bands produce useful features.
 
 \begin{figure}[h!]
    \centering
@@ -240,7 +240,7 @@ Consider a graph whose nodes represent specific features that can be extracted f
 $$w_{ij} = \text{corr}(f_i,f_j)^2$$
 We take the square correlation since we want both correlated and anti-correlated features to be considered similar.  The correlation we used is a Spearman correlation.  The benefit of Spearman over Pearson is that the Pearson correlation assumes a linear relationship, whereas Spearman is nonparametric and better accounts for nonlinearities.
 
-Once we have constructed a matrix, $W$, containing all of the weights of our feature graph, we normalize the rows to sum to $1$, giving a normalized matrix $H$.  Our graph is naturally (nearly) fully connected with our choice of weights, so no escape probabilities need to be added to our matrix.  This also means that we do not need to include any damping that is often used with Page Rank.  Finding the rankings of the features is then just a simple eigenvalue problem, solving $r^T = r^T H$.  Running this ranking method on the full set of training songs gave us top 5 features shown in table \ref{tab:all_pr}
+Once we have constructed a matrix, $W$, containing all of the weights of our feature graph, we normalize the rows to sum to $1$, giving a normalized matrix $H$.  Our graph is naturally (nearly) fully connected with our choice of weights, so no escape probabilities need to be added to our matrix.  This also means that we do not need to include any damping that is often used with Page Rank.  Finding the rankings of the features is then just a simple eigenvalue problem, solving $r^T = r^T H$.  Running this ranking method on the full set of training songs gave us top 5 features shown in Table \ref{tab:all_pr}
 
 \begin{table}[!h]
 \begin{center}
@@ -254,11 +254,11 @@ Rank & Feature \\ \hline
 5 & Autocorrelation Max\tss{(1)} \\ \hline
 \end{tabular}
 \caption{Top 5 features extracted using Page Rank with the entire feature set.  Superscripts refer to which moment of the feature is being considered (1-mean, 2-variance, 3-skewness, 4-kurtosis).}
-\end{center}
 \label{tab:all_pr}
+\end{center}
 \end{table}
 
-One potential problem with this implementation is that all songs are considered to be representable by the same features.  In general, this is not true as different genres exhibit different behaviors of features.  To capture this difference between features, we can instead run the feature selection considering a single genre at a time.  The top 5 features for each genre are shown in \ref{tab:genre_pr}.
+One potential problem with this implementation is that all songs are considered to be representable by the same features.  In general, this is not true as different genres exhibit different behaviors of features.  To capture this difference between features, we can instead run the feature selection considering a single genre at a time.  The top 5 features for each genre are shown in Table \ref{tab:genre_pr}.
 
 \begin{table}[!h]
 \begin{center}
@@ -280,8 +280,8 @@ Rank & Metal/Punk & Rock/Pop & World \\ \hline
 \end{tabular}
 
 \caption{Top 5 features extracted using Page Rank with the genres considered separately.  Superscripts refer to which moment of the feature is being considered (1-mean, 2-variance, 3-skewness, 4-kurtosis).}
-\end{center}
 \label{tab:genre_pr}
+\end{center}
 \end{table}
 
 %\begin{figure}[!ht]
@@ -333,16 +333,79 @@ Unfortunately, this adjustment generally performs worse.  Initially it gives sli
 %the songs for which you know the genre. Or it could involve more
 %sophisticated methods.
 %_________________________________________________________________
-\subsection{$K$-Nearest Neighbor}
-One way to classify an observation is to use $K$-Nearest Neighbors. It is a simple machine learning algorithm that stores all the similarity measures of the training data and classifies a new observation based on the ``distance" of the testing data to the training data. It finds the  $K$ nearest neighbors and uses those observation to classify based on a majority vote. 
+\subsection{$k$-Nearest Neighbor}
+Perhaps the simplest way to classify a new song is to use its $k$-nearest neighbors.  We first compute the reduced dimension feature vector of all the songs in the training set and the test song.  Then we find the $k$ songs in the training set that are closest in some metric to the test song.  We used the standardized Euclidean distance, but there are many other possible distances.  Finally, the method finds the most common genre (with ties broken in some manner) among the $k$-nearest neighbors and assigns that genre to the test song.\\
 
 \subsection{Support Vector Machines}
-Support vector machines is another simple machine learning algorithm. It defines each observation of the training data as a point in space and creates a boundary line that best separates the data into its correct classification with minimal amount of incorrect classifications. It then takes the testing data projects in down into the space and classifies the observation based on its relation to the boundary line. We can repeat this process until we have as many boundary lines as needed. To transform the boundary lines into a nonlinear form we can use kernel support vector machines.
+Support vector machines (SVMs) are another supervised learning algorithm.  There were originally developed as a binary classification method, but there exist many methods to extend SVMs to support multiple classes.  In the linear case, the SVM method attempts to draw the ``best'' hyperplane between two sets of points with known classification.  The ``best'' hyperplane is the one that maximizes the margin between the two classes.  Sometimes the data are nearly linearly separable, but perhaps some of the points from one class live on the other side of what would otherwise be the maximum-margin separating hyperplane.  This issue is resolved by admitting these points and adding a penalty to account for the margin violation.\\
 
-\subsection{Cross-Validation}
+In more extreme cases, the data are truly non-linearly separable.  It may be possible to map the data to a higher dimensional space in which they are linearly separable.  However, determining suitable mappings can be quite difficult and may add considerable computational expense.  It turns out that we can implicitly map the data to a higher (even infinite) dimensional space using what is known as the kernel trick.  It transpires that a slight modification to the linear SVM algorithm gives us the advantage of working with the data mapped into a higher dimensional space all without actually computing the mapping!  The linear SVM algorithm uses the inner product $\mathbf{x}_i\cdot\mathbf{x}_j$ between data vectors $\mathbf{x}_i$ and $\mathbf{x}_j$; the kernel trick essentially just replaces the standard inner product with a new kernel.  Popular kernels are the Gaussian kernel
 
+\[ k(\mathbf{x}_i,\mathbf{x}_j) = \exp\left(-\gamma \|\mathbf{x}_i-\mathbf{x}_j\|\right), \] 
 
-To validate our classification algorithm, we want to use cross-validation which is a way for us to asses our results if were were to generalize to a new and independent data set. We want to get an idea about how well we are able to predict the genre correctly using a random subset of our training data as the test data since we are have the ground truth. Cross-validation also give us insight in the training phase of our algorithm to determine if we are over fitting. Overfitting the data occurs when the algorithm is predicting the error instead of true trends in the data. This can occur due to many factors, one of which is due to using too many features to describe the model, thus cross-validation can also inform which features or methods provide the best and consistent results. For our purpose we are using a leave-$p$-out-cross-validation method. This consists of leaving out $p$ observations of our training set and using the rest of the observations as our training data. We then repeat with all the different ways to cut the original data and compute the mean and the standard deviation of our results.
+\noindent where $\gamma>0$ is a chosen scale parameter, and the polynomial kernel
+
+\[ k(\mathbf{x}_i,\mathbf{x}_j) = \left(1+\mathbf{x}_i\cdot\mathbf{x}_j\right)^p, \] 
+
+\noindent where $p$ is a chosen polynomial order.\\
+
+\subsubsection{Extension of SVMs to multiple classes}
+In order to fully utilize SVMs as a classification method, they should be extended beyond a binary classifier.  There exist methods that ``natively'' extend the SVM ideas to support multiple classes.  Another approch, the one we take, is to build many binary SVM classifiers that, when combined in an intelligent manner, result in a multi-class classier.\\ 
+
+Perhaps the simplest multi-class extension of binary SVMs is to use a ``one vs. all'' classification for each class.  This method builds an SVM classifier for each class and trains the classifier by grouping the training data into in the class and not in the class.  Specifically, if there are $n$ classes, we build the $n$ SVM classifiers $f_i$, $i=1,...,n$ that classify the data into class $i$ and not class $i$.  Each $f_i$ will return $1$ if the test data is likely in class $i$ and $0$ otherwise.  Table \ref{tab:onevall} shows a schematic of the return values for each $f_i$ for $n=6$.  To characterize a test song, we run each classifier, which will also produce a score measuring the likelihood that the song is in the class; we assign the most likely genre to the test song.\\
+
+\begin{table}[h!]
+   \centering
+   \begin{tabular}{|c|cccccc|}
+      \hline
+      class&$f_1$ & $f_2$ & $f_3$ & $f_4$ & $f_5$ & $f_6$\\\hline
+      1 & 1 & 0 & 0 & 0 &0 &0\\\hline
+      2 & 0 & 1 & 0 & 0 & 0 & 0\\\hline
+      3 & 0 & 0 & 1 & 0 & 0 & 0\\\hline
+      4 & 0 & 0 & 0 & 1 & 0 & 0\\\hline
+      5 & 0 & 0 & 0 & 0 & 1 & 0\\\hline
+      6 & 0 & 0 & 0 & 0 & 0 & 1\\\hline
+   \end{tabular}
+   \caption{Schematic of SVM multi-class extension one-versus-all.}
+   \label{tab:onevall}
+\end{table}
+
+Another popular option is the ``one vs. one'' extension, wherein one builds a classifier for each pair of classes.  If there are $n$ classes, then we will have $\binom n 2$ SVM classifiers.  Abusing notation slightly, let $f_{ij}$ be the classifer that decides between class $i$ and class $j$.  We set $f_{ij}$ to return $1$ if the test song likely belongs to class $i$ and $0$ if it likely belongs to class $j$.  See Table \ref{tab:onevone} for a schematic.  We if apply $f_{ij}$ to a song that does not belong to either class $i$ or class $j$, then the song will get mislabeled.  By applying each $f_{ij}$ to a test song, we get possibly multiple votes for each genre; we assign the genre with the most votes.\\
+
+\begin{table}
+   \centering
+   \begin{tabular}{|c|ccccccc|}
+      \hline
+      class&$f_{12}$ & $f_{13}$ & $f_{14}$ & $f_{15}$ & $f_{16}$ & $f_{23}$ & $\cdots$ \\\hline
+      1 & 1 & 1 & 1 & 1 & 1 &   & $\cdots$ \\\hline
+      2 & 0 &   &   &   &   & 1 & $\cdots$ \\\hline
+      3 &   & 0 &   &   &   & 0 & $\cdots$ \\\hline
+      4 &   &   & 0 &   &   &   & $\cdots$ \\\hline
+      5 &   &   &   & 0 &   &   & $\cdots$ \\\hline
+      6 &   &   &   &   & 0 &   & $\cdots$ \\\hline
+   \end{tabular}
+   \caption{Schematic of SVM multi-class extension one-versus-one.}
+   \label{tab:onevone}
+\end{table}
+
+The final extension method we consider uses ideas borrowed from error control coding.  When we apply some SVM classifier $f_i$ to a test track, it might make an error, in effect switching a $1$ to a $0$ or a $0$ to a $1$.  This happens for each classifier $f_i$.  One can think of the sequence of outputs of the $f_i$ as the output of a noisy communications channel.  As an example, see Table \ref{tab:ecoc}, which shows a choice of $f_i$, $i=1,...,6$ based on a Hamming code.  To classify a new track, we run each classifier $f_i$ on the test track, resulting in a row vector.  We then compare the output row vector with each row of the table (which corresponds to the unique codeword assigned to a class) and pick the closest class based on the Hamming distance.\\
+
+\begin{table}
+   \centering
+   \begin{tabular}{|c|cccccc|}
+      \hline
+      class&$f_{1}$ & $f_{2}$ & $f_{3}$ & $f_{4}$ & $f_{5}$ & $f_{6}$ \\\hline
+      1 & 0 & 0 & 0 & 0 & 0 & 0 \\\hline
+      2 & 0 & 1 & 0 & 1 & 0 & 1 \\\hline
+      3 & 1 & 0 & 0 & 1 & 1 & 0 \\\hline
+      4 & 1 & 1 & 0 & 0 & 1 & 1 \\\hline
+      5 & 1 & 1 & 1 & 0 & 0 & 0 \\\hline
+      6 & 1 & 0 & 1 & 1 & 0 & 1 \\\hline
+   \end{tabular}
+   \caption{Schematic of SVM multi-class extension based on a Hamming code.}
+   \label{tab:ecoc}
+\end{table}
+
 
 %_________________________________________________________________
 \section{Experiments}

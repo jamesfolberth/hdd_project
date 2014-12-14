@@ -45,7 +45,7 @@ end
 if strcmp(opt.dimRed, 'pr')
    if ~isfield(opt, 'prDim')
       %opt.prDim = 67;
-      opt.prDim = 118;
+      opt.prDim = 125;
       %opt.prDim = 40;
    end
    if ~isfield(opt, 'prMode')
@@ -274,6 +274,8 @@ probCorrect = sum(diag(confMat)./reshape(sum(confMat,1), [6 1])*1/6);
 probCorrect
 correctClassRate
 
+printClassifyResults(predGenre);
+
 end
 
 function [g, code] = getGenres(genres)
@@ -303,3 +305,33 @@ function [g, code] = getGenres(genres)
    end
 
 end % getGenres
+
+function [st] = printClassifyResults(predGenre, filename)
+% write our classification results to a file
+
+   if nargin < 2
+      filename = 'james_aly_dale_predict.txt';
+   end
+   
+   genreNames = {'classical','electronic','jazz_blues','rock_pop','metal_punk','world'};
+   
+   try
+      fid = fopen(filename,'w+');
+   
+      if fid == -1
+         error('Cannot open/create file %s for writing.',filename);
+      end
+   
+      fprintf(fid, 'Song  Genre\n');
+      fprintf(fid, '================\n');
+      for i=1:numel(predGenre)
+         fprintf(fid, '%03d   %s\n', i, genreNames{predGenre(i)});   
+      end
+   
+      st = fclose(fid);
+   
+   catch 
+      error('Writing to file %s failed',filename);
+   end
+
+end

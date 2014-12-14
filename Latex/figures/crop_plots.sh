@@ -3,3 +3,5 @@
 
 find . -name wch_box\* -type f -execdir pdfcrop -margin 10 '{}' '{}' \;
 
+find . -name optim\* -type f -execdir pdfcrop -margin 10 '{}' '{}' \;
+

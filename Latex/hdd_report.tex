@@ -12,6 +12,9 @@
 \DeclareMathOperator*{\argmin}{argmin}
 \DeclareMathOperator*{\argmax}{argmax}
 \newcommand{\tss}[1]{\textsuperscript{#1}}
+
+\hyphenpenalty = 9001 % Over 9000!!
+
 \begin{document}
 %_________________________________________________________________
 \title{Automated Music Genre Classification}
@@ -221,7 +224,7 @@ In the context of music classification, much of the dimension reduction is done 
 
 Even after features are extracted from the songs, the space may be larger than desired.  For one of our feature vector, we selected to use $198$ features.  While working in $198$ dimensions is not unmanageable, we wish to reduce dimensionality for a few reasons.  Not all features add new, useful information to the feature vector.  For example, many of the WCH energy features are highly correlated.  Some features may add ``noise'' our feature vector; removing those features via smart dimensionality reduction techniques is desirable.  As the dimension of the feature vector increases, the distance between a pair of songs becomes less significant, corresponding to the concentration of measure results we saw during the first half of the semester.  We have relatively few training songs ($729$) compared to the full feature set of $198$ features.  The machine learning methods we employ will lose some of their predictive power if we use a too high dimensional space with too few training songs.\\
 
-\subsection*{PCA and LLE}
+\subsection{PCA and LLE}
 We first employed a simple PCA algorithm.  This method projects the feature vectors into a new orthogonal basis where the first basis vector explains the largest possible variance in the data, and each successive basis vector is orthogonal to the preceding basis vectors and explains the largest possible variance in the data.  Once we transform the features into the principal component basis, we keep the first $d$ components, which correspond to the basis vectors that explain the most variance.  We can then attempt to cluster and classify the songs in the principal component basis using the first $d$ components.  Dimension reduction of new songs can be done via a pre-computed linear mapping onto the principal component basis.  PCA can be extended to attempt to separate non-linearly separable data via mapping the data into an even higher dimensional space.  This process can be done implicitly and with minimal extra computational cost via the kernel trick.\\
 
 % There is some literature suggesting PCA + clustering/classification might not work so well (for certain algorithms).  Don't know if we want to mention this blasphemy in the report.
@@ -229,7 +232,7 @@ We first employed a simple PCA algorithm.  This method projects the feature vect
 
 We also used LLE to reduce dimension.  This method has the benefit that it will work with data that live on a non-linear manifold.  Although there are more sophisticated manifold learning methods, LLE is a reasonably cheap starting point.  One possible downside to LLE is that to bring a new song into the lower dimensional space, we must recompute the embedding for all songs in the training set plus the new song.  For larger data sets, this could become quite expensive.  We would like our dimension reduction method to admit new songs into the test set with minimal computational expense.\\
 
-\subsection*{PageRank Feature Selection}
+\subsection{PageRank Feature Selection}
 One problem with most dimensionality reduction techniques is that they do not reduce the amount of feature extraction.  Although all dimensionality reduction methods allow for classification to take place in a lower dimensional space, they rely on starting in the higher dimensional space, and then projecting down to the lower dimensional space.  In the context of song classification, this mean that the entire feature vector needs to be computed for any new song.  This calculation can be more time consuming than desired.  As such, it is of interest to attempt to pick out the important features.  To do this, we implemented a Page Rank inspired technique similar to what Ienco et al. used for document classification in \cite{ieonco:pagerank}.
 
 \begin{center}
@@ -350,7 +353,7 @@ In more extreme cases, the data are truly non-linearly separable.  It may be pos
 \noindent where $p$ is a chosen polynomial order.\\
 
 \subsubsection{Extension of SVMs to multiple classes}
-In order to fully utilize SVMs as a classification method, they should be extended beyond a binary classifier.  There exist methods that ``natively'' extend the SVM ideas to support multiple classes.  Another approch, the one we take, is to build many binary SVM classifiers that, when combined in an intelligent manner, result in a multi-class classier.\\ 
+In order to fully utilize SVMs as a classification method, they should be extended beyond a binary classifier.  There exist methods that ``natively'' extend the SVM ideas to support multiple classes.  Another approach, the one we take, is to build many binary SVM classifiers that, when combined in an intelligent manner, result in a multi-class classier.\\ 
 
 Perhaps the simplest multi-class extension of binary SVMs is to use a ``one vs. all'' classification for each class.  This method builds an SVM classifier for each class and trains the classifier by grouping the training data into in the class and not in the class.  Specifically, if there are $n$ classes, we build the $n$ SVM classifiers $f_i$, $i=1,...,n$ that classify the data into class $i$ and not class $i$.  Each $f_i$ will return $1$ if the test data is likely in class $i$ and $0$ otherwise.  Table \ref{tab:onevall} shows a schematic of the return values for each $f_i$ for $n=6$.  To characterize a test song, we run each classifier, which will also produce a score measuring the likelihood that the song is in the class; we assign the most likely genre to the test song.\\
 
@@ -370,7 +373,7 @@ Perhaps the simplest multi-class extension of binary SVMs is to use a ``one vs. 
    \label{tab:onevall}
 \end{table}
 
-Another popular option is the ``one vs. one'' extension, wherein one builds a classifier for each pair of classes.  If there are $n$ classes, then we will have $\binom n 2$ SVM classifiers.  Abusing notation slightly, let $f_{ij}$ be the classifer that decides between class $i$ and class $j$.  We set $f_{ij}$ to return $1$ if the test song likely belongs to class $i$ and $0$ if it likely belongs to class $j$.  See Table \ref{tab:onevone} for a schematic.  We if apply $f_{ij}$ to a song that does not belong to either class $i$ or class $j$, then the song will get mislabeled.  By applying each $f_{ij}$ to a test song, we get possibly multiple votes for each genre; we assign the genre with the most votes.\\
+Another popular option is the ``one vs. one'' extension, wherein one builds a classifier for each pair of classes.  If there are $n$ classes, then we will have $\binom n 2$ SVM classifiers.  Abusing notation slightly, let $f_{ij}$ be the classifier that decides between class $i$ and class $j$.  We set $f_{ij}$ to return $1$ if the test song likely belongs to class $i$ and $0$ if it likely belongs to class $j$.  See Table \ref{tab:onevone} for a schematic.  We if apply $f_{ij}$ to a song that does not belong to either class $i$ or class $j$, then the song will get mislabeled.  By applying each $f_{ij}$ to a test song, we get possibly multiple votes for each genre; we assign the genre with the most votes.\\
 
 \begin{table}
    \centering
@@ -388,7 +391,7 @@ Another popular option is the ``one vs. one'' extension, wherein one builds a cl
    \label{tab:onevone}
 \end{table}
 
-The final extension method we consider uses ideas borrowed from error control coding.  When we apply some SVM classifier $f_i$ to a test track, it might make an error, in effect switching a $1$ to a $0$ or a $0$ to a $1$.  This happens for each classifier $f_i$.  One can think of the sequence of outputs of the $f_i$ as the output of a noisy communications channel.  As an example, see Table \ref{tab:ecoc}, which shows a choice of $f_i$, $i=1,...,6$ based on a Hamming code.  To classify a new track, we run each classifier $f_i$ on the test track, resulting in a row vector.  We then compare the output row vector with each row of the table (which corresponds to the unique codeword assigned to a class) and pick the closest class based on the Hamming distance.\\
+The final extension method we consider, called error correcting output codes (ECOC), uses ideas borrowed from error control coding.  When we apply some SVM classifier $f_i$ to a test track, it might make an error, in effect switching a $1$ to a $0$ or a $0$ to a $1$.  This happens for each classifier $f_i$.  One can think of the sequence of outputs of the $f_i$ as the output of a noisy communications channel.  As an example, see Table \ref{tab:ecoc}, which shows a choice of $f_i$, $i=1,...,6$ based on a Hamming code.  To classify a new track, we run each classifier $f_i$ on the test track, resulting in a row vector.  We then compare the output row vector with each row of the table (which corresponds to the unique codeword assigned to a class) and pick the closest class based on the Hamming distance.\\
 
 \begin{table}
    \centering
@@ -414,6 +417,54 @@ The final extension method we consider uses ideas borrowed from error control co
 %parameters were chosen. Include the computation time for your method.
 %_________________________________________________________________
 
+In this section we will describe a few of the experiments we performed.  We first computed and saved the feature vectors for the training set.  For our implementation, this is the performance bottleneck, and it took about three hours to compute the feature vectors for the training set.  This is due not to the complexity of extracting the features but due to our use of an inefficient toolbox (which we use for convenience); we believe that it is possible to optimize the routines in the toolbox we use for our purposes.\\
+
+Once the feature vectors are computed, we can reduce dimension and attempt training and classification.  We first used PCA and LLE dimension reduction as a baseline for comparison against the PageRank feature selection.  For the sake of brevity, we only note that we were able to optimize the parameters of the PageRank feature selection to perform significantly better than either PCA or LLE.  We use both the $k$-nearest neighbor and multi-class SVM classifiers.  The $k$-nearest neighbor classifier generally works well with $k=5$ neighbors.  Generally, one-versus-all SVM and ECOC SVM with a Hamming-like code perform quite well with a polynomial kernel with order $p\approx 2.5$.  The one-versus-one SVM classifier did not perform as well as the other two multi-class extensions, and we found the Gaussian kernel did not work well.\\
+
+One of the main parameters of the PageRank feature selection is how many features we select.  In Figure \ref{fig:prDim} we have plotted the classification accuracy during training cross-validation as a function of dimension using the one-versus-all SVM classifier with a genre-based PageRank feature selection.  Looking only at the aggregate adjusted classification rate, we see that the optimal dimensionality is around $125$ dimensions.  Looking at each genre we see that different genres obtain peak performance at different dimensionalities.
+
+\begin{figure}[h!]
+   \centering
+   \includegraphics[width=0.45\textwidth]{figures/optimSVMOVAprDim_genre05_Dale.pdf}
+   \includegraphics[width=0.45\textwidth]{figures/optimSVMOVAprDimClass_Dale.pdf}
+   \caption{Dimension dependence of genre-based PageRank feature selection with one-versus-all SVM.}
+   \label{fig:prDim}
+\end{figure}
+
+For the $125$ dimensional PageRank dimension reduced feature vectors, running a cross validation of the one-versus-all SVM classifier on the training set takes approximately $25$ seconds running in serial on a $1.6\,\text{GHz}$ CPU.  In Table \ref{tab:xval} we show the results of a cross-validation using the $125$ selected features and the one-vs-all SVM classifier.  The entries are normalized so that the column sums are $1$ (entry $(i,j)$ is the average rate that genre $j$ is classified as genre $i$).  The most significant confusions are between world and classical, rock/pop and metal/punk, and jazz/blues and rock/pop.  This cross-validation gave an adjusted classification rate of $73.1\%$, which matches what we expect from Figure \ref{fig:prDim}.\\
+
+\begin{table}[h!]
+   \centering
+   \begin{tabular}{ l||l | l | l | l | l | l | }
+   & classical& electronic& jazz\_blues& metal\_punk& rock\_pop& world\\\hline
+   classical & 0.93 \pm0.04 &0.04 \pm0.03 &0.00 \pm0.00 &0.00 \pm0.00 &0.04 \pm0.03 &0.20 \pm0.08 \\ \hline 
+   electronic & 0.01 \pm0.01 &0.73 \pm0.09 &0.01 \pm0.05 &0.04 \pm0.08 &0.08 \pm0.06 &0.06 \pm0.05 \\ \hline 
+   jazz\_blues & 0.00 \pm0.00 &0.00 \pm0.01 &0.82 \pm0.16 &0.00 \pm0.02 &0.03 \pm0.03 &0.02 \pm0.03 \\ \hline 
+   metal\_punk & 0.01 \pm0.01 &0.02 \pm0.03 &0.00 \pm0.00 &0.61 \pm0.16 &0.09 \pm0.06 &0.04 \pm0.05 \\ \hline 
+   rock\_pop & 0.01 \pm0.01 &0.10 \pm0.06 &0.13 \pm0.15 &0.28 \pm0.15 &0.68 \pm0.10 &0.06 \pm0.05 \\ \hline 
+   world & 0.05 \pm0.03 &0.11 \pm0.06 &0.04 \pm0.09 &0.06 \pm0.08 &0.09 \pm0.07 &0.62 \pm0.09 \\ \hline 
+   \end{tabular}
+   \caption{Confusion matrix (rescaled) for cross-validation using genre-based PageRank and one-vs-all SVM.}
+   \label{tab:xval}
+\end{table}
+
+For the final test, we attempt classification of the test data.  We use the optimal parameters found by running cross-validations.  Specifically, we use a genre-based PageRank feature selection keeping $125$ features and one-versus-all SVM with a polynomial kernel with order $p=2.5$.  Table \ref{tab:class} shows the confusion matrix for the classification.  The classification performs much better on the test data compared to during cross-validation.
+
+\begin{table}[h!]
+   \centering
+   \begin{tabular}{ l||l | l | l | l | l | l | }
+   & classical & electronic & jazz\_blues & metal\_punk & rock\_pop & world\\\hline
+   classical & 25 &0 &0 &0 &0 &0 \\ \hline 
+   electronic & 0 &25 &1 &0 &0 &0 \\ \hline 
+   jazz\_blues & 0 &0 &24 &0 &0 &0 \\ \hline 
+   metal\_punk & 0 &0 &0 &25 &0 &0 \\ \hline 
+   rock\_pop & 0 &0 &0 &0 &24 &2 \\ \hline 
+   world & 0 &0 &0 &0 &1 &23 \\ \hline 
+   \end{tabular}
+   \caption{Confusion matrix for test classification using genre-based PageRank and one-vs-all SVM.}
+   \label{tab:class}
+\end{table}
+
 
 %_________________________________________________________________
 \section{Discussion}
@@ -421,6 +472,9 @@ The final extension method we consider uses ideas borrowed from error control co
 %improvement. Discuss the ability of your approach to classify
 %non-classical into the five remaining genres.
 %_________________________________________________________________
+
+
+
 
 
 Dr. Meyer and James talked about wavelet stuff.  We should acknowledge his help in our conclusion.

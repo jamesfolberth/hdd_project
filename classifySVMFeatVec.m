@@ -11,7 +11,7 @@ if nargin < 1 % set all to defaults
    %opt = struct('MCMethod','onevone');
    %opt = struct('MCMethod','ECOC');
 
-   %opt = struct('MCMethod','onevall','dimRed','pr');
+   %opt = struct('MCMethod','onevall','dimRed','pca');
    %opt = struct('MCMethod','onevone','dimRed','pr');
    %opt = struct('MCMethod','ECOC','dimRed','pr');
 
@@ -380,7 +380,7 @@ otherwise
 end
 
 % print results
-%latexTable(crossValAvg, 'crossValAvg.tex', '%3.2f', unique(genre));
+latexTable(confMat, 'crossValAvg.tex', '%d', unique(trainGenre));
 correctClassRate = diag(confMat)./reshape(sum(confMat,1), [6 1]);
 
 % scaled percent correct as done in project guide book

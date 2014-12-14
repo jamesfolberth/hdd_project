@@ -179,14 +179,14 @@ else
       %print('Latex/figures/optimSVMOVAprDim_Dale.pdf','-dpdf');
       print('Latex/figures/optimSVMOVAprDim_genre05_Dale.pdf','-dpdf');
 
-      %errorbar(repmat(transpose(dim), [1 6]), transpose(mean(genreClassRate,3)),...
-      %   transpose(std(genreClassRate,0,3)));
-      %axis([min(dim)-1 max(dim)+1 0.4 1])
-      %xlabel('Dimension'); ylabel('Classification Rate');
-      %title('Classification Rate - One vs. All');
-      %legend('c','e','j\_b','m\_p','r\_p','w','Orientation','horizonta',...
-      %   'Location','SouthEast');
-      %print('Latex/figures/optimSVMOVAprDimClass_Dale.pdf','-dpdf');
+      errorbar(repmat(transpose(dim), [1 6]), transpose(mean(genreClassRate,3)),...
+         transpose(std(genreClassRate,0,3)));
+      axis([min(dim)-1 max(dim)+1 0.4 1])
+      xlabel('Dimension'); ylabel('Classification Rate');
+      title('Classification Rate - One vs. All');
+      legend('c','e','j\_b','m\_p','r\_p','w','Orientation','horizonta',...
+         'Location','SouthEast');
+      print('Latex/figures/optimSVMOVAprDimClass_Dale.pdf','-dpdf');
 
 
  

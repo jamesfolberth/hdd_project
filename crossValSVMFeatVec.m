@@ -401,8 +401,13 @@ end
 %latexTable(round(crossValAvg), 'crossValAvg.tex', '%i', unique(genre));
 latexTable(crossValAvg, 'crossValAvg.tex', '%3.2f', unique(genre));
 latexTable(crossValSD, 'crossValSD.tex', '%3.2f', unique(genre));
+%latexTableMSD(crossValAvg,crossValSD,'crossValMSD.tex','%3.2f','%3.2f',...
+%   unique(genre));
 
 correctClassRate = diag(crossValAvg)./reshape(sum(crossValAvg,1), [6 1]);
+latexTableMSD(bsxfun(@rdivide, crossValAvg, sum(crossValAvg,1)),...
+   bsxfun(@rdivide, crossValSD, sum(crossValAvg,1)),...
+   'crossValMSD.tex','%3.2f','%3.2f',unique(genre));
 
 % scaled percent correct as done in project guide book
 probCorrect = sum(diag(crossValAvg)./reshape(sum(crossValAvg,1), [6 1])*1/6);

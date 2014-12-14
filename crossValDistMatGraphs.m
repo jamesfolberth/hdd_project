@@ -1,14 +1,13 @@
 
-function [correctClassRate, probCorrect] = crossValDistMatGraphs(NumofEvcs)
+function [correctClassRate, probCorrect,correctClassRate2, probCorrect2,correctClassRate3, probCorrect3] = crossValDistMatGraphs(NumofEvcs)
 % Test the classification algorithm following the ideas of Section 6 of
 % Dr. Meyer's project guide.
 %clc
 %close all 
 %clear all 
-   savefile = 'distG1C.mat';
+[G1,G2,G3]  = createGraph(.15);
 
-
-load(savefile); % load in the distance matrix 'dist'
+% load(savefile); % load in the distance matrix 'dist'
 %distMatknn(dist, 500, 15)
 dataDir = getDir();
 [wavList,genre] = textread([dataDir,'ground_truth.csv'],'%s %s','delimiter',',');
@@ -17,6 +16,9 @@ genre   = strrep(genre, '"', '');
 
 genreValues = getGenres(genre); 
 R = cell(10,5); 
+R2 = cell(10,5); 
+R3 = cell(10,5); 
+
 for n =1: 10
     G = cell(6,5); 
     for i =1:6
@@ -38,30 +40,61 @@ for n =1: 10
         genreTest = genreValues(testIndex);
         genreTrain = genreValues(trainIndex); 
         probCorrect = []; 
-        confMat = zeros(numel(unique(genreValues))); % 6x6
-        IDXGraph = normalizeSpectralCustering2(NumofEvcs,2); 
+        probCorrect2 = []; 
+        probCorrect3 = []; 
 
-        for j=1:length(testIndex)
-           trueGenre = genreTest(j);
-           Index = find(IDXGraph == IDXGraph(testIndex(j))); 
-           p = []; 
-           for b = 1:length(Index); 
-               if ~isempty(find(trainIndex ==Index(b)) )
-               p = [p find(trainIndex ==Index(b))];
-               end
-           end
+        confMat = zeros(numel(unique(genreValues))); % 6x6
+        confMat2 = zeros(numel(unique(genreValues))); % 6x6
+        confMat3 = zeros(numel(unique(genreValues))); % 6x6
+
+        IDXGraph = unnormalizeSpectralCustering(NumofEvcs,G1); 
+        IDXGraph2 = normalizeSpectralCustering(NumofEvcs,G1);
+        IDXGraph3 = normalizeSpectralCustering2(NumofEvcs,G1);
+        
+        
+%         Predict
+%         [predGenre] = multisvm(IDXGraph(trainIndex,:), genreTrain,IDXGraph(testIndex,:));
+%          [predGenre2] = multisvm(IDXGraph2(trainIndex,:), genreTrain,IDXGraph2(testIndex,:));
+%         [predGenre3] = multisvm(IDXGraph3(trainIndex,:), genreTrain,IDXGraph3(testIndex,:));
+    
+  K=5;         
            
-           if isempty(p)
-               predGenre = randi(6,1);
-               
-           else
-           predGenre = mode(genreTrain(p));
-           end
-           
-           confMat(predGenre, trueGenre) = confMat(predGenre, trueGenre) + 1;
-        end
+      for j=1:length(testIndex)
+         trueGenre = genreTest(j);
+         index = sort ([trainIndex,testIndex(j)]);
+            D = G1(index,:);
+            D = D(:,index); 
+            D1 = G2(index,:);
+            D1 = D1(:,index); 
+            D2 = G3(index,:);
+            D2 = D2(:,index); 
+           neighbors = distMatknn1(D, find(index ==testIndex(j)), K);
+           neighborGenres = genreTrain(neighbors);
+           predGenre = mode(neighborGenres);
+         neighbors = distMatknn1(D1, find(index ==testIndex(j)), K);
+           neighborGenres = genreTrain(neighbors);
+           predGenre2 = mode(neighborGenres);
+           neighbors = distMatknn1(D2, find(index ==testIndex(j)), K);
+           neighborGenres = genreTrain(neighbors);
+           predGenre3 = mode(neighborGenres);
+            confMat(predGenre, trueGenre) = confMat(predGenre, trueGenre) + 1;
+            confMat2(predGenre2, trueGenre) = confMat(predGenre2, trueGenre) + 1;
+            confMat3(predGenre3, trueGenre) = confMat(predGenre3, trueGenre) + 1;
+
+         
+%          predGenreTest = predGenre(j);
+%          confMat(predGenreTest, trueGenre) = confMat(predGenreTest, trueGenre) + 1;
+%          predGenreTest = predGenre2(j);
+%          confMat2(predGenreTest, trueGenre) = confMat2(predGenreTest, trueGenre) + 1;
+%          predGenreTest = predGenre3(j);
+%          confMat3(predGenreTest, trueGenre) = confMat3(predGenreTest, trueGenre) + 1;
+      end
         R{n,k} = confMat; 
-        probCorrect = [probCorrect diag( R{n,k})./sum( R{n,k},2)];
+        R2{n,k} = confMat2;
+        R3{n,k} = confMat3;
+%         probCorrect = [probCorrect diag( R{n,k})./sum( R{n,k},2)];
+%         probCorrect2 = [probCorrect2 diag( R2{n,k})./sum( R2{n,k},2)];
+%         probCorrect3 = [probCorrect3 diag( R3{n,k})./sum( R3{n,k},2)];
 
         
     end
@@ -69,6 +102,12 @@ for n =1: 10
 end
     crossValAvg = zeros(6,6); 
     crossValSD = zeros(6,6); 
+for l =1:3
+        if l ==2
+            R = R2; 
+        elseif l ==3
+            R = R3; 
+        end
 
     for i =1:6
         for j =1:6
@@ -97,16 +136,25 @@ end
         end
     end
 
-latexTable(crossValAvg, 'crossValAvg.tex', '%i', unique(genre));
-latexTable(crossValSD, 'crossValSD.tex', '%3.2f', unique(genre));
+% latexTable(crossValAvg, 'crossValAvg.tex', '%i', unique(genre));
+% latexTable(crossValSD, 'crossValSD.tex', '%3.2f', unique(genre));
 
-correctClassRate = diag(crossValAvg)./reshape(sum(crossValAvg,1), [6 1]);
 
 % scaled percent correct as done in project guide book
-probCorrect = sum(diag(crossValAvg)./reshape(sum(crossValAvg,1), [6 1])*1/6);
 
-correctClassRate
-probCorrect
+
+    if l ==2 
+        correctClassRate2 = diag(crossValAvg)./reshape(sum(crossValAvg,1), [6 1]);
+        probCorrect2 = sum(diag(crossValAvg)./reshape(sum(crossValAvg,1), [6 1])*1/6);
+    elseif l ==3 
+        correctClassRate3 = diag(crossValAvg)./reshape(sum(crossValAvg,1), [6 1]);
+        probCorrect3 = sum(diag(crossValAvg)./reshape(sum(crossValAvg,1), [6 1])*1/6);
+    else
+        correctClassRate = diag(crossValAvg)./reshape(sum(crossValAvg,1), [6 1]);
+        probCorrect = sum(diag(crossValAvg)./reshape(sum(crossValAvg,1), [6 1])*1/6);
+    end
+end
+
 end
 
 function [g, code] = getGenres(genres)

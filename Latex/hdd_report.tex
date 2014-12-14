@@ -322,8 +322,47 @@ Unfortunately, this adjustment generally performs worse.  Initially it gives sli
 \end{center}
 \end{figure}
 
-\subsection*{Graph Methods}
-% TODO Aly
+\subsection{Graph Methods and Spectral Clustering}
+From the features that we extracted we have a feature vector for every training and test song that can be label as a se of data points $x_1,\hdots, x_n$. From the data points we create some notion of similarity $s_{ij} \geq 0$  between the data points $x_i$ and $x_j$. Using the Gaussian similarity function, 
+\[s(x_i,x_j) = e^{\frac{-||x_i-x_j||^2}{2_\sigma^2}}\]
+where the parameter $\sigma$ is chosen by the user, we can create a similarity matrix of all data points. We can then create a graph representation of the data using the similarity matrix. There are three ways that we used to create the similarity graphs. A graph $G(V,E)$ is undirected with the vertex set $V = \{ v_i, \hdots, v_n\}$ and the edge set $E$  with the property that if vertex $v_i$ is connected to $v_j$ the weighted edge $e_{i,j} = e_{j,j} \in E$.  
+
+\begin{itemize}
+\item {\bf{$\epsilon$-Neighborhood Graph:}} Choose a parameter $\epsilon$ and keep only the values of $s_{i,j}$ that are greater than $\epsilon$.  
+\item {\bf{k-Nearest Neighbor Graph:}} We connect the vertex $v_i$ with the vertex $v_j$ if $v_j$ is among the $k$-nearest neighborsn of $v_i$ with the edge weight $s_{ij}$. 
+\item{\bf{Fully Connected Graph:}} We keep all the weighted edges with positive similarity $s_{ij}$. 
+\end{itemize}
+
+We can then define the adjacency matrix $W$ is as the matrix with the weighted edges that was chosen by the above methods. We can then define the graph laplacian and the normalized graph laplacian as 
+
+\[ L = D -W\] and \[ \tilde{L} = I -D^{-1/2}WD^{-1/2}\] 
+Where $D$ is the row sum of the weighted matrix. From the graph Laplacians we have a few methods of spectral clustering to choose from. 
+
+\begin{itemize}
+\item {\bf{ Unnormalized Spectral Clustering:}}
+\begin{enumerate}
+\item Computed the unnormalized graph Laplacian, $L$,from the similarity adjacency matrix.  
+\item Compute the associated eigenvectors of the first (magnitude) $k$ eigenvalues of $L$ and store them in the matrix $V$. 
+\item Using the rows of $V$  as our spectral coordinates for clustering the points. 
+\end{enumerate}
+ \item {\bf{ Normalized Spectral Clustering Method 1:}}
+ \begin{enumerate}
+\item Computed the unnormalized graph Laplacian $L$ from the similarity adjacency matrix.  
+\item Compute the associated eigenvectors of the first (magnitude) $k$ eigenvalues of the system, $Lv = \lambda Dv$ and store them in the matrix $V$. 
+\item Using the rows of $V$  as our spectral coordinates for clustering the points. 
+\end{enumerate}
+
+\item {\bf{ Normalized Spectral Clustering Method 2:}}
+\begin{enumerate}
+\item Computed the normalized graph Laplacian $L$ from the similarity adjacency matrix.  
+\item Compute the associated eigenvectors of the first (magnitude) $k$ eigenvalues of $L$ and store them in the matrix $V$. 
+\item Using the rows of $V$ normalize the row sums to have 1 and then use the normalized $V$ as our spectral  coordinates for clustering the points. 
+\end{enumerate}
+
+\end{itemize}
+
+
+
 
 %_________________________________________________________________
 \section{Statistical learning}
@@ -431,20 +470,20 @@ One of the main parameters of the PageRank feature selection is how many feature
 
 For the $125$ dimensional PageRank dimension reduced feature vectors, running a cross validation of the one-versus-all SVM classifier on the training set takes approximately $25$ seconds running in serial on a $1.6\,\text{GHz}$ CPU.  In Table \ref{tab:xval} we show the results of a cross-validation using the $125$ selected features and the one-vs-all SVM classifier.  The entries are normalized so that the column sums are $1$ (entry $(i,j)$ is the average rate that genre $j$ is classified as genre $i$).  The most significant confusions are between world and classical, rock/pop and metal/punk, and jazz/blues and rock/pop.  This cross-validation gave an adjusted classification rate of $73.1\%$, which matches what we expect from Figure \ref{fig:prDim}.\\
 
-\begin{table}[h!]
-   \centering
-   \begin{tabular}{ l||l | l | l | l | l | l | }
-   & classical& electronic& jazz\_blues& metal\_punk& rock\_pop& world\\\hline
-   classical & 0.93 \pm0.04 &0.04 \pm0.03 &0.00 \pm0.00 &0.00 \pm0.00 &0.04 \pm0.03 &0.20 \pm0.08 \\ \hline 
-   electronic & 0.01 \pm0.01 &0.73 \pm0.09 &0.01 \pm0.05 &0.04 \pm0.08 &0.08 \pm0.06 &0.06 \pm0.05 \\ \hline 
-   jazz\_blues & 0.00 \pm0.00 &0.00 \pm0.01 &0.82 \pm0.16 &0.00 \pm0.02 &0.03 \pm0.03 &0.02 \pm0.03 \\ \hline 
-   metal\_punk & 0.01 \pm0.01 &0.02 \pm0.03 &0.00 \pm0.00 &0.61 \pm0.16 &0.09 \pm0.06 &0.04 \pm0.05 \\ \hline 
-   rock\_pop & 0.01 \pm0.01 &0.10 \pm0.06 &0.13 \pm0.15 &0.28 \pm0.15 &0.68 \pm0.10 &0.06 \pm0.05 \\ \hline 
-   world & 0.05 \pm0.03 &0.11 \pm0.06 &0.04 \pm0.09 &0.06 \pm0.08 &0.09 \pm0.07 &0.62 \pm0.09 \\ \hline 
-   \end{tabular}
-   \caption{Confusion matrix (rescaled) for cross-validation using genre-based PageRank and one-vs-all SVM.}
-   \label{tab:xval}
-\end{table}
+%\begin{table}[h!]
+%   \centering
+%   \begin{tabular}{ l||l | l | l | l | l | l | }
+%   & classical& electronic& jazz\_blues& metal\_punk& rock\_pop& world\\\hline
+%   classical & 0.93 \pm0.04 &0.04 \pm0.03 &0.00 \pm0.00 &0.00 \pm0.00 &0.04 \pm0.03 &0.20 \pm0.08 \\ \hline 
+%   electronic & 0.01 \pm0.01 &0.73 \pm0.09 &0.01 \pm0.05 &0.04 \pm0.08 &0.08 \pm0.06 &0.06 \pm0.05 \\ \hline 
+%   jazz\_blues & 0.00 \pm0.00 &0.00 \pm0.01 &0.82 \pm0.16 &0.00 \pm0.02 &0.03 \pm0.03 &0.02 \pm0.03 \\ \hline 
+%   metal\_punk & 0.01 \pm0.01 &0.02 \pm0.03 &0.00 \pm0.00 &0.61 \pm0.16 &0.09 \pm0.06 &0.04 \pm0.05 \\ \hline 
+%   rock\_pop & 0.01 \pm0.01 &0.10 \pm0.06 &0.13 \pm0.15 &0.28 \pm0.15 &0.68 \pm0.10 &0.06 \pm0.05 \\ \hline 
+%   world & 0.05 \pm0.03 &0.11 \pm0.06 &0.04 \pm0.09 &0.06 \pm0.08 &0.09 \pm0.07 &0.62 \pm0.09 \\ \hline 
+%   \end{tabular}
+%   \caption{Confusion matrix (rescaled) for cross-validation using genre-based PageRank and one-vs-all SVM.}
+%   \label{tab:xval}
+%\end{table}
 
 For the final test, we attempt classification of the test data.  We use the optimal parameters found by running cross-validations.  Specifically, we use a genre-based PageRank feature selection keeping $125$ features and one-versus-all SVM with a polynomial kernel with order $p=2.5$.  Table \ref{tab:class} shows the confusion matrix for the classification, which has an adjusted classification rate of $97.3\%$.  The classification performs much better on the test data compared to during cross-validation.
 
@@ -464,6 +503,14 @@ For the final test, we attempt classification of the test data.  We use the opti
 \end{table}
 
 
+\subsubsection{Experiments for Graphs Methods} 
+Using the optimal features that were selected using the PageRank algorithm we normalized each feature and created the similarity matrix using the Gaussian similarity function. After a number of tests we selected $\sigma = 0.15$. 
+\begin{itemize}
+\item{Unnormalized Spectral Clustering:}
+
+\end{itemize} 
+
+Obviously, the PageRank feature selection and using one-verse all SVM out preformed the graph methods. 
 %_________________________________________________________________
 \section{Discussion}
 %Provide a critique of the approach and discuss any potential

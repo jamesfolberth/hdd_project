@@ -1,11 +1,11 @@
 
-function [correctClassRate, probCorrect,correctClassRate2, probCorrect2,correctClassRate3, probCorrect3] = crossValDistMatGraphs(NumofEvcs)
+function [correctClassRate, probCorrect,correctClassRate2, probCorrect2,correctClassRate3, probCorrect3] = crossValDistMatGraphs(NumofEvcs,G1)
 % Test the classification algorithm following the ideas of Section 6 of
 % Dr. Meyer's project guide.
 %clc
 %close all 
 %clear all 
-[G1,G2,G3]  = createGraph(.15);
+
 
 % load(savefile); % load in the distance matrix 'dist'
 %distMatknn(dist, 500, 15)
@@ -58,36 +58,40 @@ for n =1: 10
 %         [predGenre3] = multisvm(IDXGraph3(trainIndex,:), genreTrain,IDXGraph3(testIndex,:));
     
   K=5;         
-           
+        predGenre = knnclassify( IDXGraph(testIndex,:),IDXGraph(trainIndex,:), genreTrain',5);
+        predGenre2 = knnclassify( IDXGraph2(testIndex,:),IDXGraph2(trainIndex,:), genreTrain',5);
+        predGenre3 = knnclassify( IDXGraph3(testIndex,:),IDXGraph3(trainIndex,:), genreTrain',5);
+
       for j=1:length(testIndex)
          trueGenre = genreTest(j);
-         index = sort ([trainIndex,testIndex(j)]);
-            D = G1(index,:);
-            D = D(:,index); 
-            D1 = G2(index,:);
-            D1 = D1(:,index); 
-            D2 = G3(index,:);
-            D2 = D2(:,index); 
-           neighbors = distMatknn1(D, find(index ==testIndex(j)), K);
-           neighborGenres = genreTrain(neighbors);
-           predGenre = mode(neighborGenres);
-         neighbors = distMatknn1(D1, find(index ==testIndex(j)), K);
-           neighborGenres = genreTrain(neighbors);
-           predGenre2 = mode(neighborGenres);
-           neighbors = distMatknn1(D2, find(index ==testIndex(j)), K);
-           neighborGenres = genreTrain(neighbors);
-           predGenre3 = mode(neighborGenres);
-            confMat(predGenre, trueGenre) = confMat(predGenre, trueGenre) + 1;
-            confMat2(predGenre2, trueGenre) = confMat(predGenre2, trueGenre) + 1;
-            confMat3(predGenre3, trueGenre) = confMat(predGenre3, trueGenre) + 1;
+%          index = sort ([trainIndex,testIndex(j)]);
+%             D = IDXGraph(index,:);
+% %             D = D(:,index); 
+%             D1 = IDXGraph2(index,:);
+% %             D1 = D1(:,index); 
+%             D2 = IDXGraph3(index,:);
+% %             D2 = D2(:,index); 
+% neighbors = knnsearch(D,find(index ==testIndex(j)),'k',5);
+% %            neighbors = distMatknn1(D', find(index ==testIndex(j)), K);
+%            neighborGenres = genreTrain(neighbors);
+%            predGenre = mode(neighborGenres);
+%          neighbors = distMatknn1(D1, find(index ==testIndex(j)), K);
+%            neighborGenres = genreTrain(neighbors);
+%            predGenre2 = mode(neighborGenres);
+%            neighbors = distMatknn1(D2, find(index ==testIndex(j)), K);
+%            neighborGenres = genreTrain(neighbors);
+%            predGenre3 = mode(neighborGenres);
+%             confMat(predGenre, trueGenre) = confMat(predGenre, trueGenre) + 1;
+%             confMat2(predGenre2, trueGenre) = confMat(predGenre2, trueGenre) + 1;
+%             confMat3(predGenre3, trueGenre) = confMat(predGenre3, trueGenre) + 1;
 
          
-%          predGenreTest = predGenre(j);
-%          confMat(predGenreTest, trueGenre) = confMat(predGenreTest, trueGenre) + 1;
-%          predGenreTest = predGenre2(j);
-%          confMat2(predGenreTest, trueGenre) = confMat2(predGenreTest, trueGenre) + 1;
-%          predGenreTest = predGenre3(j);
-%          confMat3(predGenreTest, trueGenre) = confMat3(predGenreTest, trueGenre) + 1;
+         predGenreTest = predGenre(j);
+         confMat(predGenreTest, trueGenre) = confMat(predGenreTest, trueGenre) + 1;
+         predGenreTest = predGenre2(j);
+         confMat2(predGenreTest, trueGenre) = confMat2(predGenreTest, trueGenre) + 1;
+         predGenreTest = predGenre3(j);
+         confMat3(predGenreTest, trueGenre) = confMat3(predGenreTest, trueGenre) + 1;
       end
         R{n,k} = confMat; 
         R2{n,k} = confMat2;

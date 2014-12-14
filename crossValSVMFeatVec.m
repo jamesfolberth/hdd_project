@@ -242,7 +242,6 @@ otherwise
    error('Unknown dimension reduction method: %s', opt.dimRed);
 end
 
-
 % Begin cross validation
 R = cell(opt.XValNum,5); 
 for n =1:size(R,1);

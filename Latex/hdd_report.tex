@@ -26,7 +26,7 @@
 %_________________________________________________________________
 \indent Digital music has changed the face of music collection. Users can have a megabyte or a gigabyte worth of music on their personal laptops and can easily download music from the internet. This has lead to the need to invent and test new tools in musical information retrieval. There are many websites and apps, Pandora and iTunes are a few examples, that can create playlists based on similarity to a certain song or genre of music. These sites need to be able to classify certain features of a song and build the playlist from there.\\
 
-The goal of this project is to able to classify the genre of a song. This may seem like a simple problem, since we can usually classify a song by ear, but that relies on the user having a vast knowledge of music. If we can automate the process using computers, we could find new and interesting insights that may not be obvious. However, this adds complexity that must be dealt with since we need techniques so that  the computer can ``listen'' to the song and extract features to be able to identify the genre. To do this we take  a song, which is a continuous signal and we sample at certain frequency to transform it into a discrete signal that is based on pitch which created by the sound pressures changes  and define it as a function of time. From the discrete signal we can define  ``features" for each song that may be able to be used to classify the genre.\\
+The goal of this project is to classify the genre of a song. This may seem like a simple problem, since we can usually classify a song by ear, but that relies on the user having a vast knowledge of music. If we can automate the process using computers, we could find new and interesting insights that may not be obvious. However, this adds complexity that must be dealt with since we need techniques so that  the computer can ``listen'' to the song and extract features to be able to identify the genre. To do this we take  a song, which is a continuous signal and we sample at certain frequency to transform it into a discrete signal that is based on pitch which created by the sound pressures changes  and define it as a function of time. From the discrete signal we can define  ``features" for each song that may be able to be used to classify the genre.\\
 
  For our project we are only classifying within six different genres: classical, electronic, jazz/blues, metal/punk, rock/pop, and world. To compute similarities between each song it is imperative that we generate features. Given 729 training tracks, we will construct features for each song and the song that we would like to classify. We can use theses quantifiable features to develop a machine learning algorithm to classify the genre. Most features that we used were developed by or used in Elias Pampalk dissertation \cite{pampalk:dissertation} or in Tzanetakis and Cook \cite{tzanetakis:classification}.
 
@@ -456,7 +456,7 @@ Our implementation of the algorithms presented above are hosted at \url{https://
 
 In this section we will describe a few of the experiments we performed.  We first computed and saved the feature vectors for the training set.  For our implementation, this is the performance bottleneck, and it took about three hours to compute the feature vectors for the training set.  This is due not to the complexity of extracting the features but due to our use of an inefficient toolbox (which we use for convenience); we believe that it is possible to optimize the routines in the toolbox we use for our purposes.\\
 
-Once the feature vectors are computed, we can reduce dimension and attempt training and classification.  We first used PCA and LLE dimension reduction as a baseline for comparison against the PageRank feature selection.  For the sake of brevity, we only note that we were able to optimize the parameters of the PageRank feature selection to perform significantly better than either PCA or LLE.  We use both the $k$-nearest neighbor and multi-class SVM classifiers.  The $k$-nearest neighbor classifier generally works well with $k=5$ neighbors.  Generally, one-versus-all SVM and ECOC SVM with a Hamming-like code perform quite well with a polynomial kernel with order $p\approx 2.5$.  The one-versus-one SVM classifier did not perform as well as the other two multi-class extensions, and we found the Gaussian kernel did not work well.\\
+Once the feature vectors are computed, we can reduce dimension and attempt training and classification.  We first used PCA and LLE dimension reduction as a baseline for comparison against the PageRank feature selection.  For the sake of brevity, we only note that we were able to optimize the parameters of the PageRank feature selection to perform significantly better than both optimized PCA and optimized LLE.  We use both the $k$-nearest neighbor and multi-class SVM classifiers.  The $k$-nearest neighbor classifier generally works well with $k=5$ neighbors.  Generally, one-versus-all SVM and ECOC SVM with a Hamming-like code perform quite well with a polynomial kernel with order $p\approx 2.5$.  The one-versus-one SVM classifier did not perform as well as the other two multi-class extensions, and we found the Gaussian kernel did not work well.\\
 
 One of the main parameters of the PageRank feature selection is how many features we select.  In Figure \ref{fig:prDim} we have plotted the classification accuracy during training cross-validation as a function of dimension using the one-versus-all SVM classifier with a genre-based PageRank feature selection.  Looking only at the aggregate adjusted classification rate, we see that the optimal dimensionality is around $125$ dimensions.  Looking at each genre we see that different genres obtain peak performance at different dimensionalities.
 
@@ -470,20 +470,20 @@ One of the main parameters of the PageRank feature selection is how many feature
 
 For the $125$ dimensional PageRank dimension reduced feature vectors, running a cross validation of the one-versus-all SVM classifier on the training set takes approximately $25$ seconds running in serial on a $1.6\,\text{GHz}$ CPU.  In Table \ref{tab:xval} we show the results of a cross-validation using the $125$ selected features and the one-vs-all SVM classifier.  The entries are normalized so that the column sums are $1$ (entry $(i,j)$ is the average rate that genre $j$ is classified as genre $i$).  The most significant confusions are between world and classical, rock/pop and metal/punk, and jazz/blues and rock/pop.  This cross-validation gave an adjusted classification rate of $73.1\%$, which matches what we expect from Figure \ref{fig:prDim}.\\
 
-%\begin{table}[h!]
-%   \centering
-%   \begin{tabular}{ l||l | l | l | l | l | l | }
-%   & classical& electronic& jazz\_blues& metal\_punk& rock\_pop& world\\\hline
-%   classical & 0.93 \pm0.04 &0.04 \pm0.03 &0.00 \pm0.00 &0.00 \pm0.00 &0.04 \pm0.03 &0.20 \pm0.08 \\ \hline 
-%   electronic & 0.01 \pm0.01 &0.73 \pm0.09 &0.01 \pm0.05 &0.04 \pm0.08 &0.08 \pm0.06 &0.06 \pm0.05 \\ \hline 
-%   jazz\_blues & 0.00 \pm0.00 &0.00 \pm0.01 &0.82 \pm0.16 &0.00 \pm0.02 &0.03 \pm0.03 &0.02 \pm0.03 \\ \hline 
-%   metal\_punk & 0.01 \pm0.01 &0.02 \pm0.03 &0.00 \pm0.00 &0.61 \pm0.16 &0.09 \pm0.06 &0.04 \pm0.05 \\ \hline 
-%   rock\_pop & 0.01 \pm0.01 &0.10 \pm0.06 &0.13 \pm0.15 &0.28 \pm0.15 &0.68 \pm0.10 &0.06 \pm0.05 \\ \hline 
-%   world & 0.05 \pm0.03 &0.11 \pm0.06 &0.04 \pm0.09 &0.06 \pm0.08 &0.09 \pm0.07 &0.62 \pm0.09 \\ \hline 
-%   \end{tabular}
-%   \caption{Confusion matrix (rescaled) for cross-validation using genre-based PageRank and one-vs-all SVM.}
-%   \label{tab:xval}
-%\end{table}
+\begin{table}[h!]
+   \centering
+   \begin{tabular}{ l||l | l | l | l | l | l | }
+   & classical& electronic& jazz\_blues& metal\_punk& rock\_pop& world\\\hline
+   classical & 0.93 \pm0.04 &0.04 \pm0.03 &0.00 \pm0.00 &0.00 \pm0.00 &0.04 \pm0.03 &0.20 \pm0.08 \\ \hline 
+   electronic & 0.01 \pm0.01 &0.73 \pm0.09 &0.01 \pm0.05 &0.04 \pm0.08 &0.08 \pm0.06 &0.06 \pm0.05 \\ \hline 
+   jazz\_blues & 0.00 \pm0.00 &0.00 \pm0.01 &0.82 \pm0.16 &0.00 \pm0.02 &0.03 \pm0.03 &0.02 \pm0.03 \\ \hline 
+   metal\_punk & 0.01 \pm0.01 &0.02 \pm0.03 &0.00 \pm0.00 &0.61 \pm0.16 &0.09 \pm0.06 &0.04 \pm0.05 \\ \hline 
+   rock\_pop & 0.01 \pm0.01 &0.10 \pm0.06 &0.13 \pm0.15 &0.28 \pm0.15 &0.68 \pm0.10 &0.06 \pm0.05 \\ \hline 
+   world & 0.05 \pm0.03 &0.11 \pm0.06 &0.04 \pm0.09 &0.06 \pm0.08 &0.09 \pm0.07 &0.62 \pm0.09 \\ \hline 
+   \end{tabular}
+   \caption{Confusion matrix (rescaled) for cross-validation using genre-based PageRank and one-vs-all SVM.}
+   \label{tab:xval}
+\end{table}
 
 For the final test, we attempt classification of the test data.  We use the optimal parameters found by running cross-validations.  Specifically, we use a genre-based PageRank feature selection keeping $125$ features and one-versus-all SVM with a polynomial kernel with order $p=2.5$.  Table \ref{tab:class} shows the confusion matrix for the classification, which has an adjusted classification rate of $97.3\%$.  The classification performs much better on the test data compared to during cross-validation.
 

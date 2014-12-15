@@ -49,9 +49,9 @@ for r=1:size(mu,1)
    end
    for c=1:size(mu,2)
         if c==size(mu,2)
-            fprintf(fid,strcat(fmt1,' \\pm ',fmt2),mu(r,c),sd(r,c));
+            fprintf(fid,strcat('$',fmt1,' \\pm ',fmt2,'$'),mu(r,c),sd(r,c));
         else
-            fprintf(fid,strcat(fmt1,' \\pm ',fmt2,' & '),mu(r,c),sd(r,c));
+            fprintf(fid,strcat('$',fmt1,' \\pm ',fmt2,'$ & '),mu(r,c),sd(r,c));
         end
     end            
 

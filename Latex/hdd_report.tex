@@ -4,6 +4,7 @@
 \usepackage{caption}
 \usepackage{subcaption}
 \usepackage{hyperref}
+\usepackage{color}
 \textheight 240mm
 \textwidth  170mm
 \oddsidemargin  0mm
@@ -470,22 +471,22 @@ One of the main parameters of the PageRank feature selection is how many feature
 
 For the $125$ dimensional PageRank dimension reduced feature vectors, running a cross validation of the one-versus-all SVM classifier on the training set takes approximately $25$ seconds running in serial on a $1.6\,\text{GHz}$ CPU.  In Table \ref{tab:xval} we show the results of a cross-validation using the $125$ selected features and the one-vs-all SVM classifier.  The entries are normalized so that the column sums are $1$ (entry $(i,j)$ is the average rate that genre $j$ is classified as genre $i$).  The most significant confusions are between world and classical, rock/pop and metal/punk, and jazz/blues and rock/pop.  This cross-validation gave an adjusted classification rate of $73.1\%$, which matches what we expect from Figure \ref{fig:prDim}.\\
 
-%\begin{table}[h!]
-%   \centering
-%   \begin{tabular}{ l||l | l | l | l | l | l | }
-%   & classical& electronic& jazz\_blues& metal\_punk& rock\_pop& world\\\hline
-%   classical & 0.93 \pm0.04 &0.04 \pm0.03 &0.00 \pm0.00 &0.00 \pm0.00 &0.04 \pm0.03 &0.20 \pm0.08 \\ \hline 
-%   electronic & 0.01 \pm0.01 &0.73 \pm0.09 &0.01 \pm0.05 &0.04 \pm0.08 &0.08 \pm0.06 &0.06 \pm0.05 \\ \hline 
-%   jazz\_blues & 0.00 \pm0.00 &0.00 \pm0.01 &0.82 \pm0.16 &0.00 \pm0.02 &0.03 \pm0.03 &0.02 \pm0.03 \\ \hline 
-%   metal\_punk & 0.01 \pm0.01 &0.02 \pm0.03 &0.00 \pm0.00 &0.61 \pm0.16 &0.09 \pm0.06 &0.04 \pm0.05 \\ \hline 
-%   rock\_pop & 0.01 \pm0.01 &0.10 \pm0.06 &0.13 \pm0.15 &0.28 \pm0.15 &0.68 \pm0.10 &0.06 \pm0.05 \\ \hline 
-%   world & 0.05 \pm0.03 &0.11 \pm0.06 &0.04 \pm0.09 &0.06 \pm0.08 &0.09 \pm0.07 &0.62 \pm0.09 \\ \hline 
-%   \end{tabular}
-%   \caption{Confusion matrix (rescaled) for cross-validation using genre-based PageRank and one-vs-all SVM.}
-%   \label{tab:xval}
-%\end{table}
+\begin{table}[h!]
+   \centering
+   \begin{tabular}{ l||l | l | l | l | l | l | }
+   & classical& electronic& jazz\_blues& metal\_punk& rock\_pop& world\\\hline
+   classical & $0.94 \pm0.03$ &$0.03 \pm0.04$ &$0.00 \pm0.00$ &$0.00 \pm0.00$ &$0.03 \pm0.04$ &$0.20 \pm0.07$ \\ \hline 
+   electronic & $0.00 \pm0.01$ &$0.73 \pm0.09$ &$0.02 \pm0.07$ &$0.03 \pm0.05$ &$0.09 \pm0.07$ &$0.06 \pm0.04$ \\ \hline 
+   jazz\_blues & $0.00 \pm0.00$ &$0.01 \pm0.01$ &$0.80 \pm0.17$ &$0.00 \pm0.00$ &$0.01 \pm0.02$ &$0.01 \pm0.02$ \\ \hline 
+   metal\_punk & $0.01 \pm0.01$ &$0.01 \pm0.03$ &$0.00 \pm0.00$ &$0.60 \pm0.17$ &$0.09 \pm0.07$ &$0.04 \pm0.04$ \\ \hline 
+   rock\_pop & $0.01 \pm0.01$ &$0.10 \pm0.06$ &$0.12 \pm0.12$ &$0.30 \pm0.16$ &$0.68 \pm0.10$ &$0.04 \pm0.04$ \\ \hline 
+   world & $0.05 \pm0.02$ &$0.11 \pm0.06$ &$0.07 \pm0.10$ &$0.07 \pm0.08$ &$0.09 \pm0.07$ &$0.64 \pm0.08$ \\ \hline 
+   \end{tabular}
+   \caption{Confusion matrix (rescaled) for cross-validation using genre-based PageRank and one-vs-all SVM.}
+   \label{tab:xval}
+\end{table}
 
-For the final test, we attempt classification of the test data.  We use the optimal parameters found by running cross-validations.  Specifically, we use a genre-based PageRank feature selection keeping $125$ features and one-versus-all SVM with a polynomial kernel with order $p=2.5$.  Table \ref{tab:class} shows the confusion matrix for the classification, which has an adjusted classification rate of $97.3\%$.  The classification performs much better on the test data compared to during cross-validation.
+For the final test with PageRank, we attempt classification of the test data.  We use the optimal parameters found by running cross-validations.  Specifically, we use a genre-based PageRank feature selection keeping $125$ features and one-versus-all SVM with a polynomial kernel with order $p=2.5$.  Table \ref{tab:class} shows the confusion matrix for the classification, which has an adjusted classification rate of $97.3\%$.  The classification performs much better on the test data compared to during cross-validation.
 
 \begin{table}[h!]
    \centering
@@ -503,10 +504,10 @@ For the final test, we attempt classification of the test data.  We use the opti
 \end{table}
 
 
-\subsubsection{Experiments for Graphs Methods} 
-Using the optimal features that were selected using the PageRank algorithm we normalized each feature and created the similarity matrix using the Gaussian similarity function. After a number of tests we selected $\sigma = 0.15$. In the following graphs blue is the Unnormalized, red is the Normalized Method 1 and green represents the Normalized Method 2, using $k$-nearest neighbor classification with $k =5$. 
+\subsection{Experiments for Graphs Methods} 
+Using the optimal features that were selected using the PageRank algorithm we normalized each feature and created the similarity matrix using the Gaussian similarity function. After a number of tests we selected $\sigma = 0.15$. In the following graphs {\color{blue} blue} is the Unnormalized, {\color{red} red} is the Normalized Method 1 and {\color{green} green} represents the Normalized Method 2, using $k$-nearest neighbor classification with $k =5$. 
 \begin{itemize}
-\item{\bf{$\epsilon$-Neighborhood Graph:}} Using $\epsilon = 0.0338$ which is the mean of the similarity matrix we have the folioing results in Figure \ref{fig:G1}. We see that Normalized Method 2 out preformed the other two methods. 
+\item{\bf{$\epsilon$-Neighborhood Graph:}} Using $\epsilon = 0.0338$ which is the mean of the similarity matrix we have the folioing results in Figure \ref{fig:G1}. We see that Normalized Method 2 outperformed the other two methods. 
 \begin{figure}[h!]
    \centering
    \includegraphics[width=0.45\textwidth]{figures/G1_epsmean.png}
@@ -535,7 +536,7 @@ Using the optimal features that were selected using the PageRank algorithm we no
 \end{figure}
 We can see that when $k=2$ with the Normalized Method 2 has the highest normalized probability correct. 
 \vspace{55mm}
-\item{\bf{Fully Connected Graph:}} Below in Figure \ref{fig:G3} we have the fully connected graph using all three methods. We see that the Unnormalized Method preformed the best till we get to the higher number of eigenvectors and Normalized Method 2 preformed the best. 
+\item{\bf{Fully Connected Graph:}} Below in Figure \ref{fig:G3} we have the fully connected graph using all three methods. We see that the Unnormalized Method performed the best till we get to the higher number of eigenvectors and Normalized Method 2 performed the best. 
 \begin{figure}[h!]
    \centering
    \includegraphics[width=0.45\textwidth]{figures/G3_All.png}
@@ -544,7 +545,7 @@ We can see that when $k=2$ with the Normalized Method 2 has the highest normaliz
 \end{figure}
 \end{itemize} 
 
-Overall, the best results were for the $2$-Nearest Neighbor Graph with the Normalized Method 2 spectral clustering. Obviously, the PageRank feature selection and using one-verse all SVM outperformed the graph methods. 
+Overall, the best results were for the $2$-Nearest Neighbor Graph with the Normalized Method 2 spectral clustering. Obviously, the PageRank feature selection and using one-versus-all SVM outperformed the graph methods. 
 %_________________________________________________________________
 \section{Discussion}
 %Provide a critique of the approach and discuss any potential
